@@ -69,7 +69,7 @@ Implementar en incrementos pequeños:
 
 1. Inicio de sesión, usuarios, roles y auditoría. **Implementado.**
 2. Ficha del residente y contactos. **Implementado.**
-3. Registros diarios, plan de cuidados, correcciones y revisión de Enfermería. **Implementado, pendiente de validación con el equipo.**
+3. Registros diarios, plan de cuidados, correcciones y revisión de Enfermería. **Implementado y probado técnicamente (67 pruebas); pendiente de validación con el equipo.**
 4. Incidentes, consulta e informes básicos. **Pendiente.**
 5. Pruebas automatizadas, respaldos y documentación operativa. **En curso: 67 pruebas y documentación de los incrementos 1 y 2.**
 
@@ -105,10 +105,19 @@ Construir primero con datos ficticios. Revisar cada entrega con el personal del 
 
 ## Lista de decisiones pendientes
 
+### Generales y de piloto
+
 - [ ] Número de residentes, funcionarios y turnos que debe soportar el piloto.
 - [ ] Dispositivos disponibles y calidad de internet en las áreas de atención.
-- [ ] Formularios y registros que se usarán en el MVP.
 - [ ] Roles definitivos y permisos asociados.
 - [ ] Proveedor de alojamiento y ubicación de los datos.
 - [ ] Requisitos de conservación, acceso, corrección y eliminación de datos.
 - [ ] Responsable de soporte y respuesta ante incidentes.
+
+### Funcionales y operacionales (Incrementos 1 y 2)
+
+- [ ] Validación con el equipo de las categorías de cuidados acordadas.
+- [ ] Validación de los rangos de turno (mañana 07–15, tarde 15–23, noche 23–07) según la rutina del ELEAM.
+- [ ] Criterios y plazos de revisión obligatoria por parte de Enfermería.
+- [ ] Ventana de tiempo permitida para que el autor corrija un registro antes del cierre de turno.
+- [ ] Criterios de cierre y reapertura de planes de cuidados con el equipo clínico.

@@ -28,16 +28,18 @@ El prototipo oculta botones y secciones según el rol para mostrar la intención
 
 ## Páginas
 
-| Archivo | Flujo que permite probar |
-|---|---|
-| `login.html` | Acceso con cuenta individual y advertencia de equipo compartido. |
-| `panel.html` | Resumen del turno, alertas de cuidado y accesos rápidos. |
-| `residentes.html` | Búsqueda por nombre/RUT/habitación, filtros y ficha archivada. |
-| `ficha.html` | Datos administrativos, alergias, antecedentes, contactos y actividad. |
-| `registro-diario.html` | Registro de cuidados del incremento 2 (propuesta). |
-| `incidente.html` | Reporte de incidentes del incremento 3 (propuesta). |
-| `auditoria.html` | Historial de cambios y bloqueo para roles no autorizados. |
-| `usuarios.html` | Gestión de cuentas y roles, solo para Administración. |
+| Archivo | Flujo que permite probar | Estado en la aplicación Django |
+|---|---|---|
+| `login.html` | Acceso con cuenta individual y advertencia de equipo compartido. | Implementado (Incremento 1) |
+| `panel.html` | Resumen del turno, alertas de cuidado y accesos rápidos. | Implementado (Incrementos 1 y 2) |
+| `residentes.html` | Búsqueda por nombre/RUT/habitación, filtros y ficha archivada. | Implementado (Incremento 1) |
+| `ficha.html` | Datos administrativos, alergias, antecedentes, contactos y actividad. | Implementado (Incrementos 1 y 2) |
+| `registro-diario.html` | Registro de cuidados por turno y planes de cuidado. | Implementado (Incremento 2) |
+| `incidente.html` | Reporte de incidentes y acciones tomadas. | Propuesta (Incremento 3) |
+| `auditoria.html` | Historial de cambios y bloqueo para roles no autorizados. | Implementado (Incremento 1) |
+| `usuarios.html` | Gestión de cuentas y roles, solo para Administración. | Implementado (Incremento 1) |
+
+> **Nota:** La aplicación funcional con backend Django, base de datos SQLite/PostgreSQL y permisos en el servidor se ejecuta con `iniciar.bat` o `python manage.py runserver`. Este prototipo estático se conserva como herramienta ligera de diseño y entrevistas preliminares.
 
 ## Qué observar con el personal
 

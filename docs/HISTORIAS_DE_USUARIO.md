@@ -55,12 +55,12 @@ No incluye todavía:
 
 **Criterios de aceptación**
 
-- [ ] El acceso usa correo electrónico y contraseña; no hay usuario compartido.
-- [ ] Una cuenta desactivada no puede iniciar sesión.
-- [ ] La sesión expira a las 8 horas o al cerrar el navegador.
-- [ ] El cierre de sesión se hace con POST y no queda una sesión activa.
-- [ ] Los errores no revelan si el correo existe o no.
-- [ ] La pantalla funciona en teléfono, tablet y computador.
+- [x] El acceso usa correo electrónico y contraseña; no hay usuario compartido.
+- [x] Una cuenta desactivada no puede iniciar sesión.
+- [x] La sesión expira a las 8 horas o al cerrar el navegador.
+- [x] El cierre de sesión se hace con POST y no queda una sesión activa.
+- [x] Los errores no revelan si el correo existe o no.
+- [x] La pantalla funciona en teléfono, tablet y computador.
 
 **Prioridad:** alta.
 
@@ -70,10 +70,10 @@ No incluye todavía:
 
 **Criterios de aceptación**
 
-- [ ] Se solicita la contraseña actual.
-- [ ] La nueva contraseña cumple la política mínima (10 caracteres, no común, no numérica).
-- [ ] El cambio queda registrado en auditoría sin guardar la contraseña ni su hash.
-- [ ] La sesión continúa activa después del cambio.
+- [x] Se solicita la contraseña actual.
+- [x] La nueva contraseña cumple la política mínima (10 caracteres, no común, no numérica).
+- [x] El cambio queda registrado en auditoría sin guardar la contraseña ni su hash.
+- [x] La sesión continúa activa después del cambio.
 
 **Prioridad:** alta.
 
@@ -83,13 +83,13 @@ No incluye todavía:
 
 **Criterios de aceptación**
 
-- [ ] Solo Administración puede entrar a la gestión de usuarios.
-- [ ] Se puede crear una cuenta con correo único, nombre, apellido, rol y contraseña inicial.
-- [ ] Se puede cambiar el rol y desactivar una cuenta sin eliminarla.
-- [ ] No se puede desactivar la propia cuenta.
-- [ ] No se puede dejar el sistema sin una cuenta activa con rol Administración.
-- [ ] Cada cambio queda auditado con actor y fecha.
-- [ ] Las contraseñas se almacenan con el algoritmo seguro de Django y nunca se muestran.
+- [x] Solo Administración puede entrar a la gestión de usuarios.
+- [x] Se puede crear una cuenta con correo único, nombre, apellido, rol y contraseña inicial.
+- [x] Se puede cambiar el rol y desactivar una cuenta sin eliminarla.
+- [x] No se puede desactivar la propia cuenta.
+- [x] No se puede dejar el sistema sin una cuenta activa con rol Administración.
+- [x] Cada cambio queda auditado con actor y fecha.
+- [x] Las contraseñas se almacenan con el algoritmo seguro de Django y nunca se muestran.
 
 **Prioridad:** alta.
 
@@ -99,10 +99,10 @@ No incluye todavía:
 
 **Criterios de aceptación**
 
-- [ ] Solo Administración puede hacerlo.
-- [ ] Se pide la nueva contraseña dos veces y se valida la política.
-- [ ] El cambio se registra en auditoría como acción separada, sin guardar la contraseña.
-- [ ] Se recomienda a la persona cambiar la contraseña al ingresar.
+- [x] Solo Administración puede hacerlo.
+- [x] Se pide la nueva contraseña dos veces y se valida la política.
+- [x] El cambio se registra en auditoría como acción separada, sin guardar la contraseña.
+- [x] Se recomienda a la persona cambiar la contraseña al ingresar.
 
 **Prioridad:** media.
 
@@ -112,11 +112,11 @@ No incluye todavía:
 
 **Criterios de aceptación**
 
-- [ ] Muestra cantidad de residentes activos y residentes con alergias registradas.
-- [ ] Muestra los últimos residentes incorporados y alertas de alergias.
-- [ ] Ofrece accesos directos según el rol.
-- [ ] No muestra información de auditoría a quien no tiene permiso.
-- [ ] Se adapta a pantallas pequeñas.
+- [x] Muestra cantidad de residentes activos y residentes con alergias registradas.
+- [x] Muestra los últimos residentes incorporados y alertas de alergias.
+- [x] Ofrece accesos directos según el rol.
+- [x] No muestra información de auditoría a quien no tiene permiso.
+- [x] Se adapta a pantallas pequeñas.
 
 **Prioridad:** media.
 
@@ -126,12 +126,12 @@ No incluye todavía:
 
 **Criterios de aceptación**
 
-- [ ] La búsqueda es parcial y no distingue mayúsculas ni tildes básicas.
-- [ ] Se puede filtrar por estado (activo, hospitalizado, egresado) y por archivados.
-- [ ] Los resultados muestran nombre, RUT, habitación, edad, estado y alerta de alergia.
-- [ ] Sin JavaScript la búsqueda funciona con el botón "Buscar".
-- [ ] Con HTMX la lista se actualiza sin recargar la página.
-- [ ] La lista se pagina y no expone datos a usuarios anónimos.
+- [x] La búsqueda es parcial y no distingue mayúsculas ni tildes básicas.
+- [x] Se puede filtrar por estado (activo, hospitalizado, egresado) y por archivados.
+- [x] Los resultados muestran nombre, RUT, habitación, edad, estado y alerta de alergia.
+- [x] Sin JavaScript la búsqueda funciona con el botón "Buscar".
+- [x] Con HTMX la lista se actualiza sin recargar la página.
+- [x] La lista se pagina y no expone datos a usuarios anónimos.
 
 **Prioridad:** alta.
 
@@ -141,12 +141,12 @@ No incluye todavía:
 
 **Criterios de aceptación**
 
-- [ ] Se ven datos administrativos, alergias, antecedentes relevantes y contactos.
-- [ ] Las alergias se destacan visualmente.
-- [ ] Se ve quién creó y actualizó por última vez la ficha.
-- [ ] Los botones de edición solo aparecen para roles autorizados.
-- [ ] La ficha archivada se muestra como archivada y no se puede editar hasta reactivarla.
-- [ ] Los datos de demostración llevan una marca visible "DEMO".
+- [x] Se ven datos administrativos, alergias, antecedentes relevantes y contactos.
+- [x] Las alergias se destacan visualmente.
+- [x] Se ve quién creó y actualizó por última vez la ficha.
+- [x] Los botones de edición solo aparecen para roles autorizados.
+- [x] La ficha archivada se muestra como archivada y no se puede editar hasta reactivarla.
+- [x] Los datos de demostración llevan una marca visible "DEMO".
 
 **Prioridad:** alta.
 
@@ -156,12 +156,12 @@ No incluye todavía:
 
 **Criterios de aceptación**
 
-- [ ] El RUT es obligatorio, válido y único.
-- [ ] La fecha de nacimiento no puede ser futura y la fecha de ingreso no puede ser anterior al nacimiento.
-- [ ] Se registran datos mínimos: nombre, apellido, RUT, nacimiento, habitación, ingreso, previsión y estado.
-- [ ] La información clínica se completa después, solo por Enfermería.
-- [ ] La creación queda auditada con el usuario y la fecha.
-- [ ] Un rol no autorizado recibe HTTP 403.
+- [x] El RUT es obligatorio, válido y único.
+- [x] La fecha de nacimiento no puede ser futura y la fecha de ingreso no puede ser anterior al nacimiento.
+- [x] Se registran datos mínimos: nombre, apellido, RUT, nacimiento, habitación, ingreso, previsión y estado.
+- [x] La información clínica se completa después, solo por Enfermería.
+- [x] La creación queda auditada con el usuario y la fecha.
+- [x] Un rol no autorizado recibe HTTP 403.
 
 **Prioridad:** alta.
 
@@ -171,11 +171,11 @@ No incluye todavía:
 
 **Criterios de aceptación**
 
-- [ ] Solo se editan campos administrativos en este formulario.
-- [ ] El RUT sigue siendo único.
-- [ ] Los cambios quedan auditados con valor anterior y nuevo.
-- [ ] No se puede editar una ficha archivada sin reactivarla.
-- [ ] Técnico/a, Cuidador/a y Dirección reciben HTTP 403 si intentan editar.
+- [x] Solo se editan campos administrativos en este formulario.
+- [x] El RUT sigue siendo único.
+- [x] Los cambios quedan auditados con valor anterior y nuevo.
+- [x] No se puede editar una ficha archivada sin reactivarla.
+- [x] Técnico/a, Cuidador/a y Dirección reciben HTTP 403 si intentan editar.
 
 **Prioridad:** alta.
 
@@ -185,10 +185,10 @@ No incluye todavía:
 
 **Criterios de aceptación**
 
-- [ ] Solo Enfermería puede editar alergias, antecedentes y observaciones clínicas.
-- [ ] El formulario advierte que no se deben registrar diagnósticos innecesarios ni datos de terceros.
-- [ ] Cada cambio queda auditado con valor anterior y nuevo.
-- [ ] Los demás roles ven la información en modo lectura.
+- [x] Solo Enfermería puede editar alergias, antecedentes y observaciones clínicas.
+- [x] El formulario advierte que no se deben registrar diagnósticos innecesarios ni datos de terceros.
+- [x] Cada cambio queda auditado con valor anterior y nuevo.
+- [x] Los demás roles ven la información en modo lectura.
 
 **Prioridad:** alta.
 
@@ -198,11 +198,11 @@ No incluye todavía:
 
 **Criterios de aceptación**
 
-- [ ] Se puede crear, editar y eliminar un contacto con nombre, parentesco, teléfono, correo y notas.
-- [ ] Solo puede haber un contacto principal por residente; al marcarlo se desmarca el anterior.
-- [ ] Se muestra quién es el contacto principal en la ficha.
-- [ ] La eliminación pide confirmación y queda auditada con los datos anteriores.
-- [ ] Técnico/a, Cuidador/a y Dirección no pueden modificar contactos.
+- [x] Se puede crear, editar y eliminar un contacto con nombre, parentesco, teléfono, correo y notas.
+- [x] Solo puede haber un contacto principal por residente; al marcarlo se desmarca el anterior.
+- [x] Se muestra quién es el contacto principal en la ficha.
+- [x] La eliminación pide confirmación y queda auditada con los datos anteriores.
+- [x] Técnico/a, Cuidador/a y Dirección no pueden modificar contactos.
 
 **Prioridad:** alta.
 
@@ -212,11 +212,11 @@ No incluye todavía:
 
 **Criterios de aceptación**
 
-- [ ] Archivar no elimina la ficha ni sus contactos.
-- [ ] La ficha archivada deja de aparecer en la lista por defecto.
-- [ ] Se puede consultar con el filtro "Archivados" y reactivar.
-- [ ] La acción pide confirmación y queda auditada.
-- [ ] No existe una acción para borrar definitivamente desde la aplicación.
+- [x] Archivar no elimina la ficha ni sus contactos.
+- [x] La ficha archivada deja de aparecer en la lista por defecto.
+- [x] Se puede consultar con el filtro "Archivados" y reactivar.
+- [x] La acción pide confirmación y queda auditada.
+- [x] No existe una acción para borrar definitivamente desde la aplicación.
 
 **Prioridad:** alta.
 
@@ -226,12 +226,12 @@ No incluye todavía:
 
 **Criterios de aceptación**
 
-- [ ] Solo Dirección y Administración acceden a la auditoría.
-- [ ] Se lista actor, acción, registro afectado, fecha y campos cambiados.
-- [ ] Se puede filtrar por tipo de registro o acción y buscar por persona o registro.
-- [ ] Los cambios muestran valor anterior y nuevo.
-- [ ] Las contraseñas nunca aparecen en la auditoría.
-- [ ] La auditoría no se puede editar ni eliminar desde la aplicación.
+- [x] Solo Dirección y Administración acceden a la auditoría.
+- [x] Se lista actor, acción, registro afectado, fecha y campos cambiados.
+- [x] Se puede filtrar por tipo de registro o acción y buscar por persona o registro.
+- [x] Los cambios muestran valor anterior y nuevo.
+- [x] Las contraseñas nunca aparecen en la auditoría.
+- [x] La auditoría no se puede editar ni eliminar desde la aplicación.
 
 **Prioridad:** alta.
 
@@ -243,15 +243,15 @@ No incluye todavía:
 
 **Criterios de aceptación**
 
-- [ ] Solo Enfermería, Técnico/a y Cuidador/a pueden registrar; Dirección y Administración reciben HTTP 403.
-- [ ] El residente debe estar activo; una ficha archivada bloquea el registro hasta reactivarla.
-- [ ] Se registran residente, plan relacionado opcional, fecha y hora, turno, categoría, descripción y observaciones.
-- [ ] El plan relacionado debe estar activo y pertenecer al mismo residente.
-- [ ] La fecha y hora no puede ser futura (margen de 5 minutos) ni anterior al ingreso.
-- [ ] El turno se sugiere según la hora local: mañana 07–15, tarde 15–23, noche 23–07.
-- [ ] La descripción exige al menos 10 caracteres; las observaciones admiten hasta 1000.
-- [ ] Se puede marcar el registro para revisión de Enfermería.
-- [ ] El registro queda asociado a su autor y a la auditoría; no se puede editar ni eliminar después de guardarlo.
+- [x] Solo Enfermería, Técnico/a y Cuidador/a pueden registrar; Dirección y Administración reciben HTTP 403.
+- [x] El residente debe estar activo; una ficha archivada bloquea el registro hasta reactivarla.
+- [x] Se registran residente, plan relacionado opcional, fecha y hora, turno, categoría, descripción y observaciones.
+- [x] El plan relacionado debe estar activo y pertenecer al mismo residente.
+- [x] La fecha y hora no puede ser futura (margen de 5 minutos) ni anterior al ingreso.
+- [x] El turno se sugiere según la hora local: mañana 07–15, tarde 15–23, noche 23–07.
+- [x] La descripción exige al menos 10 caracteres; las observaciones admiten hasta 1000.
+- [x] Se puede marcar el registro para revisión de Enfermería.
+- [x] El registro queda asociado a su autor y a la auditoría; no se puede editar ni eliminar después de guardarlo.
 
 **Prioridad:** alta.
 
@@ -261,15 +261,15 @@ No incluye todavía:
 
 **Criterios de aceptación**
 
-- [ ] Todos los roles autenticados pueden consultar la bandeja y el detalle.
-- [ ] Por defecto se muestran los registros de la fecha local actual.
-- [ ] Se puede filtrar por fecha, todas las fechas, turno, categoría, residente o texto.
-- [ ] Se puede filtrar solo pendientes de revisión y decidir si se incluyen los corregidos.
-- [ ] Los corregidos se ocultan por defecto.
-- [ ] Se muestra fecha y hora, turno, residente y habitación, categoría, descripción, autor, estado y marca de revisión.
-- [ ] Las acciones visibles respetan el rol y el estado del registro.
-- [ ] La bandeja muestra conteos de registros del día, pendientes, planes activos y correcciones del día.
-- [ ] La vista se adapta a teléfono, tablet y computador sin desbordamiento horizontal.
+- [x] Todos los roles autenticados pueden consultar la bandeja y el detalle.
+- [x] Por defecto se muestran los registros de la fecha local actual.
+- [x] Se puede filtrar por fecha, todas las fechas, turno, categoría, residente o texto.
+- [x] Se puede filtrar solo pendientes de revisión y decidir si se incluyen los corregidos.
+- [x] Los corregidos se ocultan por defecto.
+- [x] Se muestra fecha y hora, turno, residente y habitación, categoría, descripción, autor, estado y marca de revisión.
+- [x] Las acciones visibles respetan el rol y el estado del registro.
+- [x] La bandeja muestra conteos de registros del día, pendientes, planes activos y correcciones del día.
+- [x] La vista se adapta a teléfono, tablet y computador sin desbordamiento horizontal.
 
 **Prioridad:** alta.
 
@@ -279,14 +279,14 @@ No incluye todavía:
 
 **Criterios de aceptación**
 
-- [ ] Solo el autor del registro o Enfermería pueden corregirlo; otro rol recibe HTTP 403.
-- [ ] Solo se corrige un registro vigente; uno ya corregido redirige a la versión vigente.
-- [ ] Una ficha archivada bloquea la corrección.
-- [ ] El formulario se precarga con los datos originales y exige un motivo de 10 a 500 caracteres.
-- [ ] Al guardar se crea una versión nueva enlazada con `supersedes`; la anterior queda como `CORREGIDO`.
-- [ ] El registro original sigue visible en el historial con su autor, fecha y motivo.
-- [ ] No se puede corregir dos veces el mismo registro.
-- [ ] La corrección queda auditada como acción `CORRECTION`.
+- [x] Solo el autor del registro o Enfermería pueden corregirlo; otro rol recibe HTTP 403.
+- [x] Solo se corrige un registro vigente; uno ya corregido redirige a la versión vigente.
+- [x] Una ficha archivada bloquea la corrección.
+- [x] El formulario se precarga con los datos originales y exige un motivo de 10 a 500 caracteres.
+- [x] Al guardar se crea una versión nueva enlazada con `supersedes`; la anterior queda como `CORREGIDO`.
+- [x] El registro original sigue visible en el historial con su autor, fecha y motivo.
+- [x] No se puede corregir dos veces el mismo registro.
+- [x] La corrección queda auditada como acción `CORRECTION`.
 
 **Prioridad:** alta.
 
@@ -296,13 +296,13 @@ No incluye todavía:
 
 **Criterios de aceptación**
 
-- [ ] Solo Enfermería puede revisar; los demás roles reciben HTTP 403.
-- [ ] Solo se revisan registros vigentes marcados con `requires_nursing_review=True`.
-- [ ] Un registro no marcado, ya revisado o corregido no se puede revisar.
-- [ ] Las observaciones de revisión admiten hasta 1000 caracteres.
-- [ ] Se guarda quién revisó y cuándo; la revisión queda auditada como `REVIEW`.
-- [ ] El detalle muestra la revisión y el registro deja de aparecer como pendiente.
-- [ ] Una ficha archivada bloquea la revisión.
+- [x] Solo Enfermería puede revisar; los demás roles reciben HTTP 403.
+- [x] Solo se revisan registros vigentes marcados con `requires_nursing_review=True`.
+- [x] Un registro no marcado, ya revisado o corregido no se puede revisar.
+- [x] Las observaciones de revisión admiten hasta 1000 caracteres.
+- [x] Se guarda quién revisó y cuándo; la revisión queda auditada como `REVIEW`.
+- [x] El detalle muestra la revisión y el registro deja de aparecer como pendiente.
+- [x] Una ficha archivada bloquea la revisión.
 
 **Prioridad:** alta.
 
@@ -312,14 +312,14 @@ No incluye todavía:
 
 **Criterios de aceptación**
 
-- [ ] Solo Enfermería puede crear o editar planes; los demás roles solo consultan.
-- [ ] El plan registra necesidad o foco, descripción, objetivo, acciones acordadas, responsable, fecha de inicio, próxima revisión y observaciones.
-- [ ] La fecha de inicio no puede ser futura y la próxima revisión no puede ser anterior al inicio.
-- [ ] El responsable debe ser una cuenta activa de Enfermería, Técnico/a o Cuidador/a.
-- [ ] El plan queda asociado al residente y no se puede mover a otro.
-- [ ] La creación y cada edición quedan auditadas.
-- [ ] El sistema no genera objetivos, acciones ni recomendaciones automáticamente.
-- [ ] Una ficha archivada bloquea la creación y edición del plan.
+- [x] Solo Enfermería puede crear o editar planes; los demás roles solo consultan.
+- [x] El plan registra necesidad o foco, descripción, objetivo, acciones acordadas, responsable, fecha de inicio, próxima revisión y observaciones.
+- [x] La fecha de inicio no puede ser futura y la próxima revisión no puede ser anterior al inicio.
+- [x] El responsable debe ser una cuenta activa de Enfermería, Técnico/a o Cuidador/a.
+- [x] El plan queda asociado al residente y no se puede mover a otro.
+- [x] La creación y cada edición quedan auditadas.
+- [x] El sistema no genera objetivos, acciones ni recomendaciones automáticamente.
+- [x] Una ficha archivada bloquea la creación y edición del plan.
 
 **Prioridad:** alta.
 
@@ -329,12 +329,12 @@ No incluye todavía:
 
 **Criterios de aceptación**
 
-- [ ] Solo Enfermería puede cerrar o reactivar un plan.
-- [ ] El cierre exige un motivo de al menos 10 caracteres y guarda el estado `CERRADO`.
-- [ ] El plan cerrado y sus registros asociados se conservan y siguen visibles en el historial.
-- [ ] La reactivación vuelve a `ACTIVO`, limpia el motivo de cierre y queda auditada.
-- [ ] Una ficha archivada bloquea ambas acciones.
-- [ ] No existe una acción para eliminar un plan.
+- [x] Solo Enfermería puede cerrar o reactivar un plan.
+- [x] El cierre exige un motivo de al menos 10 caracteres y guarda el estado `CERRADO`.
+- [x] El plan cerrado y sus registros asociados se conservan y siguen visibles en el historial.
+- [x] La reactivación vuelve a `ACTIVO`, limpia el motivo de cierre y queda auditada.
+- [x] Una ficha archivada bloquea ambas acciones.
+- [x] No existe una acción para eliminar un plan.
 
 **Prioridad:** alta.
 
@@ -344,12 +344,12 @@ No incluye todavía:
 
 **Criterios de aceptación**
 
-- [ ] La ficha tiene una pestaña “Cuidados” con planes activos, planes cerrados y registros recientes.
-- [ ] Los registros corregidos se consultan desde el detalle y desde la bandeja al incluir corregidos.
-- [ ] Los botones de plan, registro, corrección y revisión solo aparecen para roles autorizados.
-- [ ] El panel muestra registros del día, pendientes de revisión y planes activos.
-- [ ] El acceso directo a cuidados respeta el inicio de sesión.
-- [ ] La navegación por enlace directo muestra la pestaña activa sin ocultar la barra de pestañas bajo el navbar fijo.
+- [x] La ficha tiene una pestaña “Cuidados” con planes activos, planes cerrados y registros recientes.
+- [x] Los registros corregidos se consultan desde el detalle y desde la bandeja al incluir corregidos.
+- [x] Los botones de plan, registro, corrección y revisión solo aparecen para roles autorizados.
+- [x] El panel muestra registros del día, pendientes de revisión y planes activos.
+- [x] El acceso directo a cuidados respeta el inicio de sesión.
+- [x] La navegación por enlace directo muestra la pestaña activa sin ocultar la barra de pestañas bajo el navbar fijo.
 
 **Prioridad:** media.
 
@@ -369,10 +369,10 @@ No incluye todavía:
 
 ## Definición de terminado (incrementos 1 y 2)
 
-- [ ] Todas las historias de prioridad alta implementadas.
-- [ ] Matriz de permisos cubierta por pruebas automatizadas.
-- [ ] Datos ficticios cargables con un comando seguro.
-- [ ] README con instalación, ejecución y pruebas.
+- [x] Todas las historias de prioridad alta implementadas (US-01 a US-20 cubiertas técnicamente).
+- [x] Matriz de permisos cubierta por pruebas automatizadas (67 pruebas en la suite pytest).
+- [x] Datos ficticios cargables con un comando seguro (`seed_demo`).
+- [x] README con instalación, lanzador de Windows (`iniciar.bat`), ejecución y pruebas.
 - [ ] Revisión de la interfaz con al menos una persona de Enfermería y una de Administración.
 - [ ] Validación de categorías, turnos, campos, revisión y corrección con el equipo del ELEAM.
 - [ ] Revisión legal y de seguridad antes de usar datos reales.
