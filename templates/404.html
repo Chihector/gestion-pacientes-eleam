@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Página no encontrada{% endblock %}
+
+{% block content %}
+  <div class="row justify-content-center py-5">
+    <div class="col-lg-7">
+      <section class="panel-card text-center">
+        <div class="empty-state">
+          <i class="bi bi-compass" aria-hidden="true"></i>
+          <strong>No encontramos esta página</strong>
+          <p class="mb-3">Puede que el enlace haya cambiado o que el registro ya no exista.</p>
+          <a class="btn btn-primary" href="{% url 'core:dashboard' %}">
+            <i class="bi bi-grid-1x2 me-1" aria-hidden="true"></i> Volver al panel
+          </a>
+        </div>
+      </section>
+    </div>
+  </div>
+{% endblock %}

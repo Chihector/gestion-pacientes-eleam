@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Acceso denegado{% endblock %}
+
+{% block content %}
+  <div class="row justify-content-center py-5">
+    <div class="col-lg-7">
+      <section class="panel-card text-center">
+        <div class="empty-state">
+          <i class="bi bi-shield-lock" aria-hidden="true"></i>
+          <strong>No tienes permiso para acceder a esta sección</strong>
+          <p class="mb-3">Tu rol no permite realizar esta acción. Si crees que es un error, contacta a Administración.</p>
+          <a class="btn btn-primary" href="{% url 'core:dashboard' %}">
+            <i class="bi bi-grid-1x2 me-1" aria-hidden="true"></i> Volver al panel
+          </a>
+        </div>
+      </section>
+    </div>
+  </div>
+{% endblock %}

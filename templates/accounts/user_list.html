@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block title %}Usuarios{% endblock %}
+
+{% block content %}
+  <div class="page-head">
+    <div>
+      <p class="eyebrow mb-1">Administración de accesos</p>
+      <h1>Usuarios</h1>
+      <p class="lead-sm">Cuentas individuales, roles y estado. Ninguna cuenta se comparte entre turnos.</p>
+    </div>
+    <div>
+      <a class="btn btn-primary" href="{% url 'accounts:user_create' %}">
+        <i class="bi bi-person-plus me-1" aria-hidden="true"></i> Nuevo usuario
+      </a>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-6 col-lg-3">
+      <div class="stat-card"><span class="stat-icon"><i class="bi bi-people" aria-hidden="true"></i></span><div><div class="stat-value">{{ paginator.count }}</div><div class="stat-label">Resultados del filtro</div></div></div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="stat-card"><span class="stat-icon info"><i class="bi bi-person-check" aria-hidden="true"></i></span><div><div class="stat-value">{{ active_count }}</div><div class="stat-label">Cuentas activas</div></div></div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="stat-card"><span class="stat-icon warning"><i class="bi bi-person-dash" aria-hidden="true"></i></span><div><div class="stat-value">{{ inactive_count }}</div><div class="stat-label">Cuentas desactivadas</div></div></div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="stat-card"><span class="stat-icon accent"><i class="bi bi-shield-check" aria-hidden="true"></i></span><div><div class="stat-value">{{ admin_count }}</div><div class="stat-label">Administración activa</div></div></div>
+    </div>
+  </div>
+
+  <section class="panel-card mb-3" aria-labelledby="titulo-filtros">
+    <div class="panel-card-header">
+      <div>
+        <h2 id="titulo-filtros">Filtrar cuentas</h2>
+        <p class="panel-card-sub">Busca por nombre o correo y acota por rol.</p>
+      </div>
+    </div>
+    <form method="get" class="row g-2 align-items-end" role="search">
+      <div class="col-12 col-lg-6">
+        <label for="filtro-q" class="form-label">Nombre o correo</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-search" aria-hidden="true"></i></span>
+          <input type="search" class="form-control" id="filtro-q" name="q" value="{{ filters.q }}" placeholder="Ej.: Carolina o enfermeria@example.test" autocomplete="off">
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <label for="filtro-rol" class="form-label">Rol</label>
+        <select class="form-select" id="filtro-rol" name="rol">
+          <option value="">Todos</option>
+          {% for value, label in roles %}
+            <option value="{{ value }}" {% if filters.rol == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-6 col-lg-3 d-grid">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-funnel me-1" aria-hidden="true"></i> Filtrar</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="panel-card" aria-labelledby="titulo-cuentas">
+    <div class="panel-card-header">
+      <div>
+        <h2 id="titulo-cuentas">Cuentas del establecimiento</h2>
+        <p class="panel-card-sub">Desactivar una cuenta no elimina su historial de auditoría.</p>
+      </div>
+      <span class="badge-soft primary"><i class="bi bi-shield-lock" aria-hidden="true"></i> Solo Administración</span>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-eleam mobile-card-table align-middle">
+        <thead>
+          <tr><th>Persona</th><th>Rol</th><th>Estado</th><th>Último acceso</th><th class="text-end">Acciones</th></tr>
+        </thead>
+        <tbody>
+          {% for persona in users %}
+            <tr>
+              <td data-label="Persona">
+                <div class="d-flex align-items-center gap-2">
+                  <span class="avatar" aria-hidden="true">{{ persona.initials }}</span>
+                  <div>
+                    <span class="resident-name">{{ persona.get_full_name|default:persona.email }}</span>
+                    <div class="resident-meta">{{ persona.email }}{% if persona == request.user %} · Tú{% endif %}</div>
+                  </div>
+                </div>
+              </td>
+              <td data-label="Rol">
+                {% if persona.role == "ADMINISTRACION" %}
+                  <span class="badge-soft primary">{{ persona.get_role_display }}</span>
+                {% elif persona.role == "ENFERMERIA" %}
+                  <span class="badge-soft info">{{ persona.get_role_display }}</span>
+                {% elif persona.role == "DIRECCION" %}
+                  <span class="badge-soft success">{{ persona.get_role_display }}</span>
+                {% else %}
+                  <span class="badge-soft muted">{{ persona.get_role_display }}</span>
+                {% endif %}
+              </td>
+              <td data-label="Estado">
+                {% if persona.is_active %}
+                  <span class="badge-soft success"><span class="status-dot"></span>Activa</span>
+                {% else %}
+                  <span class="badge-soft muted"><span class="status-dot muted"></span>Desactivada</span>
+                {% endif %}
+              </td>
+              <td data-label="Último acceso">
+                <span class="small">{{ persona.last_login|date:"d/m/Y H:i"|default:"Nunca" }}</span>
+              </td>
+              <td data-label="Acciones" class="text-end">
+                <div class="d-flex justify-content-end gap-1 flex-wrap">
+                  <a class="btn btn-sm btn-outline-primary" href="{% url 'accounts:user_update' persona.pk %}" aria-label="Editar cuenta de {{ persona.get_full_name }}">
+                    <i class="bi bi-pencil" aria-hidden="true"></i> Editar
+                  </a>
+                  {% if persona != request.user %}
+                    <a class="btn btn-sm btn-quiet" href="{% url 'accounts:user_password_reset' persona.pk %}" aria-label="Restablecer contraseña de {{ persona.get_full_name }}" data-bs-toggle="tooltip" title="Restablecer contraseña">
+                      <i class="bi bi-key" aria-hidden="true"></i>
+                    </a>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="5">
+                <div class="empty-state">
+                  <i class="bi bi-person-x" aria-hidden="true"></i>
+                  <strong>No encontramos cuentas</strong>
+                  <p class="mb-0">Prueba con otro nombre, correo o rol.</p>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% include "partials/pagination.html" %}
+
+    <div class="warning-callout mt-3">
+      <i class="bi bi-shield-exclamation me-1" aria-hidden="true"></i>
+      No se puede desactivar la propia cuenta ni dejar el sistema sin una persona con rol Administración activa. Cada cambio queda registrado en la auditoría.
+    </div>
+  </section>
+{% endblock %}

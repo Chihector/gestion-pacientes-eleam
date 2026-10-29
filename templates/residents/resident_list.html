@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Residentes{% endblock %}
+
+{% block content %}
+  <div class="page-head">
+    <div>
+      <p class="eyebrow mb-1">Fichas</p>
+      <h1>Residentes</h1>
+      <p class="lead-sm">Busca por nombre, RUT o habitación. Las fichas archivadas no aparecen por defecto.</p>
+    </div>
+    {% if can_create %}
+      <div>
+        <a class="btn btn-primary" href="{% url 'residents:create' %}">
+          <i class="bi bi-plus-lg me-1" aria-hidden="true"></i> Nuevo residente
+        </a>
+      </div>
+    {% endif %}
+  </div>
+
+  <section class="panel-card mb-3" aria-labelledby="titulo-busqueda">
+    <div class="panel-card-header">
+      <div>
+        <h2 id="titulo-busqueda">Buscar residentes</h2>
+        <p class="panel-card-sub">Búsqueda parcial, sin distinguir mayúsculas ni tildes básicas.</p>
+      </div>
+    </div>
+
+    <form id="form-busqueda"
+          class="row g-2 align-items-end"
+          method="get"
+          action="{% url 'residents:list' %}"
+          role="search"
+          hx-get="{% url 'residents:list' %}"
+          hx-target="#residentes-resultados"
+          hx-select="#residentes-resultados"
+          hx-swap="outerHTML"
+          hx-push-url="true"
+          hx-indicator="#lista-indicator"
+          hx-trigger="submit, keyup changed delay:350ms from:#filtro-q, change from:#filtro-estado, change from:#filtro-archivados">
+      <div class="col-12 col-lg-5">
+        <label for="filtro-q" class="form-label">Nombre, RUT o habitación</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-search" aria-hidden="true"></i></span>
+          <input type="search" class="form-control" id="filtro-q" name="q" value="{{ q }}" placeholder="Ej.: Rosa, 11.111.111-1 o 12" autocomplete="off">
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <label for="filtro-estado" class="form-label">Estado</label>
+        <select id="filtro-estado" class="form-select" name="estado">
+          <option value="">Todos</option>
+          {% for value, label in statuses %}
+            <option value="{{ value }}" {% if estado == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-6 col-lg-2">
+        <div class="form-check mt-4 pt-2">
+          <input class="form-check-input" type="checkbox" id="filtro-archivados" name="archivados" value="1" {% if incluir_archivados %}checked{% endif %}>
+          <label class="form-check-label small fw-semibold" for="filtro-archivados">Ver archivados</label>
+        </div>
+      </div>
+      <div class="col-12 col-lg-2 d-grid">
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-search me-1" aria-hidden="true"></i> Buscar
+          <span id="lista-indicator" class="htmx-indicator spinner-border spinner-border-sm ms-1" aria-hidden="true"></span>
+        </button>
+      </div>
+    </form>
+
+    {% if not user.can_edit_resident_admin %}
+      <div class="info-callout mt-3">
+        <i class="bi bi-eye me-1" aria-hidden="true"></i>
+        Tu rol puede consultar las fichas, pero no crear ni editar residentes. Los botones de acción se ocultan automáticamente.
+      </div>
+    {% endif %}
+  </section>
+
+  <section class="panel-card" aria-labelledby="titulo-lista">
+    <div class="panel-card-header">
+      <div>
+        <h2 id="titulo-lista">Fichas registradas</h2>
+        <p class="panel-card-sub">Los datos marcados DEMO son ficticios y no tienen valor clínico.</p>
+      </div>
+      <span class="badge-soft muted"><i class="bi bi-shield-check" aria-hidden="true"></i> Acceso autenticado</span>
+    </div>
+
+    {% include "residents/_results.html" %}
+  </section>
+{% endblock %}

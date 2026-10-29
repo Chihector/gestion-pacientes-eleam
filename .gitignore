@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+.venv*/
+*.egg-info/
+
+# Django
+db.sqlite3
+db.sqlite3-journal
+/staticfiles/
+/media/
+.env
+.env.*
+!.env.example
+
+# Pruebas y cobertura
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.testmondata
+
+# Herramientas
+*.log
+.mypy_cache/
+.ruff_cache/
+node_modules/
+
+# Sistema operativo / editores
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+
+# Datos locales que nunca deben subirse
+*.sqlite3
+*.dump
+*.bak

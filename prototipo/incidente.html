@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Prototipo de reporte de incidentes ELEAM. Datos ficticios.">
+  <title>Reportar incidente · ELEAM</title>
+  <link rel="stylesheet" href="assets/vendor/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/vendor/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="assets/estilos.css">
+</head>
+<body>
+  <a class="skip-link" href="#contenido">Ir al contenido</a>
+  <div class="demo-strip"><i class="bi bi-cone-striped"></i> Prototipo con datos ficticios · No ingreses información real</div>
+
+  <nav class="navbar navbar-expand-lg app-navbar sticky-top" aria-label="Navegación principal">
+    <div class="container-xl">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="panel.html">
+        <span class="brand-mark"><i class="bi bi-heart-pulse"></i></span>
+        <span class="brand-copy"><strong>ELEAM</strong><small>Gestión de residentes</small></span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navPrincipal" aria-controls="navPrincipal" aria-expanded="false" aria-label="Abrir menú">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navPrincipal">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="panel.html"><i class="bi bi-grid-1x2"></i> Panel</a></li>
+          <li class="nav-item"><a class="nav-link" href="residentes.html"><i class="bi bi-people"></i> Residentes</a></li>
+          <li class="nav-item" data-roles="DIRECCION ADMINISTRACION"><a class="nav-link" href="auditoria.html"><i class="bi bi-clock-history"></i> Auditoría</a></li>
+          <li class="nav-item" data-roles="ADMINISTRACION"><a class="nav-link" href="usuarios.html"><i class="bi bi-person-gear"></i> Usuarios</a></li>
+        </ul>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          <label class="role-switch">
+            <span>Ver como</span>
+            <select id="role-select" class="form-select form-select-sm" aria-label="Simular rol de usuario">
+              <option value="ENFERMERIA">Enfermería</option>
+              <option value="ADMINISTRACION">Administración</option>
+              <option value="TECNICO">Técnico/a</option>
+              <option value="CUIDADOR">Cuidador/a</option>
+              <option value="DIRECCION">Dirección</option>
+            </select>
+          </label>
+          <div class="dropdown">
+            <button class="btn btn-user dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <span class="avatar avatar-sm" data-role-initials>CD</span>
+              <span class="d-none d-md-inline" data-role-name>Carolina Demo</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><span class="dropdown-item-text small text-muted">Sesión demo · <span data-role-label>Enfermería</span></span></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="#" data-demo-action="En la aplicación real se pediría la contraseña actual y la nueva."><i class="bi bi-key me-2"></i>Cambiar contraseña</a></li>
+              <li><a class="dropdown-item" href="login.html"><i class="bi bi-box-arrow-right me-2"></i>Cerrar sesión</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main id="contenido" class="page-wrap">
+    <div class="container-xl">
+      <nav aria-label="Ruta de navegación" class="mb-3">
+        <ol class="breadcrumb small mb-0">
+          <li class="breadcrumb-item"><a href="panel.html">Panel</a></li>
+          <li class="breadcrumb-item"><a href="ficha.html">Rosa Ficticia Pérez</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Reportar incidente</li>
+        </ol>
+      </nav>
+
+      <div class="page-head">
+        <div>
+          <p class="eyebrow mb-1">Incidentes · Incremento 3</p>
+          <h1>Reportar un incidente</h1>
+          <p class="lead-sm">Registra los hechos de forma objetiva. La seguridad de la persona es primero.</p>
+        </div>
+        <span class="badge-soft danger"><i class="bi bi-exclamation-triangle"></i> Módulo en diseño</span>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-lg-8">
+          <div data-roles="ENFERMERIA TECNICO CUIDADOR">
+            <section class="panel-card">
+              <div class="panel-card-header">
+                <div>
+                  <h2>Datos del incidente</h2>
+                  <p class="panel-card-sub">No se reemplaza el reporte verbal ni la evaluación clínica.</p>
+                </div>
+                <span class="badge-soft warning">Borrador</span>
+              </div>
+
+              <form data-prototype-form data-success-message="Incidente reportado en la simulación. En la aplicación real se avisaría a Enfermería y quedaría en la auditoría con tu nombre y la hora.">
+                <div class="row g-3">
+                  <div class="col-md-7">
+                    <label class="form-label" for="residente">Residente</label>
+                    <select class="form-select" id="residente">
+                      <option selected>Rosa Ficticia Pérez · Hab. 12</option>
+                      <option>Juan De Prueba Soto · Hab. 3</option>
+                      <option>Pedro Muestra Díaz · Hab. 7</option>
+                      <option>Elena Simulación Vera · Hab. 2</option>
+                    </select>
+                  </div>
+                  <div class="col-md-5">
+                    <label class="form-label" for="fecha-hora">Fecha y hora del incidente</label>
+                    <input type="datetime-local" class="form-control" id="fecha-hora" value="2026-10-29T09:20">
+                  </div>
+
+                  <div class="col-md-6">
+                    <label class="form-label" for="tipo">Tipo de incidente</label>
+                    <select class="form-select" id="tipo">
+                      <option selected>Caída</option>
+                      <option>Lesión sin caída</option>
+                      <option>Error de medicación</option>
+                      <option>Confusión o desorientación</option>
+                      <option>Fuga o salida no autorizada</option>
+                      <option>Agresión</option>
+                      <option>Otro</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label" for="lugar">Lugar</label>
+                    <input class="form-control" id="lugar" placeholder="Ej.: baño de la habitación 12">
+                  </div>
+
+                  <div class="col-12">
+                    <span class="form-label d-block">Gravedad percibida</span>
+                    <div class="chip-select" role="group" aria-label="Gravedad percibida">
+                      <input type="radio" name="gravedad" id="gravedad-leve" checked><label for="gravedad-leve"><i class="bi bi-circle"></i> Leve</label>
+                      <input type="radio" name="gravedad" id="gravedad-moderado"><label for="gravedad-moderado"><i class="bi bi-circle-half"></i> Moderado</label>
+                      <input type="radio" name="gravedad" id="gravedad-grave"><label for="gravedad-grave"><i class="bi bi-exclamation-circle"></i> Grave</label>
+                    </div>
+                    <div class="form-text">La gravedad es una apreciación inicial; no reemplaza la evaluación de Enfermería.</div>
+                  </div>
+
+                  <div class="col-12">
+                    <label class="form-label" for="descripcion">¿Qué ocurrió?</label>
+                    <textarea class="form-control" id="descripcion" rows="4" placeholder="Describe los hechos observados, en orden, sin opiniones ni diagnósticos."></textarea>
+                  </div>
+
+                  <div class="col-12">
+                    <label class="form-label" for="acciones">Acciones inmediatas tomadas</label>
+                    <textarea class="form-control" id="acciones" rows="3" placeholder="Ej.: Se verificó que estaba consciente, se llamó a Enfermería y se acompañó hasta la cama."></textarea>
+                  </div>
+
+                  <div class="col-md-6">
+                    <label class="form-label" for="testigos">Personas presentes</label>
+                    <input class="form-control" id="testigos" placeholder="Nombre y rol, si corresponde">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label" for="aviso">¿A quién se avisó?</label>
+                    <input class="form-control" id="aviso" placeholder="Ej.: Enfermera de turno">
+                  </div>
+
+                  <div class="col-12">
+                    <div class="form-check mb-2">
+                      <input class="form-check-input" type="checkbox" id="notificar-familia">
+                      <label class="form-check-label" for="notificar-familia">Se debe notificar a la familia o representante</label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" id="notificar-direccion">
+                      <label class="form-check-label" for="notificar-direccion">Se debe notificar a Dirección</label>
+                    </div>
+                  </div>
+
+                  <div class="col-12">
+                    <div class="danger-callout">
+                      <i class="bi bi-shield-lock me-1"></i>
+                      Este reporte contiene datos sensibles. No lo compartas por canales personales ni incluyas información de otras personas.
+                    </div>
+                  </div>
+
+                  <div class="col-12 d-flex flex-wrap gap-2 justify-content-end">
+                    <button type="reset" class="btn btn-quiet">Limpiar</button>
+                    <button type="submit" class="btn btn-danger btn-lg"><i class="bi bi-send me-1"></i> Enviar reporte</button>
+                  </div>
+                </div>
+              </form>
+            </section>
+          </div>
+
+          <div data-roles="DIRECCION">
+            <section class="panel-card">
+              <div class="panel-card-header"><h2>Vista de Dirección</h2><span class="badge-soft info">Solo lectura</span></div>
+              <p class="text-muted-sm">Dirección revisa y hace seguimiento a los incidentes, pero no los reporta. En la aplicación real vería el listado, el estado y las acciones de cierre.</p>
+              <div class="note-card"><i class="bi bi-eye me-1"></i> El formulario está oculto porque tu rol no reporta incidentes.</div>
+            </section>
+          </div>
+
+          <div data-roles="ADMINISTRACION">
+            <section class="panel-card">
+              <div class="panel-card-header"><h2>Acceso restringido</h2><span class="badge-soft danger">Sin permiso</span></div>
+              <p class="text-muted-sm mb-0">Administración no accede a reportes de incidentes en esta propuesta. El acceso debe definirse explícitamente con el ELEAM antes de implementarlo.</p>
+            </section>
+          </div>
+        </div>
+
+        <div class="col-lg-4">
+          <section class="panel-card mb-3">
+            <div class="panel-card-header"><h2>Antes de reportar</h2></div>
+            <ol class="small mb-0 ps-3">
+              <li class="mb-2">Asegura el bienestar de la persona y pide ayuda si es necesario.</li>
+              <li class="mb-2">No muevas a alguien con sospecha de lesión grave; sigue el protocolo del ELEAM.</li>
+              <li class="mb-2">Avisa a Enfermería de inmediato.</li>
+              <li class="mb-0">Registra los hechos mientras están frescos, sin acusaciones ni diagnósticos.</li>
+            </ol>
+          </section>
+
+          <section class="panel-card mb-3">
+            <div class="panel-card-header">
+              <div><h2>Incidentes recientes</h2><p class="panel-card-sub">Datos ficticios de ejemplo.</p></div>
+            </div>
+            <div class="d-grid gap-2">
+              <div class="audit-box">
+                <div class="d-flex justify-content-between gap-2">
+                  <span class="fw-semibold small">Caída en baño · Hab. 7</span>
+                  <span class="badge-soft warning">En revisión</span>
+                </div>
+                <p class="text-muted-sm mb-0 mt-1">27/10 · Reportó Tamara Demo · Sin lesiones aparentes.</p>
+              </div>
+              <div class="audit-box">
+                <div class="d-flex justify-content-between gap-2">
+                  <span class="fw-semibold small">Error de medicación · Hab. 2</span>
+                  <span class="badge-soft success">Cerrado</span>
+                </div>
+                <p class="text-muted-sm mb-0 mt-1">24/10 · Revisó Carolina Demo · Se corrigió el horario.</p>
+              </div>
+              <div class="audit-box">
+                <div class="d-flex justify-content-between gap-2">
+                  <span class="fw-semibold small">Desorientación nocturna · Hab. 9</span>
+                  <span class="badge-soft success">Cerrado</span>
+                </div>
+                <p class="text-muted-sm mb-0 mt-1">22/10 · Reportó Camila Demo · Se avisó a Enfermería.</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel-card">
+            <div class="panel-card-header"><h2>Confidencialidad</h2></div>
+            <p class="text-muted-sm mb-2">Los incidentes son información sensible. Solo deben verlos las personas autorizadas para cuidar, supervisar o investigar.</p>
+            <div class="note-card"><i class="bi bi-lock me-1"></i> No uses este módulo para conversaciones informales ni para registrar opiniones personales.</div>
+          </section>
+        </div>
+      </div>
+
+      <p class="text-muted-sm text-center mt-4 mb-0">
+        <i class="bi bi-info-circle me-1"></i>
+        Este flujo debe validarse con Enfermería y Dirección antes de implementarse. No reemplaza protocolos internos ni obligaciones legales.
+      </p>
+    </div>
+  </main>
+
+  <footer class="app-footer">
+    <div class="container-xl d-flex flex-wrap justify-content-between gap-2">
+      <span>ELEAM · Prototipo de gestión de residentes</span>
+      <span>Datos ficticios · Sin valor clínico · No usar en producción</span>
+    </div>
+  </footer>
+
+  <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toast-container"></div>
+  <script src="assets/vendor/bootstrap.bundle.min.js"></script>
+  <script src="assets/demo.js"></script>
+</body>
+</html>

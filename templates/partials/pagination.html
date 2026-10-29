@@ -1,0 +1,33 @@
+{% if page_obj.has_other_pages %}
+  <nav class="d-flex justify-content-center mt-3" aria-label="Paginación">
+    <ul class="pagination mb-0">
+      {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="{% querystring page=page_obj.previous_page_number %}" aria-label="Página anterior">
+            <i class="bi bi-chevron-left" aria-hidden="true"></i>
+          </a>
+        </li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link"><i class="bi bi-chevron-left" aria-hidden="true"></i></span></li>
+      {% endif %}
+
+      {% for number in page_obj.paginator.page_range %}
+        {% if number == page_obj.number %}
+          <li class="page-item active" aria-current="page"><span class="page-link">{{ number }}</span></li>
+        {% elif number >= page_obj.number|add:"-2" and number <= page_obj.number|add:"2" %}
+          <li class="page-item"><a class="page-link" href="{% querystring page=number %}">{{ number }}</a></li>
+        {% endif %}
+      {% endfor %}
+
+      {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="{% querystring page=page_obj.next_page_number %}" aria-label="Página siguiente">
+            <i class="bi bi-chevron-right" aria-hidden="true"></i>
+          </a>
+        </li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link"><i class="bi bi-chevron-right" aria-hidden="true"></i></span></li>
+      {% endif %}
+    </ul>
+  </nav>
+{% endif %}

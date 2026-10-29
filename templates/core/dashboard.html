@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+{% block title %}Panel{% endblock %}
+
+{% block content %}
+  <div class="page-head">
+    <div>
+      <p class="eyebrow mb-1">Panel de turno</p>
+      <h1>Hola, {{ greeting_name }}</h1>
+      <p class="lead-sm">{{ today|date:"l, j \d\e F \d\e Y" }} · {{ user.get_role_display }}</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <a class="btn btn-outline-primary" href="{% url 'residents:list' %}">
+        <i class="bi bi-search me-1" aria-hidden="true"></i> Buscar residente
+      </a>
+      {% if user.can_edit_resident_admin %}
+        <a class="btn btn-primary" href="{% url 'residents:create' %}">
+          <i class="bi bi-plus-lg me-1" aria-hidden="true"></i> Nuevo residente
+        </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-6 col-lg-3">
+      <div class="stat-card">
+        <span class="stat-icon"><i class="bi bi-people" aria-hidden="true"></i></span>
+        <div><div class="stat-value">{{ active_count }}</div><div class="stat-label">Residentes activos</div></div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="stat-card">
+        <span class="stat-icon accent"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i></span>
+        <div><div class="stat-value">{{ allergy_count }}</div><div class="stat-label">Con alergias registradas</div></div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="stat-card">
+        <span class="stat-icon warning"><i class="bi bi-hospital" aria-hidden="true"></i></span>
+        <div><div class="stat-value">{{ hospitalized_count }}</div><div class="stat-label">Hospitalizados</div></div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="stat-card">
+        <span class="stat-icon info"><i class="bi bi-telephone-x" aria-hidden="true"></i></span>
+        <div><div class="stat-value">{{ missing_contact_count }}</div><div class="stat-label">Sin contacto principal</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-lg-8">
+      <section class="panel-card mb-3" aria-labelledby="titulo-alertas">
+        <div class="panel-card-header">
+          <div>
+            <h2 id="titulo-alertas"><i class="bi bi-bell me-1 text-danger" aria-hidden="true"></i> Alertas de cuidado</h2>
+            <p class="panel-card-sub">Información que conviene revisar antes de comenzar el turno.</p>
+          </div>
+          <span class="badge-soft danger">{{ allergy_count|add:missing_contact_count }} pendientes</span>
+        </div>
+
+        <div class="d-grid gap-2">
+          {% for resident in allergy_alerts %}
+            <a class="quick-action" href="{{ resident.get_absolute_url }}">
+              <span class="qi accent"><i class="bi bi-exclamation-octagon" aria-hidden="true"></i></span>
+              <span class="flex-grow-1">{{ resident.full_name }} <small>Hab. {{ resident.room|default:"—" }} · Alergia: {{ resident.allergies|truncatechars:48 }}</small></span>
+              <span class="badge-soft danger">Ver ficha</span>
+            </a>
+          {% endfor %}
+          {% for resident in missing_contact_residents %}
+            <a class="quick-action" href="{{ resident.get_absolute_url }}">
+              <span class="qi warning"><i class="bi bi-telephone-x" aria-hidden="true"></i></span>
+              <span class="flex-grow-1">{{ resident.full_name }} <small>Hab. {{ resident.room|default:"—" }} · Sin contacto principal registrado</small></span>
+              <span class="badge-soft warning">Revisar</span>
+            </a>
+          {% endfor %}
+          {% if not allergy_alerts and not missing_contact_residents %}
+            <div class="empty-state py-3">
+              <i class="bi bi-check-circle" aria-hidden="true"></i>
+              <strong>Sin alertas pendientes</strong>
+              <p class="mb-0">No hay alergias registradas ni fichas sin contacto principal entre los residentes activos.</p>
+            </div>
+          {% endif %}
+        </div>
+        <p class="text-muted-sm mt-3 mb-0">
+          <i class="bi bi-info-circle me-1" aria-hidden="true"></i>
+          "Sin alergias registradas" no significa "sin alergias". Confirma con Enfermería antes de administrar medicamentos.
+        </p>
+      </section>
+
+      <section class="panel-card" aria-labelledby="titulo-recientes">
+        <div class="panel-card-header">
+          <div>
+            <h2 id="titulo-recientes">Residentes recientes</h2>
+            <p class="panel-card-sub">Últimas fichas creadas o actualizadas.</p>
+          </div>
+          <a class="btn btn-sm btn-outline-primary" href="{% url 'residents:list' %}">Ver todos</a>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-eleam mobile-card-table align-middle">
+            <thead>
+              <tr><th>Residente</th><th>Habitación</th><th>Estado</th><th>Alergias</th><th class="text-end">Ficha</th></tr>
+            </thead>
+            <tbody>
+              {% for resident in recent_residents %}
+                <tr>
+                  <td data-label="Residente">
+                    <div class="d-flex align-items-center gap-2">
+                      <span class="avatar" aria-hidden="true">{{ resident.initials }}</span>
+                      <div>
+                        <a class="resident-name" href="{{ resident.get_absolute_url }}">{{ resident.full_name }}</a>
+                        <div class="resident-meta">{{ resident.rut_formatted }} · {{ resident.age }} años{% if resident.is_demo %} <span class="demo-chip ms-1">DEMO</span>{% endif %}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td data-label="Habitación">{{ resident.room|default:"—" }}</td>
+                  <td data-label="Estado">
+                    {% if resident.status == "ACTIVO" %}
+                      <span class="badge-soft success"><span class="status-dot"></span>{{ resident.get_status_display }}</span>
+                    {% elif resident.status == "HOSPITALIZADO" %}
+                      <span class="badge-soft warning"><span class="status-dot warning"></span>{{ resident.get_status_display }}</span>
+                    {% else %}
+                      <span class="badge-soft muted"><span class="status-dot muted"></span>{{ resident.get_status_display }}</span>
+                    {% endif %}
+                  </td>
+                  <td data-label="Alergias">
+                    {% if resident.has_allergies %}
+                      <span class="badge-soft danger"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i> {{ resident.allergies|truncatechars:28 }}</span>
+                    {% else %}
+                      <span class="badge-soft muted">Sin registrar</span>
+                    {% endif %}
+                  </td>
+                  <td data-label="Ficha" class="text-end">
+                    <a class="btn btn-sm btn-quiet" href="{{ resident.get_absolute_url }}" aria-label="Ver ficha de {{ resident.full_name }}">
+                      <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                    </a>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="5">
+                    <div class="empty-state">
+                      <i class="bi bi-people" aria-hidden="true"></i>
+                      <strong>No hay residentes activos</strong>
+                      <p class="mb-0">Crea la primera ficha para comenzar.</p>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        {% if archived_count %}
+          <p class="text-muted-sm mt-3 mb-0">
+            <i class="bi bi-archive me-1" aria-hidden="true"></i>
+            Hay {{ archived_count }} ficha{{ archived_count|pluralize:"s" }} archivada{{ archived_count|pluralize:"s" }}.
+            <a href="{% url 'residents:list' %}?archivados=1">Ver archivadas</a>
+          </p>
+        {% endif %}
+      </section>
+    </div>
+
+    <div class="col-lg-4">
+      <section class="panel-card mb-3" aria-labelledby="titulo-accesos">
+        <div class="panel-card-header"><h2 id="titulo-accesos">Accesos rápidos</h2></div>
+        <div class="d-grid gap-2">
+          <a class="quick-action" href="{% url 'residents:list' %}">
+            <span class="qi"><i class="bi bi-search" aria-hidden="true"></i></span>
+            <span>Buscar residente <small>Por nombre, RUT o habitación</small></span>
+          </a>
+          {% if user.can_edit_resident_admin %}
+            <a class="quick-action" href="{% url 'residents:create' %}">
+              <span class="qi"><i class="bi bi-person-plus" aria-hidden="true"></i></span>
+              <span>Nuevo residente <small>Datos administrativos</small></span>
+            </a>
+          {% endif %}
+          {% if user.can_view_audit %}
+            <a class="quick-action" href="{% url 'audit:list' %}">
+              <span class="qi warning"><i class="bi bi-clock-history" aria-hidden="true"></i></span>
+              <span>Revisar auditoría <small>Cambios y responsables</small></span>
+            </a>
+          {% endif %}
+          {% if user.can_manage_users %}
+            <a class="quick-action" href="{% url 'accounts:user_list' %}">
+              <span class="qi info"><i class="bi bi-person-gear" aria-hidden="true"></i></span>
+              <span>Gestionar usuarios <small>Cuentas, roles y accesos</small></span>
+            </a>
+          {% endif %}
+          <a class="quick-action" href="{% url 'accounts:password_change' %}">
+            <span class="qi"><i class="bi bi-key" aria-hidden="true"></i></span>
+            <span>Cambiar contraseña <small>Seguridad de tu cuenta</small></span>
+          </a>
+        </div>
+      </section>
+
+      {% if user.can_view_audit %}
+        <section class="panel-card mb-3" aria-labelledby="titulo-actividad">
+          <div class="panel-card-header">
+            <div>
+              <h2 id="titulo-actividad">Actividad reciente</h2>
+              <p class="panel-card-sub">Solo Dirección y Administración.</p>
+            </div>
+            <a class="btn btn-sm btn-quiet" href="{% url 'audit:list' %}" aria-label="Ver toda la auditoría">
+              <i class="bi bi-arrow-up-right" aria-hidden="true"></i>
+            </a>
+          </div>
+          {% if recent_logs %}
+            <ul class="timeline">
+              {% for log in recent_logs %}
+                <li class="timeline-item">
+                  <span class="timeline-dot {% if log.action_css == 'danger' or log.action_css == 'warning' %}accent{% elif log.action_css == 'muted' %}muted{% endif %}"></span>
+                  <p class="timeline-title">{{ log.get_action_display }} · {{ log.object_repr }}</p>
+                  <p class="timeline-meta">{{ log.actor_display }} · {{ log.created_at|date:"d/m/Y H:i" }}</p>
+                  {% if log.change_list %}
+                    <p class="timeline-text">
+                      {% for row in log.change_list|slice:":2" %}
+                        {{ row.field }}: {{ row.before }} → {{ row.after }}{% if not forloop.last %} · {% endif %}
+                      {% endfor %}
+                    </p>
+                  {% endif %}
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="text-muted-sm mb-0">Todavía no hay actividad registrada.</p>
+          {% endif %}
+        </section>
+      {% else %}
+        <section class="panel-card" aria-labelledby="titulo-privacidad">
+          <div class="panel-card-header"><h2 id="titulo-privacidad">Privacidad</h2></div>
+          <p class="text-muted-sm mb-2">Tu rol puede consultar la ficha, pero la auditoría completa está reservada a Dirección y Administración.</p>
+          <div class="note-card">
+            <i class="bi bi-shield-check me-1" aria-hidden="true"></i>
+            Cierra sesión al terminar el turno y no compartas tu cuenta. Los cambios quedan asociados a tu nombre.
+          </div>
+        </section>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if demo_mode %}
+    <p class="text-muted-sm text-center mt-4 mb-0">
+      <i class="bi bi-cone-striped me-1" aria-hidden="true"></i>
+      Estás en un entorno de demostración. Los nombres, RUT y datos clínicos son ficticios.
+    </p>
+  {% endif %}
+{% endblock %}

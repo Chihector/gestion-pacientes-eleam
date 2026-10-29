@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Eliminar contacto{% endblock %}
+
+{% block content %}
+  <nav aria-label="Ruta de navegación" class="mb-3">
+    <ol class="breadcrumb small mb-0">
+      <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Panel</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'residents:list' %}">Residentes</a></li>
+      <li class="breadcrumb-item"><a href="{{ resident.get_absolute_url }}">{{ resident.full_name }}</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Eliminar contacto</li>
+    </ol>
+  </nav>
+
+  <div class="page-head">
+    <div>
+      <p class="eyebrow mb-1">Contactos</p>
+      <h1>Eliminar contacto</h1>
+      <p class="lead-sm">Esta acción no se puede deshacer, pero quedará registrada en la auditoría.</p>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-lg-7">
+      <section class="panel-card">
+        <div class="danger-callout mb-3">
+          <i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i>
+          ¿Eliminar a <strong>{{ contact.name }}</strong> de la ficha de {{ resident.full_name }}?
+        </div>
+
+        <div class="data-grid mb-3">
+          <div class="data-item"><span class="data-label">Nombre</span><span class="data-value">{{ contact.name }}</span></div>
+          <div class="data-item"><span class="data-label">Vínculo</span><span class="data-value">{{ contact.relationship }}</span></div>
+          <div class="data-item"><span class="data-label">Teléfono</span><span class="data-value">{{ contact.phone }}</span></div>
+          <div class="data-item"><span class="data-label">Correo</span><span class="data-value">{{ contact.email|default:"—" }}</span></div>
+          <div class="data-item"><span class="data-label">Contacto principal</span><span class="data-value">{% if contact.is_primary %}Sí{% else %}No{% endif %}</span></div>
+        </div>
+
+        {% if contact.is_primary %}
+          <div class="warning-callout mb-3">
+            <i class="bi bi-telephone-x me-1" aria-hidden="true"></i>
+            Este es el contacto principal. Al eliminarlo, la ficha quedará sin contacto principal hasta que se designe otro.
+          </div>
+        {% endif %}
+
+        <form method="post">
+          {% csrf_token %}
+          <div class="form-actions">
+            <button type="submit" class="btn btn-danger"><i class="bi bi-trash me-1" aria-hidden="true"></i> Eliminar contacto</button>
+            <a href="{{ resident.get_absolute_url }}" class="btn btn-quiet">Cancelar</a>
+          </div>
+        </form>
+      </section>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="panel-card">
+        <div class="panel-card-header"><h2>Qué se conserva</h2></div>
+        <p class="text-muted-sm mb-2">El registro de auditoría conservará los datos anteriores del contacto, quién lo eliminó y cuándo.</p>
+        <p class="text-muted-sm mb-0">Si solo necesitas corregir un dato, es preferible editar el contacto en lugar de eliminarlo.</p>
+      </div>
+    </div>
+  </div>
+{% endblock %}

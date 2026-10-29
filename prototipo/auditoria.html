@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Prototipo de auditoría ELEAM. Datos ficticios.">
+  <title>Auditoría · ELEAM</title>
+  <link rel="stylesheet" href="assets/vendor/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/vendor/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="assets/estilos.css">
+</head>
+<body>
+  <a class="skip-link" href="#contenido">Ir al contenido</a>
+  <div class="demo-strip"><i class="bi bi-cone-striped"></i> Prototipo con datos ficticios · No ingreses información real</div>
+
+  <nav class="navbar navbar-expand-lg app-navbar sticky-top" aria-label="Navegación principal">
+    <div class="container-xl">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="panel.html">
+        <span class="brand-mark"><i class="bi bi-heart-pulse"></i></span>
+        <span class="brand-copy"><strong>ELEAM</strong><small>Gestión de residentes</small></span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navPrincipal" aria-controls="navPrincipal" aria-expanded="false" aria-label="Abrir menú">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navPrincipal">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="panel.html"><i class="bi bi-grid-1x2"></i> Panel</a></li>
+          <li class="nav-item"><a class="nav-link" href="residentes.html"><i class="bi bi-people"></i> Residentes</a></li>
+          <li class="nav-item" data-roles="DIRECCION ADMINISTRACION"><a class="nav-link active" aria-current="page" href="auditoria.html"><i class="bi bi-clock-history"></i> Auditoría</a></li>
+          <li class="nav-item" data-roles="ADMINISTRACION"><a class="nav-link" href="usuarios.html"><i class="bi bi-person-gear"></i> Usuarios</a></li>
+        </ul>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          <label class="role-switch">
+            <span>Ver como</span>
+            <select id="role-select" class="form-select form-select-sm" aria-label="Simular rol de usuario">
+              <option value="ENFERMERIA">Enfermería</option>
+              <option value="ADMINISTRACION">Administración</option>
+              <option value="TECNICO">Técnico/a</option>
+              <option value="CUIDADOR">Cuidador/a</option>
+              <option value="DIRECCION">Dirección</option>
+            </select>
+          </label>
+          <div class="dropdown">
+            <button class="btn btn-user dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <span class="avatar avatar-sm" data-role-initials>CD</span>
+              <span class="d-none d-md-inline" data-role-name>Carolina Demo</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><span class="dropdown-item-text small text-muted">Sesión demo · <span data-role-label>Enfermería</span></span></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="#" data-demo-action="En la aplicación real se pediría la contraseña actual y la nueva."><i class="bi bi-key me-2"></i>Cambiar contraseña</a></li>
+              <li><a class="dropdown-item" href="login.html"><i class="bi bi-box-arrow-right me-2"></i>Cerrar sesión</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main id="contenido" class="page-wrap">
+    <div class="container-xl">
+      <div class="page-head">
+        <div>
+          <p class="eyebrow mb-1">Control y trazabilidad</p>
+          <h1>Auditoría</h1>
+          <p class="lead-sm">Quién creó, modificó, archivó o desactivó un registro, y cuándo.</p>
+        </div>
+        <span class="badge-soft primary"><i class="bi bi-lock"></i> Solo Dirección y Administración</span>
+      </div>
+
+      <div data-audit-content>
+        <section class="panel-card mb-3">
+          <div class="panel-card-header">
+            <div>
+              <h2>Filtrar actividad</h2>
+              <p class="panel-card-sub">La auditoría es de solo lectura: no se edita ni se elimina desde la aplicación.</p>
+            </div>
+          </div>
+          <form class="row g-2 align-items-end" data-prototype-form data-success-message="Filtros aplicados en la simulación. En la aplicación real la búsqueda se haría en el servidor y respetaría los permisos.">
+            <div class="col-12 col-lg-5">
+              <label for="auditoria-buscar" class="form-label">Buscar por persona o registro</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input type="search" class="form-control" id="auditoria-buscar" placeholder="Ej.: Rosa, Carolina Demo o Resident #1">
+              </div>
+            </div>
+            <div class="col-6 col-lg-3">
+              <label for="auditoria-accion" class="form-label">Acción</label>
+              <select class="form-select" id="auditoria-accion">
+                <option value="">Todas</option>
+                <option>Creado</option>
+                <option>Modificado</option>
+                <option>Archivado</option>
+                <option>Desactivado</option>
+                <option>Contraseña restablecida</option>
+              </select>
+            </div>
+            <div class="col-6 col-lg-2">
+              <label for="auditoria-tipo" class="form-label">Registro</label>
+              <select class="form-select" id="auditoria-tipo">
+                <option value="">Todos</option>
+                <option>Residente</option>
+                <option>Contacto</option>
+                <option>Usuario</option>
+              </select>
+            </div>
+            <div class="col-12 col-lg-2 d-grid">
+              <button type="submit" class="btn btn-primary"><i class="bi bi-funnel me-1"></i> Filtrar</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel-card" aria-labelledby="titulo-registros">
+          <div class="panel-card-header">
+            <div>
+              <h2 id="titulo-registros">Registros de auditoría</h2>
+              <p class="panel-card-sub">6 eventos de ejemplo · ordenados del más reciente al más antiguo.</p>
+            </div>
+            <span class="badge-soft muted"><i class="bi bi-database"></i> Solo lectura</span>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-eleam mobile-card-table align-middle">
+              <thead>
+                <tr><th>Fecha</th><th>Actor</th><th>Acción</th><th>Registro afectado</th><th>Origen</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td data-label="Fecha"><span class="fw-semibold">Hoy, 08:42</span><div class="resident-meta">29/10/2026</div></td>
+                  <td data-label="Actor"><div class="d-flex align-items-center gap-2"><span class="avatar avatar-sm">CD</span><div><span class="fw-semibold small">Carolina Demo</span><div class="resident-meta">Enfermería</div></div></div></td>
+                  <td data-label="Acción"><span class="badge-soft info">Modificado</span></td>
+                  <td data-label="Registro afectado">
+                    <span class="fw-semibold small">Rosa Ficticia Pérez</span>
+                    <div class="resident-meta">Residente #1 · residents.Resident</div>
+                    <details class="audit-changes">
+                      <summary>Ver 1 campo cambiado</summary>
+                      <table class="table audit-change-table mb-0">
+                        <thead><tr><th>Campo</th><th>Antes</th><th>Después</th></tr></thead>
+                        <tbody><tr><td>Alergias</td><td class="text-muted">Ninguna conocida</td><td class="text-danger fw-semibold">Penicilina</td></tr></tbody>
+                      </table>
+                    </details>
+                  </td>
+                  <td data-label="Origen">190.12.34.56</td>
+                </tr>
+
+                <tr>
+                  <td data-label="Fecha"><span class="fw-semibold">Ayer, 17:10</span><div class="resident-meta">28/10/2026</div></td>
+                  <td data-label="Actor"><div class="d-flex align-items-center gap-2"><span class="avatar avatar-sm">AD</span><div><span class="fw-semibold small">Andrés Demo</span><div class="resident-meta">Administración</div></div></div></td>
+                  <td data-label="Acción"><span class="badge-soft success">Creado</span></td>
+                  <td data-label="Registro afectado">
+                    <span class="fw-semibold small">María Ficticia Pérez</span>
+                    <div class="resident-meta">Contacto #12 · residents.Contact</div>
+                    <details class="audit-changes">
+                      <summary>Ver datos creados</summary>
+                      <table class="table audit-change-table mb-0">
+                        <thead><tr><th>Campo</th><th>Valor</th></tr></thead>
+                        <tbody>
+                          <tr><td>Parentesco</td><td>Hija</td></tr>
+                          <tr><td>Teléfono</td><td>+56 9 0000 0001</td></tr>
+                          <tr><td>Principal</td><td>Sí</td></tr>
+                        </tbody>
+                      </table>
+                    </details>
+                  </td>
+                  <td data-label="Origen">190.12.34.57</td>
+                </tr>
+
+                <tr>
+                  <td data-label="Fecha"><span class="fw-semibold">Ayer, 16:40</span><div class="resident-meta">28/10/2026</div></td>
+                  <td data-label="Actor"><div class="d-flex align-items-center gap-2"><span class="avatar avatar-sm">AD</span><div><span class="fw-semibold small">Andrés Demo</span><div class="resident-meta">Administración</div></div></div></td>
+                  <td data-label="Acción"><span class="badge-soft warning">Archivado</span></td>
+                  <td data-label="Registro afectado">
+                    <span class="fw-semibold small">Sofía Muestra Rivas</span>
+                    <div class="resident-meta">Residente #9 · residents.Resident</div>
+                    <details class="audit-changes">
+                      <summary>Ver cambio de estado</summary>
+                      <table class="table audit-change-table mb-0">
+                        <thead><tr><th>Campo</th><th>Antes</th><th>Después</th></tr></thead>
+                        <tbody><tr><td>Activo</td><td>Sí</td><td>No</td></tr></tbody>
+                      </table>
+                    </details>
+                  </td>
+                  <td data-label="Origen">190.12.34.57</td>
+                </tr>
+
+                <tr>
+                  <td data-label="Fecha"><span class="fw-semibold">27/10/2026, 10:15</span></td>
+                  <td data-label="Actor"><div class="d-flex align-items-center gap-2"><span class="avatar avatar-sm">CD</span><div><span class="fw-semibold small">Carolina Demo</span><div class="resident-meta">Enfermería</div></div></div></td>
+                  <td data-label="Acción"><span class="badge-soft success">Creado</span></td>
+                  <td data-label="Registro afectado">
+                    <span class="fw-semibold small">Luis Ejemplo Fuentes</span>
+                    <div class="resident-meta">Residente #8 · residents.Resident</div>
+                    <details class="audit-changes">
+                      <summary>Ver datos creados</summary>
+                      <table class="table audit-change-table mb-0">
+                        <thead><tr><th>Campo</th><th>Valor</th></tr></thead>
+                        <tbody>
+                          <tr><td>RUT</td><td>88.888.888-8</td></tr>
+                          <tr><td>Habitación</td><td>11</td></tr>
+                          <tr><td>Estado</td><td>Activo</td></tr>
+                        </tbody>
+                      </table>
+                    </details>
+                  </td>
+                  <td data-label="Origen">190.12.34.56</td>
+                </tr>
+
+                <tr>
+                  <td data-label="Fecha"><span class="fw-semibold">27/10/2026, 09:05</span></td>
+                  <td data-label="Actor"><div class="d-flex align-items-center gap-2"><span class="avatar avatar-sm">AD</span><div><span class="fw-semibold small">Andrés Demo</span><div class="resident-meta">Administración</div></div></div></td>
+                  <td data-label="Acción"><span class="badge-soft danger">Desactivado</span></td>
+                  <td data-label="Registro afectado">
+                    <span class="fw-semibold small">Usuario de ejemplo</span>
+                    <div class="resident-meta">Usuario #7 · accounts.User</div>
+                    <details class="audit-changes">
+                      <summary>Ver cambio</summary>
+                      <table class="table audit-change-table mb-0">
+                        <thead><tr><th>Campo</th><th>Antes</th><th>Después</th></tr></thead>
+                        <tbody><tr><td>Activo</td><td>Sí</td><td>No</td></tr></tbody>
+                      </table>
+                    </details>
+                  </td>
+                  <td data-label="Origen">190.12.34.57</td>
+                </tr>
+
+                <tr>
+                  <td data-label="Fecha"><span class="fw-semibold">26/10/2026, 14:30</span></td>
+                  <td data-label="Actor"><div class="d-flex align-items-center gap-2"><span class="avatar avatar-sm">CD</span><div><span class="fw-semibold small">Carolina Demo</span><div class="resident-meta">Enfermería</div></div></div></td>
+                  <td data-label="Acción"><span class="badge-soft muted">Contraseña restablecida</span></td>
+                  <td data-label="Registro afectado">
+                    <span class="fw-semibold small">Cuenta de ejemplo</span>
+                    <div class="resident-meta">Usuario #3 · accounts.User</div>
+                    <div class="audit-changes">Sin valores: las contraseñas nunca se guardan ni se muestran.</div>
+                  </td>
+                  <td data-label="Origen">190.12.34.56</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-3">
+            <span class="text-muted-sm">Mostrando 6 de 6 eventos de ejemplo.</span>
+            <nav aria-label="Paginación de auditoría">
+              <ul class="pagination pagination-sm mb-0">
+                <li class="page-item disabled"><a class="page-link" href="#" tabindex="-1" aria-disabled="true">Anterior</a></li>
+                <li class="page-item active" aria-current="page"><a class="page-link" href="#">1</a></li>
+                <li class="page-item disabled"><a class="page-link" href="#" tabindex="-1" aria-disabled="true">Siguiente</a></li>
+              </ul>
+            </nav>
+          </div>
+        </section>
+
+        <div class="info-callout mt-3">
+          <i class="bi bi-info-circle me-1"></i>
+          La auditoría guarda datos personales y clínicos. Debe protegerse igual que la ficha y no incluirse en logs técnicos ni en reportes informales.
+        </div>
+      </div>
+
+      <div data-audit-denied hidden>
+        <section class="panel-card text-center py-5">
+          <div class="empty-state">
+            <i class="bi bi-shield-lock"></i>
+            <h2 class="h4">Acceso restringido</h2>
+            <p class="mb-3">Tu rol no puede ver la auditoría. Esta pantalla está reservada a Dirección y Administración.</p>
+            <p class="text-muted-sm mb-4">En la aplicación real, el servidor rechazaría la petición con HTTP 403 aunque alguien escribiera la dirección directamente.</p>
+            <a class="btn btn-primary" href="panel.html"><i class="bi bi-arrow-left me-1"></i> Volver al panel</a>
+          </div>
+        </section>
+      </div>
+
+      <p class="text-muted-sm text-center mt-4 mb-0">
+        <i class="bi bi-info-circle me-1"></i>
+        Cambia el rol a Técnico/a, Cuidador/a o Enfermería para comprobar el bloqueo de esta pantalla.
+      </p>
+    </div>
+  </main>
+
+  <footer class="app-footer">
+    <div class="container-xl d-flex flex-wrap justify-content-between gap-2">
+      <span>ELEAM · Prototipo de gestión de residentes</span>
+      <span>Datos ficticios · Sin valor clínico · No usar en producción</span>
+    </div>
+  </footer>
+
+  <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toast-container"></div>
+  <script src="assets/vendor/bootstrap.bundle.min.js"></script>
+  <script src="assets/demo.js"></script>
+</body>
+</html>

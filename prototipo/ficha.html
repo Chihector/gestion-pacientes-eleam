@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Ficha de residente del prototipo ELEAM. Datos ficticios.">
+  <title>Ficha de Rosa Ficticia Pérez · ELEAM</title>
+  <link rel="stylesheet" href="assets/vendor/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/vendor/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="assets/estilos.css">
+</head>
+<body>
+  <a class="skip-link" href="#contenido">Ir al contenido</a>
+  <div class="demo-strip"><i class="bi bi-cone-striped"></i> Prototipo con datos ficticios · No ingreses información real</div>
+
+  <nav class="navbar navbar-expand-lg app-navbar sticky-top" aria-label="Navegación principal">
+    <div class="container-xl">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="panel.html">
+        <span class="brand-mark"><i class="bi bi-heart-pulse"></i></span>
+        <span class="brand-copy"><strong>ELEAM</strong><small>Gestión de residentes</small></span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navPrincipal" aria-controls="navPrincipal" aria-expanded="false" aria-label="Abrir menú">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navPrincipal">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="panel.html"><i class="bi bi-grid-1x2"></i> Panel</a></li>
+          <li class="nav-item"><a class="nav-link active" aria-current="page" href="residentes.html"><i class="bi bi-people"></i> Residentes</a></li>
+          <li class="nav-item" data-roles="DIRECCION ADMINISTRACION"><a class="nav-link" href="auditoria.html"><i class="bi bi-clock-history"></i> Auditoría</a></li>
+          <li class="nav-item" data-roles="ADMINISTRACION"><a class="nav-link" href="usuarios.html"><i class="bi bi-person-gear"></i> Usuarios</a></li>
+        </ul>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          <label class="role-switch">
+            <span>Ver como</span>
+            <select id="role-select" class="form-select form-select-sm" aria-label="Simular rol de usuario">
+              <option value="ENFERMERIA">Enfermería</option>
+              <option value="ADMINISTRACION">Administración</option>
+              <option value="TECNICO">Técnico/a</option>
+              <option value="CUIDADOR">Cuidador/a</option>
+              <option value="DIRECCION">Dirección</option>
+            </select>
+          </label>
+          <div class="dropdown">
+            <button class="btn btn-user dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <span class="avatar avatar-sm" data-role-initials>CD</span>
+              <span class="d-none d-md-inline" data-role-name>Carolina Demo</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><span class="dropdown-item-text small text-muted">Sesión demo · <span data-role-label>Enfermería</span></span></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="#" data-demo-action="En la aplicación real se pediría la contraseña actual y la nueva."><i class="bi bi-key me-2"></i>Cambiar contraseña</a></li>
+              <li><a class="dropdown-item" href="login.html"><i class="bi bi-box-arrow-right me-2"></i>Cerrar sesión</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main id="contenido" class="page-wrap">
+    <div class="container-xl">
+      <nav aria-label="Ruta de navegación" class="mb-3">
+        <ol class="breadcrumb small mb-0">
+          <li class="breadcrumb-item"><a href="panel.html">Panel</a></li>
+          <li class="breadcrumb-item"><a href="residentes.html">Residentes</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Rosa Ficticia Pérez</li>
+        </ol>
+      </nav>
+
+      <section class="panel-card mb-3">
+        <div class="detail-hero">
+          <div class="detail-person">
+            <span class="avatar avatar-lg">RF</span>
+            <div>
+              <p class="eyebrow mb-1">Ficha de residente <span class="demo-chip ms-1">DEMO</span></p>
+              <h1>Rosa Ficticia Pérez</h1>
+              <p class="detail-meta mb-0">
+                11.111.111-1 <span class="divider">·</span> 84 años <span class="divider">·</span> Hab. 12
+                <span class="divider">·</span> <span class="badge-soft success"><span class="status-dot"></span>Activo</span>
+              </p>
+            </div>
+          </div>
+          <div class="d-flex gap-2 flex-wrap">
+            <a class="btn btn-outline-primary" href="#" data-roles="ENFERMERIA ADMINISTRACION" data-bs-toggle="modal" data-bs-target="#modalEditarAdministrativo"><i class="bi bi-pencil me-1"></i> Datos administrativos</a>
+            <a class="btn btn-outline-primary" href="#" data-roles="ENFERMERIA" data-bs-toggle="modal" data-bs-target="#modalEditarClinico"><i class="bi bi-clipboard-pulse me-1"></i> Información clínica</a>
+            <a class="btn btn-quiet text-danger" href="#" data-roles="ENFERMERIA ADMINISTRACION" data-bs-toggle="modal" data-bs-target="#modalArchivar"><i class="bi bi-archive me-1"></i> Archivar</a>
+          </div>
+        </div>
+
+        <div class="allergy-banner mt-3" role="alert">
+          <i class="bi bi-exclamation-octagon-fill"></i>
+          <div>
+            <strong>Alergia registrada: penicilina.</strong>
+            <div class="small">Verificar antes de administrar medicamentos. Si la información no es correcta, debe corregirla Enfermería.</div>
+          </div>
+        </div>
+
+        <div class="note-card mt-3" data-not-roles="ENFERMERIA ADMINISTRACION">
+          <i class="bi bi-eye me-1"></i>
+          Estás viendo la ficha en <strong>modo lectura</strong>. Tu rol no puede modificar datos administrativos ni clínicos.
+        </div>
+      </section>
+
+      <section class="panel-card">
+        <ul class="nav nav-tabs nav-tabs-eleam mb-3" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="tab-ficha" data-bs-toggle="tab" data-bs-target="#pane-ficha" type="button" role="tab" aria-controls="pane-ficha" aria-selected="true"><i class="bi bi-person-vcard me-1"></i> Ficha</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-contactos" data-bs-toggle="tab" data-bs-target="#pane-contactos" type="button" role="tab" aria-controls="pane-contactos" aria-selected="false"><i class="bi bi-telephone me-1"></i> Contactos <span class="badge-soft primary ms-1">2</span></button>
+          </li>
+          <li class="nav-item" role="presentation" data-roles="DIRECCION ADMINISTRACION">
+            <button class="nav-link" id="tab-actividad" data-bs-toggle="tab" data-bs-target="#pane-actividad" type="button" role="tab" aria-controls="pane-actividad" aria-selected="false"><i class="bi bi-clock-history me-1"></i> Actividad</button>
+          </li>
+        </ul>
+
+        <div class="tab-content">
+          <div class="tab-pane fade show active" id="pane-ficha" role="tabpanel" aria-labelledby="tab-ficha" tabindex="0">
+            <div class="row g-3">
+              <div class="col-lg-8">
+                <div class="row g-3">
+                  <div class="col-12">
+                    <div class="panel-card tight" style="box-shadow: none;">
+                      <div class="panel-card-header">
+                        <div>
+                          <h2>Datos administrativos</h2>
+                          <p class="panel-card-sub">Identificación, estadía y previsión.</p>
+                        </div>
+                        <a class="btn btn-sm btn-outline-primary" href="#" data-roles="ENFERMERIA ADMINISTRACION" data-bs-toggle="modal" data-bs-target="#modalEditarAdministrativo"><i class="bi bi-pencil"></i> Editar</a>
+                      </div>
+                      <div class="data-grid">
+                        <div class="data-item"><span class="data-label">RUT</span><span class="data-value">11.111.111-1</span></div>
+                        <div class="data-item"><span class="data-label">Fecha de nacimiento</span><span class="data-value">12/03/1942</span></div>
+                        <div class="data-item"><span class="data-label">Edad</span><span class="data-value">84 años</span></div>
+                        <div class="data-item"><span class="data-label">Sexo registrado</span><span class="data-value">Femenino</span></div>
+                        <div class="data-item"><span class="data-label">Habitación</span><span class="data-value">12</span></div>
+                        <div class="data-item"><span class="data-label">Fecha de ingreso</span><span class="data-value">14/06/2023</span></div>
+                        <div class="data-item"><span class="data-label">Estado</span><span class="data-value">Activo</span></div>
+                        <div class="data-item"><span class="data-label">Previsión</span><span class="data-value">FONASA</span></div>
+                        <div class="data-item"><span class="data-label">Creada por</span><span class="data-value">Andrés Demo</span></div>
+                        <div class="data-item"><span class="data-label">Última actualización</span><span class="data-value">Hoy, 08:42 · Carolina Demo</span></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-12">
+                    <div class="panel-card tight" style="box-shadow: none;">
+                      <div class="panel-card-header">
+                        <div>
+                          <h2>Información clínica relevante</h2>
+                          <p class="panel-card-sub">Solo Enfermería puede modificar esta sección.</p>
+                        </div>
+                        <a class="btn btn-sm btn-outline-primary" href="#" data-roles="ENFERMERIA" data-bs-toggle="modal" data-bs-target="#modalEditarClinico"><i class="bi bi-pencil"></i> Editar</a>
+                      </div>
+
+                      <div class="row g-3">
+                        <div class="col-md-5">
+                          <div class="section-label">Alergias</div>
+                          <div class="allergy-banner py-2">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                            <div><strong>Penicilina</strong><div class="small">Registrada el 14/06/2023</div></div>
+                          </div>
+                        </div>
+                        <div class="col-md-7">
+                          <div class="section-label">Antecedentes relevantes</div>
+                          <p class="mb-1">Hipertensión arterial, artrosis de rodilla y deterioro cognitivo leve. Usa audífono en oído derecho.</p>
+                          <p class="text-muted-sm mb-0">Registrado por Carolina Demo · actualizado hoy, 08:42</p>
+                        </div>
+                        <div class="col-12">
+                          <div class="section-label">Observaciones para el cuidado</div>
+                          <p class="mb-0">Prefiere que le hablen de frente y despacio. Camina con apoyo; requiere supervisión en el baño. No usa barreras de contención.</p>
+                        </div>
+                      </div>
+
+                      <div class="warning-callout mt-3 mb-0">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Alergias vacías significan "no registradas", no "sin alergias". Confirma con Enfermería antes de asumir que no hay alergias.
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-12">
+                    <div class="panel-card tight" style="box-shadow: none;">
+                      <div class="panel-card-header">
+                        <div>
+                          <h2>Plan de cuidados</h2>
+                          <p class="panel-card-sub">Incremento 2 del proyecto.</p>
+                        </div>
+                        <span class="badge-soft muted">Próximamente</span>
+                      </div>
+                      <p class="text-muted-sm mb-0">En la siguiente etapa se acordarán con el equipo los objetivos, las actividades y la frecuencia de evaluación. Este prototipo no reemplaza el criterio profesional ni genera órdenes clínicas.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-lg-4">
+                <div class="panel-card tight mb-3" style="box-shadow: none;">
+                  <div class="panel-card-header">
+                    <div>
+                      <h2>Contacto principal</h2>
+                      <p class="panel-card-sub">Primera persona a contactar.</p>
+                    </div>
+                    <span class="badge-soft success">Principal</span>
+                  </div>
+                  <p class="fw-bold mb-1">María Ficticia Pérez</p>
+                  <p class="text-muted-sm mb-2">Hija · representante familiar</p>
+                  <div class="contact-line"><i class="bi bi-telephone"></i> +56 9 0000 0001</div>
+                  <div class="contact-line"><i class="bi bi-envelope"></i> maria@example.test</div>
+                  <div class="contact-line"><i class="bi bi-chat-left-text"></i> Prefiere llamadas entre 09:00 y 18:00.</div>
+                  <a class="btn btn-sm btn-outline-primary w-100 mt-3" href="#pane-contactos" onclick="bootstrap.Tab.getOrCreateInstance(document.getElementById('tab-contactos')).show();"><i class="bi bi-telephone me-1"></i> Ver todos los contactos</a>
+                </div>
+
+                <div class="panel-card tight mb-3" style="box-shadow: none;" data-roles="ENFERMERIA TECNICO CUIDADOR">
+                  <div class="panel-card-header"><h2>Acciones del turno</h2></div>
+                  <div class="d-grid gap-2">
+                    <a class="quick-action" href="registro-diario.html">
+                      <span class="qi"><i class="bi bi-clipboard-plus"></i></span>
+                      <span>Registrar cuidado <small>Incremento 2 · prototipo</small></span>
+                    </a>
+                    <a class="quick-action" href="incidente.html">
+                      <span class="qi accent"><i class="bi bi-exclamation-triangle"></i></span>
+                      <span>Reportar incidente <small>Incremento 3 · prototipo</small></span>
+                    </a>
+                  </div>
+                </div>
+
+                <div class="panel-card tight" style="box-shadow: none;">
+                  <div class="panel-card-header"><h2>Privacidad</h2></div>
+                  <p class="text-muted-sm mb-2">Esta ficha contiene datos personales y de salud. Consúltala solo si es necesario para tu trabajo.</p>
+                  <div class="note-card">
+                    <i class="bi bi-shield-lock me-1"></i>
+                    No descargues ni reenvíes la ficha por canales personales. Todo cambio queda registrado con tu nombre.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-pane fade" id="pane-contactos" role="tabpanel" aria-labelledby="tab-contactos" tabindex="0">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+              <div>
+                <h2 class="h5 mb-1">Contactos del residente</h2>
+                <p class="text-muted-sm mb-0">Máximo un contacto principal. Los cambios quedan auditados.</p>
+              </div>
+              <a class="btn btn-primary" href="#" data-roles="ENFERMERIA ADMINISTRACION" data-demo-action="En la aplicación real se abriría el formulario de contacto. Al marcarlo como principal, se desmarca el anterior."><i class="bi bi-person-plus me-1"></i> Agregar contacto</a>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="contact-card primary h-100">
+                  <div class="d-flex justify-content-between align-items-start gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                      <span class="avatar">MF</span>
+                      <div><p class="fw-bold mb-0">María Ficticia Pérez</p><p class="text-muted-sm mb-0">Hija · representante familiar</p></div>
+                    </div>
+                    <span class="badge-soft success">Principal</span>
+                  </div>
+                  <div class="contact-line"><i class="bi bi-telephone"></i> +56 9 0000 0001</div>
+                  <div class="contact-line"><i class="bi bi-envelope"></i> maria@example.test</div>
+                  <div class="contact-line"><i class="bi bi-chat-left-text"></i> Prefiere llamadas entre 09:00 y 18:00.</div>
+                  <div class="contact-actions">
+                    <a class="btn btn-sm btn-outline-primary" href="#" data-roles="ENFERMERIA ADMINISTRACION" data-demo-action="En la aplicación real se abriría el formulario de edición del contacto."><i class="bi bi-pencil"></i> Editar</a>
+                    <a class="btn btn-sm btn-quiet text-danger" href="#" data-roles="ENFERMERIA ADMINISTRACION" data-demo-action="En la aplicación real se pediría confirmación. La eliminación quedará auditada con los datos anteriores."><i class="bi bi-trash"></i> Eliminar</a>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="contact-card h-100">
+                  <div class="d-flex justify-content-between align-items-start gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                      <span class="avatar">JP</span>
+                      <div><p class="fw-bold mb-0">Jorge Ficticio Pérez</p><p class="text-muted-sm mb-0">Hijo</p></div>
+                    </div>
+                  </div>
+                  <div class="contact-line"><i class="bi bi-telephone"></i> +56 9 0000 0011</div>
+                  <div class="contact-line"><i class="bi bi-envelope"></i> jorge@example.test</div>
+                  <div class="contact-line"><i class="bi bi-chat-left-text"></i> Vive en otra ciudad; disponible en caso de urgencia.</div>
+                  <div class="contact-actions">
+                    <a class="btn btn-sm btn-outline-primary" href="#" data-roles="ENFERMERIA ADMINISTRACION" data-demo-action="En la aplicación real se abriría el formulario de edición del contacto."><i class="bi bi-pencil"></i> Editar</a>
+                    <a class="btn btn-sm btn-quiet text-danger" href="#" data-roles="ENFERMERIA ADMINISTRACION" data-demo-action="En la aplicación real se pediría confirmación. La eliminación quedará auditada con los datos anteriores."><i class="bi bi-trash"></i> Eliminar</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="info-callout mt-3">
+              <i class="bi bi-info-circle me-1"></i>
+              Si se elimina el contacto principal, el sistema no promueve otro automáticamente: la ficha mostrará una advertencia hasta que se designe uno nuevo.
+            </div>
+          </div>
+
+          <div class="tab-pane fade" id="pane-actividad" role="tabpanel" aria-labelledby="tab-actividad" tabindex="0">
+            <div class="row g-3">
+              <div class="col-lg-8">
+                <h2 class="h5 mb-3">Historial de cambios de esta ficha</h2>
+                <ul class="timeline">
+                  <li class="timeline-item">
+                    <span class="timeline-dot accent"></span>
+                    <p class="timeline-title">Información clínica actualizada</p>
+                    <p class="timeline-meta">Carolina Demo · hoy, 08:42 · desde 190.12.34.56</p>
+                    <p class="timeline-text">Alergias: <span class="text-danger">"Ninguna conocida" → "Penicilina"</span></p>
+                  </li>
+                  <li class="timeline-item">
+                    <span class="timeline-dot"></span>
+                    <p class="timeline-title">Datos administrativos actualizados</p>
+                    <p class="timeline-meta">Andrés Demo · 12/10/2026, 15:20</p>
+                    <p class="timeline-text">Habitación: 10 → 12. Previsión: ISAPRE → FONASA.</p>
+                  </li>
+                  <li class="timeline-item">
+                    <span class="timeline-dot"></span>
+                    <p class="timeline-title">Contacto principal modificado</p>
+                    <p class="timeline-meta">Andrés Demo · 03/09/2026, 11:05</p>
+                    <p class="timeline-text">María Ficticia Pérez pasó a ser contacto principal.</p>
+                  </li>
+                  <li class="timeline-item">
+                    <span class="timeline-dot muted"></span>
+                    <p class="timeline-title">Ficha creada</p>
+                    <p class="timeline-meta">Andrés Demo · 14/06/2023, 10:30</p>
+                  </li>
+                </ul>
+              </div>
+              <div class="col-lg-4">
+                <div class="audit-box">
+                  <div class="section-label">Sobre la auditoría</div>
+                  <p class="text-muted-sm mb-2">Solo Dirección y Administración ven el historial completo. Cada cambio guarda actor, fecha y valores anterior/nuevo.</p>
+                  <p class="text-muted-sm mb-0"><i class="bi bi-lock me-1"></i> La auditoría no se edita ni se elimina desde la aplicación.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <p class="text-muted-sm text-center mt-4 mb-0">
+        <i class="bi bi-info-circle me-1"></i>
+        Cambia el rol para comprobar que los botones de edición y la pestaña Actividad se ocultan cuando corresponde.
+      </p>
+    </div>
+  </main>
+
+  <footer class="app-footer">
+    <div class="container-xl d-flex flex-wrap justify-content-between gap-2">
+      <span>ELEAM · Prototipo de gestión de residentes</span>
+      <span>Datos ficticios · Sin valor clínico · No usar en producción</span>
+    </div>
+  </footer>
+
+  <!-- Modal: editar datos administrativos -->
+  <div class="modal fade" id="modalEditarAdministrativo" tabindex="-1" aria-labelledby="tituloModalAdministrativo" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content" style="border-radius: 18px; border: 1px solid var(--eleam-border);">
+        <form data-prototype-form data-success-message="Datos administrativos guardados en la simulación. En la aplicación real el cambio quedaría auditado con valor anterior y nuevo.">
+          <div class="modal-header">
+            <div>
+              <h2 class="modal-title h5" id="tituloModalAdministrativo">Editar datos administrativos</h2>
+              <p class="text-muted-sm mb-0">No incluye alergias ni antecedentes clínicos.</p>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body">
+            <div class="warning-callout mb-3"><i class="bi bi-info-circle me-1"></i> Solo Enfermería y Administración pueden editar esta sección. Toda modificación queda registrada.</div>
+            <div class="row g-3">
+              <div class="col-sm-6"><label class="form-label" for="admin-nombre">Nombre</label><input class="form-control" id="admin-nombre" value="Rosa"></div>
+              <div class="col-sm-6"><label class="form-label" for="admin-apellido">Apellidos</label><input class="form-control" id="admin-apellido" value="Ficticia Pérez"></div>
+              <div class="col-sm-6"><label class="form-label" for="admin-rut">RUT</label><input class="form-control" id="admin-rut" value="11.111.111-1"></div>
+              <div class="col-sm-6"><label class="form-label" for="admin-nacimiento">Fecha de nacimiento</label><input type="date" class="form-control" id="admin-nacimiento" value="1942-03-12"></div>
+              <div class="col-sm-6"><label class="form-label" for="admin-habitacion">Habitación</label><input class="form-control" id="admin-habitacion" value="12"></div>
+              <div class="col-sm-6"><label class="form-label" for="admin-ingreso">Fecha de ingreso</label><input type="date" class="form-control" id="admin-ingreso" value="2023-06-14"></div>
+              <div class="col-sm-6"><label class="form-label" for="admin-estado">Estado</label>
+                <select class="form-select" id="admin-estado"><option selected>Activo</option><option>Hospitalizado</option><option>Egresado</option><option>Fallecido</option></select>
+              </div>
+              <div class="col-sm-6"><label class="form-label" for="admin-prevision">Previsión</label>
+                <select class="form-select" id="admin-prevision"><option selected>FONASA</option><option>ISAPRE</option><option>Particular</option><option>Otra</option><option>No informa</option></select>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-quiet" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Guardar cambios</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: editar información clínica -->
+  <div class="modal fade" id="modalEditarClinico" tabindex="-1" aria-labelledby="tituloModalClinico" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content" style="border-radius: 18px; border: 1px solid var(--eleam-border);">
+        <form data-prototype-form data-success-message="Información clínica guardada en la simulación. En la aplicación real solo Enfermería puede hacer este cambio y quedará auditado.">
+          <div class="modal-header">
+            <div>
+              <h2 class="modal-title h5" id="tituloModalClinico">Editar información clínica</h2>
+              <p class="text-muted-sm mb-0">Visible para todo el equipo; editable solo por Enfermería.</p>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body">
+            <div class="danger-callout mb-3"><i class="bi bi-exclamation-triangle me-1"></i> Registra solo información necesaria para el cuidado. No incluyas diagnósticos, opiniones ni datos de terceros que no correspondan.</div>
+            <div class="mb-3">
+              <label class="form-label" for="clinico-alergias">Alergias conocidas</label>
+              <textarea class="form-control" id="clinico-alergias" rows="2">Penicilina</textarea>
+              <div class="form-text">Si no hay alergias registradas, deja el campo vacío; no escribas "ninguna" sin confirmarlo.</div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label" for="clinico-antecedentes">Antecedentes relevantes</label>
+              <textarea class="form-control" id="clinico-antecedentes" rows="3">Hipertensión arterial, artrosis de rodilla y deterioro cognitivo leve. Usa audífono en oído derecho.</textarea>
+            </div>
+            <div class="mb-0">
+              <label class="form-label" for="clinico-observaciones">Observaciones para el cuidado</label>
+              <textarea class="form-control" id="clinico-observaciones" rows="3">Prefiere que le hablen de frente y despacio. Camina con apoyo; requiere supervisión en el baño. No usa barreras de contención.</textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-quiet" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Guardar información clínica</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: archivar -->
+  <div class="modal fade" id="modalArchivar" tabindex="-1" aria-labelledby="tituloModalArchivar" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content" style="border-radius: 18px; border: 1px solid var(--eleam-border);">
+        <div class="modal-header">
+          <h2 class="modal-title h5" id="tituloModalArchivar">Archivar ficha</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <p>La ficha de <strong>Rosa Ficticia Pérez</strong> dejará de aparecer en el listado principal, pero no se eliminará. Sus contactos y su historial se conservan.</p>
+          <div class="warning-callout"><i class="bi bi-archive me-1"></i> Podrás consultarla con el filtro "Ver archivados" y reactivarla si es necesario. La acción quedará auditada.</div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-quiet" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal" data-demo-action="Ficha archivada en la simulación. En la aplicación real seguiría disponible para consulta y podría reactivarse.">Archivar ficha</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toast-container"></div>
+  <script src="assets/vendor/bootstrap.bundle.min.js"></script>
+  <script src="assets/demo.js"></script>
+</body>
+</html>

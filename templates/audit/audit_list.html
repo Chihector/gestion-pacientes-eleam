@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% load audit_extras %}
+{% block title %}Auditoría{% endblock %}
+
+{% block content %}
+  <div class="page-head">
+    <div>
+      <p class="eyebrow mb-1">Control y trazabilidad</p>
+      <h1>Auditoría</h1>
+      <p class="lead-sm">Quién creó, modificó, archivó o desactivó un registro, y cuándo.</p>
+    </div>
+    <span class="badge-soft primary"><i class="bi bi-lock" aria-hidden="true"></i> Solo Dirección y Administración</span>
+  </div>
+
+  <section class="panel-card mb-3" aria-labelledby="titulo-filtros">
+    <div class="panel-card-header">
+      <div>
+        <h2 id="titulo-filtros">Filtrar actividad</h2>
+        <p class="panel-card-sub">La auditoría es de solo lectura: no se edita ni se elimina desde la aplicación.</p>
+      </div>
+    </div>
+    <form method="get" class="row g-2 align-items-end" role="search">
+      <div class="col-12 col-lg-5">
+        <label for="auditoria-q" class="form-label">Buscar por persona o registro</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-search" aria-hidden="true"></i></span>
+          <input type="search" class="form-control" id="auditoria-q" name="q" value="{{ filters.q }}" placeholder="Ej.: Rosa, Carolina Demo o Resident" autocomplete="off">
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <label for="auditoria-accion" class="form-label">Acción</label>
+        <select class="form-select" id="auditoria-accion" name="accion">
+          <option value="">Todas</option>
+          {% for value, label in actions %}
+            <option value="{{ value }}" {% if filters.accion == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-6 col-lg-2">
+        <label for="auditoria-modelo" class="form-label">Registro</label>
+        <select class="form-select" id="auditoria-modelo" name="modelo">
+          <option value="">Todos</option>
+          {% for model_label in model_labels %}
+            <option value="{{ model_label }}" {% if filters.modelo == model_label %}selected{% endif %}>{{ model_label|model_friendly }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-12 col-lg-2 d-grid">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-funnel me-1" aria-hidden="true"></i> Filtrar</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="panel-card" aria-labelledby="titulo-registros">
+    <div class="panel-card-header">
+      <div>
+        <h2 id="titulo-registros">Registros de auditoría</h2>
+        <p class="panel-card-sub">{{ paginator.count }} evento{{ paginator.count|pluralize:"s" }} · ordenados del más reciente al más antiguo.</p>
+      </div>
+      <span class="badge-soft muted"><i class="bi bi-database" aria-hidden="true"></i> Solo lectura</span>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-eleam mobile-card-table align-middle">
+        <thead>
+          <tr><th>Fecha</th><th>Actor</th><th>Acción</th><th>Registro afectado</th><th>Origen</th></tr>
+        </thead>
+        <tbody>
+          {% for log in logs %}
+            <tr>
+              <td data-label="Fecha">
+                <span class="fw-semibold">{{ log.created_at|date:"d/m/Y H:i" }}</span>
+                <div class="resident-meta">{{ log.created_at|timesince }} atrás</div>
+              </td>
+              <td data-label="Actor">
+                <div class="d-flex align-items-center gap-2">
+                  <span class="avatar avatar-sm" aria-hidden="true">
+                    {% if log.actor %}{{ log.actor.initials }}{% else %}SIS{% endif %}
+                  </span>
+                  <div>
+                    <span class="fw-semibold small">{{ log.actor_display }}</span>
+                    <div class="resident-meta">{% if log.actor %}{{ log.actor.get_role_display }}{% else %}Sistema{% endif %}</div>
+                  </div>
+                </div>
+              </td>
+              <td data-label="Acción"><span class="badge-soft {{ log.action_css }}">{{ log.get_action_display }}</span></td>
+              <td data-label="Registro afectado">
+                <span class="fw-semibold small">
+                  {% if log.model_label == "residents.Resident" %}
+                    <a href="{% url 'residents:detail' log.object_id %}">{{ log.object_repr }}</a>
+                  {% else %}
+                    {{ log.object_repr }}
+                  {% endif %}
+                </span>
+                <div class="resident-meta">{{ log.model_label|model_friendly }} #{{ log.object_id }}</div>
+                {% if log.change_list %}
+                  <details class="audit-changes">
+                    <summary>Ver {{ log.change_list|length }} campo{{ log.change_list|length|pluralize:"s" }} con cambios</summary>
+                    <div class="table-responsive">
+                      <table class="table audit-change-table mb-0">
+                        <thead><tr><th>Campo</th><th>Antes</th><th>Después</th></tr></thead>
+                        <tbody>
+                          {% for row in log.change_list %}
+                            <tr>
+                              <td>{{ row.field }}</td>
+                              <td class="text-muted">{{ row.before }}</td>
+                              <td class="fw-semibold">{{ row.after }}</td>
+                            </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                    </div>
+                  </details>
+                {% else %}
+                  <div class="resident-meta mt-1">Sin detalle de campos.</div>
+                {% endif %}
+              </td>
+              <td data-label="Origen">
+                <span class="small mono">{{ log.ip_address|default:"—" }}</span>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="5">
+                <div class="empty-state">
+                  <i class="bi bi-clock-history" aria-hidden="true"></i>
+                  <strong>No hay registros que coincidan</strong>
+                  <p class="mb-0">Prueba con otro término, acción o tipo de registro.</p>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% include "partials/pagination.html" %}
+
+    <div class="info-callout mt-3">
+      <i class="bi bi-shield-check me-1" aria-hidden="true"></i>
+      La auditoría conserva el actor, la fecha, la dirección IP y los valores anterior/nuevo de cada cambio. No se edita ni se elimina desde la aplicación.
+    </div>
+  </section>
+{% endblock %}

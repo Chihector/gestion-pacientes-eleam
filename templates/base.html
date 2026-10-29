@@ -1,0 +1,135 @@
+{% load static %}
+<!doctype html>
+<html lang="es-CL">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Gestión de residentes de un ELEAM. Datos ficticios en demostración.">
+  <meta name="robots" content="noindex, nofollow">
+  <title>{% block title %}Panel{% endblock %} · ELEAM</title>
+  <link rel="stylesheet" href="{% static 'vendor/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'vendor/bootstrap-icons.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  <a class="skip-link" href="#contenido">Ir al contenido</a>
+
+  {% if demo_mode %}
+    <div class="demo-strip">
+      <i class="bi bi-cone-striped" aria-hidden="true"></i>
+      Entorno de demostración con datos ficticios · No ingreses información real de residentes
+    </div>
+  {% endif %}
+
+  <nav class="navbar navbar-expand-lg app-navbar sticky-top" aria-label="Navegación principal">
+    <div class="container-xl">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="{% url 'core:dashboard' %}">
+        <span class="brand-mark"><i class="bi bi-heart-pulse" aria-hidden="true"></i></span>
+        <span class="brand-copy"><strong>ELEAM</strong><small>Gestión de residentes</small></span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navPrincipal" aria-controls="navPrincipal" aria-expanded="false" aria-label="Abrir menú">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navPrincipal">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.view_name == 'core:dashboard' %}active{% endif %}" href="{% url 'core:dashboard' %}" {% if request.resolver_match.view_name == 'core:dashboard' %}aria-current="page"{% endif %}>
+              <i class="bi bi-grid-1x2" aria-hidden="true"></i> Panel
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if 'residents:' in request.resolver_match.view_name %}active{% endif %}" href="{% url 'residents:list' %}" {% if 'residents:' in request.resolver_match.view_name %}aria-current="page"{% endif %}>
+              <i class="bi bi-people" aria-hidden="true"></i> Residentes
+            </a>
+          </li>
+          {% if user.can_view_audit %}
+            <li class="nav-item">
+              <a class="nav-link {% if 'audit:' in request.resolver_match.view_name %}active{% endif %}" href="{% url 'audit:list' %}" {% if 'audit:' in request.resolver_match.view_name %}aria-current="page"{% endif %}>
+                <i class="bi bi-clock-history" aria-hidden="true"></i> Auditoría
+              </a>
+            </li>
+          {% endif %}
+          {% if user.can_manage_users %}
+            <li class="nav-item">
+              <a class="nav-link {% if 'accounts:user_' in request.resolver_match.view_name %}active{% endif %}" href="{% url 'accounts:user_list' %}" {% if 'accounts:user_' in request.resolver_match.view_name %}aria-current="page"{% endif %}>
+                <i class="bi bi-person-gear" aria-hidden="true"></i> Usuarios
+              </a>
+            </li>
+          {% endif %}
+        </ul>
+
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          {% if user.is_authenticated %}
+            <span class="badge-soft primary d-none d-xl-inline-flex">
+              <i class="bi bi-shield-lock" aria-hidden="true"></i> {{ user.get_role_display }}
+            </span>
+            <div class="dropdown">
+              <button class="btn btn-user dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <span class="avatar avatar-sm" aria-hidden="true">{{ user.initials }}</span>
+                <span class="d-none d-md-inline">{{ user.get_full_name|default:user.email }}</span>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                  <span class="dropdown-item-text small text-muted">
+                    {{ user.get_full_name|default:user.email }}<br>
+                    {{ user.email }} · {{ user.get_role_display }}
+                  </span>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                  <a class="dropdown-item" href="{% url 'accounts:password_change' %}">
+                    <i class="bi bi-key me-2" aria-hidden="true"></i>Cambiar contraseña
+                  </a>
+                </li>
+                <li>
+                  <form method="post" action="{% url 'accounts:logout' %}">
+                    {% csrf_token %}
+                    <button class="dropdown-item" type="submit">
+                      <i class="bi bi-box-arrow-right me-2" aria-hidden="true"></i>Cerrar sesión
+                    </button>
+                  </form>
+                </li>
+              </ul>
+            </div>
+          {% else %}
+            <a class="btn btn-outline-primary" href="{% url 'accounts:login' %}">
+              <i class="bi bi-box-arrow-in-right me-1" aria-hidden="true"></i> Ingresar
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main id="contenido" class="page-wrap">
+    <div class="container-xl">
+      {% if messages %}
+        <div class="mb-3" aria-live="polite">
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+              <i class="bi {% if message.tags == 'success' %}bi-check-circle{% elif message.tags == 'warning' %}bi-exclamation-triangle{% elif message.tags == 'danger' %}bi-exclamation-octagon{% else %}bi-info-circle{% endif %} me-1" aria-hidden="true"></i>
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+
+  <footer class="app-footer">
+    <div class="container-xl d-flex flex-wrap justify-content-between gap-2">
+      <span>ELEAM · Gestión de residentes</span>
+      <span>{% if demo_mode %}Datos ficticios · Sin valor clínico · No usar en producción{% else %}Uso interno · Información confidencial{% endif %}</span>
+    </div>
+  </footer>
+
+  <script src="{% static 'vendor/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'vendor/htmx.min.js' %}"></script>
+  <script src="{% static 'js/app.js' %}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

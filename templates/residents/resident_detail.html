@@ -1,0 +1,399 @@
+{% extends "base.html" %}
+{% block title %}{{ resident.full_name }}{% endblock %}
+
+{% block content %}
+  <nav aria-label="Ruta de navegación" class="mb-3">
+    <ol class="breadcrumb small mb-0">
+      <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Panel</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'residents:list' %}">Residentes</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ resident.full_name }}</li>
+    </ol>
+  </nav>
+
+  <section class="panel-card mb-3">
+    <div class="detail-hero">
+      <div class="detail-person">
+        <span class="avatar avatar-lg" aria-hidden="true">{{ resident.initials }}</span>
+        <div>
+          <p class="eyebrow mb-1">
+            Ficha de residente
+            {% if resident.is_demo %}<span class="demo-chip ms-1">DEMO</span>{% endif %}
+            {% if is_archived %}<span class="badge-soft muted ms-1">Archivada</span>{% endif %}
+          </p>
+          <h1>{{ resident.full_name }}</h1>
+          <p class="detail-meta mb-0">
+            {{ resident.rut_formatted }} <span class="divider">·</span> {{ resident.age }} años
+            {% if resident.room %}<span class="divider">·</span> Hab. {{ resident.room }}{% endif %}
+            <span class="divider">·</span>
+            {% if resident.status == "ACTIVO" %}
+              <span class="badge-soft success"><span class="status-dot"></span>{{ resident.get_status_display }}</span>
+            {% elif resident.status == "HOSPITALIZADO" %}
+              <span class="badge-soft warning"><span class="status-dot warning"></span>{{ resident.get_status_display }}</span>
+            {% elif resident.status == "FALLECIDO" %}
+              <span class="badge-soft danger"><span class="status-dot danger"></span>{{ resident.get_status_display }}</span>
+            {% else %}
+              <span class="badge-soft muted"><span class="status-dot muted"></span>{{ resident.get_status_display }}</span>
+            {% endif %}
+          </p>
+        </div>
+      </div>
+      <div class="detail-actions">
+        {% if can_edit_admin and not is_archived %}
+          <a class="btn btn-outline-primary" href="{% url 'residents:update' resident.pk %}">
+            <i class="bi bi-pencil me-1" aria-hidden="true"></i> Datos administrativos
+          </a>
+        {% endif %}
+        {% if can_edit_clinical and not is_archived %}
+          <a class="btn btn-outline-primary" href="{% url 'residents:clinical_update' resident.pk %}">
+            <i class="bi bi-clipboard-pulse me-1" aria-hidden="true"></i> Información clínica
+          </a>
+        {% endif %}
+        {% if can_archive %}
+          <button class="btn {% if is_archived %}btn-outline-primary{% else %}btn-quiet text-danger{% endif %}" type="button" data-bs-toggle="modal" data-bs-target="#modalArchivar">
+            <i class="bi {% if is_archived %}bi-arrow-counterclockwise{% else %}bi-archive{% endif %} me-1" aria-hidden="true"></i>
+            {% if is_archived %}Reactivar ficha{% else %}Archivar{% endif %}
+          </button>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if resident.has_allergies %}
+      <div class="allergy-banner mt-3" role="alert">
+        <i class="bi bi-exclamation-octagon-fill" aria-hidden="true"></i>
+        <div>
+          <strong>Alergia registrada: {{ resident.allergies }}.</strong>
+          <div class="small">Verificar antes de administrar medicamentos. Si la información no es correcta, debe corregirla Enfermería.</div>
+        </div>
+      </div>
+    {% else %}
+      <div class="warning-callout mt-3 mb-0">
+        <i class="bi bi-info-circle me-1" aria-hidden="true"></i>
+        <strong>Alergias no registradas.</strong> Esto no equivale a "sin alergias": confirma con Enfermería antes de administrar medicamentos.
+      </div>
+    {% endif %}
+
+    {% if not user.can_edit_resident_admin and not user.can_edit_resident_clinical %}
+      <div class="note-card mt-3">
+        <i class="bi bi-eye me-1" aria-hidden="true"></i>
+        Estás viendo la ficha en <strong>modo lectura</strong>. Tu rol no puede modificar datos administrativos ni clínicos.
+      </div>
+    {% elif is_archived %}
+      <div class="note-card mt-3">
+        <i class="bi bi-archive me-1" aria-hidden="true"></i>
+        La ficha está archivada. Para modificarla, primero debes reactivarla.
+      </div>
+    {% endif %}
+  </section>
+
+  <section class="panel-card">
+    <ul class="nav nav-tabs nav-tabs-eleam mb-3" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="tab-ficha" data-bs-toggle="tab" data-bs-target="#pane-ficha" type="button" role="tab" aria-controls="pane-ficha" aria-selected="true">
+          <i class="bi bi-person-vcard me-1" aria-hidden="true"></i> Ficha
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-contactos" data-bs-toggle="tab" data-bs-target="#pane-contactos" type="button" role="tab" aria-controls="pane-contactos" aria-selected="false">
+          <i class="bi bi-telephone me-1" aria-hidden="true"></i> Contactos
+          <span class="badge-soft primary ms-1">{{ contacts|length }}</span>
+        </button>
+      </li>
+      {% if can_view_audit %}
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="tab-actividad" data-bs-toggle="tab" data-bs-target="#pane-actividad" type="button" role="tab" aria-controls="pane-actividad" aria-selected="false">
+            <i class="bi bi-clock-history me-1" aria-hidden="true"></i> Actividad
+          </button>
+        </li>
+      {% endif %}
+    </ul>
+
+    <div class="tab-content">
+      <div class="tab-pane fade show active" id="pane-ficha" role="tabpanel" aria-labelledby="tab-ficha" tabindex="0">
+        <div class="row g-3">
+          <div class="col-lg-8">
+            <div class="row g-3">
+              <div class="col-12">
+                <div class="panel-card tight" style="box-shadow: none;">
+                  <div class="panel-card-header">
+                    <div>
+                      <h2>Datos administrativos</h2>
+                      <p class="panel-card-sub">Identificación, estadía y previsión.</p>
+                    </div>
+                    {% if can_edit_admin and not is_archived %}
+                      <a class="btn btn-sm btn-outline-primary" href="{% url 'residents:update' resident.pk %}">
+                        <i class="bi bi-pencil" aria-hidden="true"></i> Editar
+                      </a>
+                    {% endif %}
+                  </div>
+                  <div class="data-grid">
+                    <div class="data-item"><span class="data-label">RUT</span><span class="data-value">{{ resident.rut_formatted }}</span></div>
+                    <div class="data-item"><span class="data-label">Fecha de nacimiento</span><span class="data-value">{{ resident.birth_date|date:"d/m/Y" }}</span></div>
+                    <div class="data-item"><span class="data-label">Edad</span><span class="data-value">{{ resident.age }} años</span></div>
+                    <div class="data-item"><span class="data-label">Sexo registrado</span><span class="data-value">{{ resident.get_sex_display }}</span></div>
+                    <div class="data-item"><span class="data-label">Habitación</span><span class="data-value">{{ resident.room|default:"—" }}</span></div>
+                    <div class="data-item"><span class="data-label">Fecha de ingreso</span><span class="data-value">{{ resident.admission_date|date:"d/m/Y" }}</span></div>
+                    <div class="data-item"><span class="data-label">Estado</span><span class="data-value">{{ resident.get_status_display }}</span></div>
+                    <div class="data-item"><span class="data-label">Previsión</span><span class="data-value">{{ resident.get_health_insurance_display }}</span></div>
+                    <div class="data-item"><span class="data-label">Creada por</span><span class="data-value">{{ resident.created_by.get_full_name|default:"—" }}</span></div>
+                    <div class="data-item"><span class="data-label">Última actualización</span><span class="data-value">{{ resident.updated_at|date:"d/m/Y H:i" }}{% if resident.updated_by %} · {{ resident.updated_by.get_full_name }}{% endif %}</span></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12">
+                <div class="panel-card tight" style="box-shadow: none;">
+                  <div class="panel-card-header">
+                    <div>
+                      <h2>Información clínica relevante</h2>
+                      <p class="panel-card-sub">Solo Enfermería puede modificar esta sección.</p>
+                    </div>
+                    {% if can_edit_clinical and not is_archived %}
+                      <a class="btn btn-sm btn-outline-primary" href="{% url 'residents:clinical_update' resident.pk %}">
+                        <i class="bi bi-pencil" aria-hidden="true"></i> Editar
+                      </a>
+                    {% endif %}
+                  </div>
+
+                  <div class="row g-3">
+                    <div class="col-md-5">
+                      <div class="section-label">Alergias</div>
+                      {% if resident.has_allergies %}
+                        <div class="allergy-banner py-2">
+                          <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+                          <div><strong>{{ resident.allergies }}</strong><div class="small">Verificar antes de administrar medicamentos.</div></div>
+                        </div>
+                      {% else %}
+                        <span class="badge-soft muted">Sin registrar</span>
+                        <p class="text-muted-sm mt-2 mb-0">Vacío significa "no registradas", no "sin alergias".</p>
+                      {% endif %}
+                    </div>
+                    <div class="col-md-7">
+                      <div class="section-label">Antecedentes relevantes</div>
+                      {% if resident.relevant_background %}
+                        <p class="mb-1">{{ resident.relevant_background|linebreaksbr }}</p>
+                      {% else %}
+                        <p class="text-muted-sm mb-1">Sin registrar.</p>
+                      {% endif %}
+                      <p class="text-muted-sm mb-0">
+                        {% if resident.updated_by %}Actualizado por {{ resident.updated_by.get_full_name }} · {% endif %}{{ resident.updated_at|date:"d/m/Y H:i" }}
+                      </p>
+                    </div>
+                    <div class="col-12">
+                      <div class="section-label">Observaciones para el cuidado</div>
+                      {% if resident.clinical_notes %}
+                        <p class="mb-0">{{ resident.clinical_notes|linebreaksbr }}</p>
+                      {% else %}
+                        <p class="text-muted-sm mb-0">Sin registrar.</p>
+                      {% endif %}
+                    </div>
+                  </div>
+
+                  <div class="warning-callout mt-3 mb-0">
+                    <i class="bi bi-info-circle me-1" aria-hidden="true"></i>
+                    Alergias vacías significan "no registradas", no "sin alergias". Confirma con Enfermería antes de asumir que no hay alergias.
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12">
+                <div class="panel-card tight" style="box-shadow: none;">
+                  <div class="panel-card-header">
+                    <div>
+                      <h2>Plan de cuidados</h2>
+                      <p class="panel-card-sub">Incremento 2 del proyecto.</p>
+                    </div>
+                    <span class="badge-soft muted">Próximamente</span>
+                  </div>
+                  <p class="text-muted-sm mb-0">En la siguiente etapa se acordarán con el equipo los objetivos, las actividades y la frecuencia de evaluación. Este sistema no reemplaza el criterio profesional ni genera órdenes clínicas.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-4">
+            <div class="panel-card tight mb-3" style="box-shadow: none;">
+              <div class="panel-card-header">
+                <div>
+                  <h2>Contacto principal</h2>
+                  <p class="panel-card-sub">Primera persona a contactar.</p>
+                </div>
+                {% if primary_contact %}<span class="badge-soft success">Principal</span>{% endif %}
+              </div>
+              {% if primary_contact %}
+                <p class="fw-bold mb-1">{{ primary_contact.name }}</p>
+                <p class="text-muted-sm mb-2">{{ primary_contact.relationship }}</p>
+                <div class="contact-line"><i class="bi bi-telephone" aria-hidden="true"></i> {{ primary_contact.phone }}</div>
+                {% if primary_contact.email %}<div class="contact-line"><i class="bi bi-envelope" aria-hidden="true"></i> {{ primary_contact.email }}</div>{% endif %}
+                {% if primary_contact.notes %}<div class="contact-line"><i class="bi bi-chat-left-text" aria-hidden="true"></i> {{ primary_contact.notes }}</div>{% endif %}
+              {% else %}
+                <div class="empty-state py-3">
+                  <i class="bi bi-telephone-x" aria-hidden="true"></i>
+                  <strong>Sin contacto principal</strong>
+                  <p class="text-muted-sm mb-0">Agrega un contacto y márcalo como principal.</p>
+                </div>
+              {% endif %}
+              <button class="btn btn-sm btn-outline-primary w-100 mt-3" type="button" data-bs-toggle="tab" data-bs-target="#pane-contactos">
+                <i class="bi bi-telephone me-1" aria-hidden="true"></i> Ver todos los contactos
+              </button>
+            </div>
+
+            <div class="panel-card tight" style="box-shadow: none;">
+              <div class="panel-card-header"><h2>Privacidad</h2></div>
+              <p class="text-muted-sm mb-2">Esta ficha contiene datos personales y de salud. Consúltala solo si es necesario para tu trabajo.</p>
+              <div class="note-card">
+                <i class="bi bi-shield-lock me-1" aria-hidden="true"></i>
+                No descargues ni reenvíes la ficha por canales personales. Todo cambio queda registrado con tu nombre.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-pane fade" id="pane-contactos" role="tabpanel" aria-labelledby="tab-contactos" tabindex="0">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+          <div>
+            <h2 class="h5 mb-1">Contactos del residente</h2>
+            <p class="text-muted-sm mb-0">Máximo un contacto principal. Los cambios quedan auditados.</p>
+          </div>
+          {% if can_manage_contacts and not is_archived %}
+            <a class="btn btn-primary" href="{% url 'residents:contact_create' resident.pk %}">
+              <i class="bi bi-person-plus me-1" aria-hidden="true"></i> Agregar contacto
+            </a>
+          {% endif %}
+        </div>
+
+        <div class="row g-3">
+          {% for contact in contacts %}
+            <div class="col-md-6">
+              <div class="contact-card h-100{% if contact.is_primary %} primary{% endif %}">
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="avatar" aria-hidden="true">{{ contact.name|slice:":1" }}</span>
+                    <div>
+                      <p class="fw-bold mb-0">{{ contact.name }}</p>
+                      <p class="text-muted-sm mb-0">{{ contact.relationship }}</p>
+                    </div>
+                  </div>
+                  {% if contact.is_primary %}<span class="badge-soft success">Principal</span>{% endif %}
+                </div>
+                <div class="contact-line"><i class="bi bi-telephone" aria-hidden="true"></i> {{ contact.phone }}</div>
+                {% if contact.email %}<div class="contact-line"><i class="bi bi-envelope" aria-hidden="true"></i> {{ contact.email }}</div>{% endif %}
+                {% if contact.notes %}<div class="contact-line"><i class="bi bi-chat-left-text" aria-hidden="true"></i> {{ contact.notes }}</div>{% endif %}
+                {% if can_manage_contacts and not is_archived %}
+                  <div class="contact-actions">
+                    <a class="btn btn-sm btn-outline-primary" href="{% url 'residents:contact_update' contact.pk %}">
+                      <i class="bi bi-pencil" aria-hidden="true"></i> Editar
+                    </a>
+                    <a class="btn btn-sm btn-quiet text-danger" href="{% url 'residents:contact_delete' contact.pk %}">
+                      <i class="bi bi-trash" aria-hidden="true"></i> Eliminar
+                    </a>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          {% empty %}
+            <div class="col-12">
+              <div class="empty-state">
+                <i class="bi bi-telephone-x" aria-hidden="true"></i>
+                <strong>No hay contactos registrados</strong>
+                <p class="mb-0">Agrega al menos un contacto y marca uno como principal.</p>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+
+        <div class="info-callout mt-3">
+          <i class="bi bi-info-circle me-1" aria-hidden="true"></i>
+          Si se elimina el contacto principal, el sistema no promueve otro automáticamente: la ficha mostrará una advertencia hasta que se designe uno nuevo.
+        </div>
+      </div>
+
+      {% if can_view_audit %}
+        <div class="tab-pane fade" id="pane-actividad" role="tabpanel" aria-labelledby="tab-actividad" tabindex="0">
+          <div class="row g-3">
+            <div class="col-lg-8">
+              <h2 class="h5 mb-3">Historial de cambios de esta ficha</h2>
+              {% if audit_logs %}
+                <ul class="timeline">
+                  {% for log in audit_logs %}
+                    <li class="timeline-item">
+                      <span class="timeline-dot {% if log.action_css == 'danger' or log.action_css == 'warning' %}accent{% elif log.action_css == 'muted' %}muted{% endif %}"></span>
+                      <p class="timeline-title">{{ log.get_action_display }} · {{ log.object_repr }}</p>
+                      <p class="timeline-meta">
+                        {{ log.actor_display }} · {{ log.created_at|date:"d/m/Y H:i" }}
+                        {% if log.ip_address %} · desde {{ log.ip_address }}{% endif %}
+                      </p>
+                      {% if log.change_list %}
+                        <div class="table-responsive mt-1">
+                          <table class="table audit-change-table mb-0">
+                            <thead><tr><th>Campo</th><th>Antes</th><th>Después</th></tr></thead>
+                            <tbody>
+                              {% for row in log.change_list %}
+                                <tr>
+                                  <td>{{ row.field }}</td>
+                                  <td class="text-muted">{{ row.before }}</td>
+                                  <td class="fw-semibold">{{ row.after }}</td>
+                                </tr>
+                              {% endfor %}
+                            </tbody>
+                          </table>
+                        </div>
+                      {% endif %}
+                    </li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <div class="empty-state">
+                  <i class="bi bi-clock-history" aria-hidden="true"></i>
+                  <strong>Sin actividad registrada</strong>
+                  <p class="mb-0">Los cambios aparecerán aquí a medida que se modifique la ficha.</p>
+                </div>
+              {% endif %}
+            </div>
+            <div class="col-lg-4">
+              <div class="audit-box">
+                <div class="section-label">Sobre la auditoría</div>
+                <p class="text-muted-sm mb-2">Solo Dirección y Administración ven el historial completo. Cada cambio guarda actor, fecha y valores anterior/nuevo.</p>
+                <p class="text-muted-sm mb-0"><i class="bi bi-lock me-1" aria-hidden="true"></i> La auditoría no se edita ni se elimina desde la aplicación.</p>
+              </div>
+              <a class="btn btn-sm btn-outline-primary w-100 mt-3" href="{% url 'audit:list' %}?q={{ resident.full_name|urlencode }}">
+                <i class="bi bi-clock-history me-1" aria-hidden="true"></i> Ver auditoría completa
+              </a>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </section>
+
+  {% if can_archive %}
+    <div class="modal fade" id="modalArchivar" tabindex="-1" aria-labelledby="tituloModalArchivar" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content" style="border-radius: 18px; border: 1px solid var(--eleam-border);">
+          <div class="modal-header">
+            <h2 class="modal-title h5" id="tituloModalArchivar">{% if is_archived %}Reactivar ficha{% else %}Archivar ficha{% endif %}</h2>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body">
+            {% if is_archived %}
+              <p>La ficha de <strong>{{ resident.full_name }}</strong> volverá a aparecer en el listado principal y podrá modificarse según los permisos del rol.</p>
+              <div class="warning-callout mb-0"><i class="bi bi-arrow-counterclockwise me-1" aria-hidden="true"></i> La reactivación quedará registrada en la auditoría con tu nombre.</div>
+            {% else %}
+              <p>La ficha de <strong>{{ resident.full_name }}</strong> dejará de aparecer en el listado principal, pero no se eliminará. Sus contactos y su historial se conservan.</p>
+              <div class="warning-callout mb-0"><i class="bi bi-archive me-1" aria-hidden="true"></i> Podrás consultarla con el filtro "Ver archivados" y reactivarla si es necesario. La acción quedará auditada.</div>
+            {% endif %}
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-quiet" data-bs-dismiss="modal">Cancelar</button>
+            <form method="post" action="{% url 'residents:archive' resident.pk %}">
+              {% csrf_token %}
+              <button type="submit" class="btn {% if is_archived %}btn-primary{% else %}btn-danger{% endif %}">
+                {% if is_archived %}Reactivar ficha{% else %}Archivar ficha{% endif %}
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+{% endblock %}

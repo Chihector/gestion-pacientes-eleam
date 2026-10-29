@@ -1,0 +1,73 @@
+{% extends "base_auth.html" %}
+{% block title %}Ingresar{% endblock %}
+
+{% block auth_content %}
+  <p class="eyebrow">Acceso al sistema</p>
+  <h1 class="mb-1">Ingresa con tu cuenta</h1>
+  <p class="text-muted-sm mb-4">Usa tu correo institucional. No compartas tu contraseña entre turnos.</p>
+
+  <form method="post" action="{% url 'accounts:login' %}" id="formulario" novalidate>
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ next }}">
+
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger" role="alert">
+        <i class="bi bi-exclamation-octagon me-1" aria-hidden="true"></i>
+        {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="mb-3">
+      <label for="{{ form.username.id_for_label }}" class="form-label">Correo electrónico</label>
+      <div class="input-group">
+        <span class="input-group-text"><i class="bi bi-envelope" aria-hidden="true"></i></span>
+        {{ form.username }}
+      </div>
+      {% for error in form.username.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+    </div>
+
+    <div class="mb-3">
+      <div class="d-flex justify-content-between align-items-center">
+        <label for="{{ form.password.id_for_label }}" class="form-label">Contraseña</label>
+        <span class="small text-muted">¿La olvidaste? Contacta a Administración.</span>
+      </div>
+      <div class="input-group">
+        <span class="input-group-text"><i class="bi bi-key" aria-hidden="true"></i></span>
+        {{ form.password }}
+        <button class="btn btn-outline-secondary" type="button" data-toggle-password="#{{ form.password.id_for_label }}" aria-label="Mostrar contraseña">
+          <i class="bi bi-eye" aria-hidden="true"></i>
+        </button>
+      </div>
+      {% for error in form.password.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+    </div>
+
+    <div class="form-check mb-3">
+      <input class="form-check-input" type="checkbox" id="equipo-compartido" required>
+      <label class="form-check-label small" for="equipo-compartido">
+        Entiendo que este equipo puede ser compartido y debo cerrar sesión al terminar.
+      </label>
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-lg w-100">
+      <i class="bi bi-box-arrow-in-right me-1" aria-hidden="true"></i> Ingresar
+    </button>
+  </form>
+
+  {% if demo_mode %}
+    <div class="warning-callout mt-4">
+      <strong>Entorno de demostración.</strong> Los datos son ficticios. No uses nombres, RUT ni información de salud reales.
+    </div>
+
+    <div class="divider-y"></div>
+    <p class="login-note mb-0">
+      <i class="bi bi-info-circle me-1" aria-hidden="true"></i>
+      Cuentas de ejemplo disponibles tras ejecutar <span class="mono">seed_demo</span>.
+      Consulta el README para las credenciales.
+    </p>
+  {% else %}
+    <p class="login-note mt-4 mb-0">
+      <i class="bi bi-shield-lock me-1" aria-hidden="true"></i>
+      El acceso queda registrado para la seguridad del sistema.
+    </p>
+  {% endif %}
+{% endblock %}

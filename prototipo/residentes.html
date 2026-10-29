@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Listado de residentes del prototipo ELEAM. Datos ficticios.">
+  <title>Residentes · ELEAM</title>
+  <link rel="stylesheet" href="assets/vendor/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/vendor/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="assets/estilos.css">
+</head>
+<body>
+  <a class="skip-link" href="#contenido">Ir al contenido</a>
+  <div class="demo-strip"><i class="bi bi-cone-striped"></i> Prototipo con datos ficticios · No ingreses información real</div>
+
+  <nav class="navbar navbar-expand-lg app-navbar sticky-top" aria-label="Navegación principal">
+    <div class="container-xl">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="panel.html">
+        <span class="brand-mark"><i class="bi bi-heart-pulse"></i></span>
+        <span class="brand-copy"><strong>ELEAM</strong><small>Gestión de residentes</small></span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navPrincipal" aria-controls="navPrincipal" aria-expanded="false" aria-label="Abrir menú">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navPrincipal">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="panel.html"><i class="bi bi-grid-1x2"></i> Panel</a></li>
+          <li class="nav-item"><a class="nav-link active" aria-current="page" href="residentes.html"><i class="bi bi-people"></i> Residentes</a></li>
+          <li class="nav-item" data-roles="DIRECCION ADMINISTRACION"><a class="nav-link" href="auditoria.html"><i class="bi bi-clock-history"></i> Auditoría</a></li>
+          <li class="nav-item" data-roles="ADMINISTRACION"><a class="nav-link" href="usuarios.html"><i class="bi bi-person-gear"></i> Usuarios</a></li>
+        </ul>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          <label class="role-switch">
+            <span>Ver como</span>
+            <select id="role-select" class="form-select form-select-sm" aria-label="Simular rol de usuario">
+              <option value="ENFERMERIA">Enfermería</option>
+              <option value="ADMINISTRACION">Administración</option>
+              <option value="TECNICO">Técnico/a</option>
+              <option value="CUIDADOR">Cuidador/a</option>
+              <option value="DIRECCION">Dirección</option>
+            </select>
+          </label>
+          <div class="dropdown">
+            <button class="btn btn-user dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <span class="avatar avatar-sm" data-role-initials>CD</span>
+              <span class="d-none d-md-inline" data-role-name>Carolina Demo</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><span class="dropdown-item-text small text-muted">Sesión demo · <span data-role-label>Enfermería</span></span></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="#" data-demo-action="En la aplicación real se pediría la contraseña actual y la nueva."><i class="bi bi-key me-2"></i>Cambiar contraseña</a></li>
+              <li><a class="dropdown-item" href="login.html"><i class="bi bi-box-arrow-right me-2"></i>Cerrar sesión</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main id="contenido" class="page-wrap">
+    <div class="container-xl">
+      <div class="page-head">
+        <div>
+          <p class="eyebrow mb-1">Fichas</p>
+          <h1>Residentes</h1>
+          <p class="lead-sm">Busca por nombre, RUT o habitación. Las fichas archivadas no aparecen por defecto.</p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+          <a class="btn btn-outline-primary" href="#" data-roles="DIRECCION ADMINISTRACION" data-demo-action="La exportación no está incluida en el incremento 1. Si se agrega, tendrá permisos y auditoría propios."><i class="bi bi-download me-1"></i> Exportar</a>
+          <a class="btn btn-primary" href="#" data-roles="ENFERMERIA ADMINISTRACION" data-demo-action="En la aplicación real se abriría el formulario de ingreso. La información clínica se completa después, solo con Enfermería."><i class="bi bi-plus-lg me-1"></i> Nuevo residente</a>
+        </div>
+      </div>
+
+      <section class="panel-card mb-3" aria-labelledby="titulo-busqueda">
+        <div class="panel-card-header">
+          <div>
+            <h2 id="titulo-busqueda">Buscar residentes</h2>
+            <p class="panel-card-sub">Búsqueda parcial, sin distinguir mayúsculas ni tildes.</p>
+          </div>
+          <span class="badge-soft primary" id="resultado-conteo">8 residentes</span>
+        </div>
+
+        <form id="form-busqueda" class="row g-2 align-items-end" role="search">
+          <div class="col-12 col-lg-5">
+            <label for="filtro-texto" class="form-label">Nombre, RUT o habitación</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-search"></i></span>
+              <input type="search" class="form-control" id="filtro-texto" placeholder="Ej.: Rosa, 11.111.111-1 o 12" autocomplete="off">
+            </div>
+          </div>
+          <div class="col-6 col-lg-3">
+            <label for="filtro-estado" class="form-label">Estado</label>
+            <select id="filtro-estado" class="form-select">
+              <option value="">Todos</option>
+              <option value="ACTIVO">Activo</option>
+              <option value="HOSPITALIZADO">Hospitalizado</option>
+              <option value="EGRESADO">Egresado</option>
+            </select>
+          </div>
+          <div class="col-6 col-lg-2">
+            <div class="form-check mt-4 pt-2">
+              <input class="form-check-input" type="checkbox" id="filtro-archivados">
+              <label class="form-check-label small fw-semibold" for="filtro-archivados">Ver archivados</label>
+            </div>
+          </div>
+          <div class="col-12 col-lg-2 d-grid">
+            <button type="submit" class="btn btn-primary"><i class="bi bi-search me-1"></i> Buscar</button>
+          </div>
+        </form>
+
+        <div class="info-callout mt-3" data-not-roles="ENFERMERIA ADMINISTRACION">
+          <i class="bi bi-eye me-1"></i>
+          Tu rol puede consultar la ficha, pero no crear ni editar residentes. Los botones de acción se ocultan automáticamente.
+        </div>
+      </section>
+
+      <section class="panel-card" aria-labelledby="titulo-lista">
+        <div class="panel-card-header">
+          <div>
+            <h2 id="titulo-lista">Fichas registradas</h2>
+            <p class="panel-card-sub">Los datos marcados DEMO son ficticios y no tienen valor clínico.</p>
+          </div>
+          <span class="badge-soft muted"><i class="bi bi-shield-check"></i> Acceso autenticado</span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-eleam mobile-card-table align-middle" id="tabla-residentes">
+            <thead>
+              <tr>
+                <th>Residente</th>
+                <th>Habitación</th>
+                <th>Estado</th>
+                <th>Alergias</th>
+                <th>Contacto principal</th>
+                <th class="text-end">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr data-search="Rosa Ficticia Pérez 11111111-1 12 penicilina activo" data-status="ACTIVO" data-archived="false">
+                <td data-label="Residente">
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="avatar">RF</span>
+                    <div>
+                      <a class="resident-name" href="ficha.html">Rosa Ficticia Pérez</a>
+                      <div class="resident-meta">11.111.111-1 · 84 años <span class="demo-chip ms-1">DEMO</span></div>
+                    </div>
+                  </div>
+                </td>
+                <td data-label="Habitación">12</td>
+                <td data-label="Estado"><span class="badge-soft success"><span class="status-dot"></span>Activo</span></td>
+                <td data-label="Alergias"><span class="badge-soft danger"><i class="bi bi-exclamation-triangle"></i> Penicilina</span></td>
+                <td data-label="Contacto principal"><span class="small fw-semibold">María Ficticia</span><div class="resident-meta">Hija · +56 9 0000 0001</div></td>
+                <td data-label="Acciones" class="text-end">
+                  <div class="d-flex justify-content-end gap-1">
+                    <a class="btn btn-sm btn-outline-primary" href="ficha.html" aria-label="Ver ficha de Rosa Ficticia Pérez"><i class="bi bi-eye"></i></a>
+                    <a class="btn btn-sm btn-quiet" href="#" data-roles="ENFERMERIA ADMINISTRACION" data-demo-action="En la aplicación real se abriría el formulario de datos administrativos." aria-label="Editar ficha de Rosa Ficticia Pérez"><i class="bi bi-pencil"></i></a>
+                  </div>
+                </td>
+              </tr>
+
+              <tr data-search="Juan De Prueba Soto 22222222-2 3 activo" data-status="ACTIVO" data-archived="false">
+                <td data-label="Residente">
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="avatar">JM</span>
+                    <div>
+                      <a class="resident-name" href="ficha.html">Juan De Prueba Soto</a>
+                      <div class="resident-meta">22.222.222-2 · 79 años <span class="demo-chip ms-1">DEMO</span></div>
+                    </div>
+                  </div>
+                </td>
+                <td data-label="Habitación">3</td>
+                <td data-label="Estado"><span class="badge-soft success"><span class="status-dot"></span>Activo</span></td>
+                <td data-label="Alergias"><span class="badge-soft muted">Sin registrar</span></td>
+                <td data-label="Contacto principal"><span class="small fw-semibold">Pedro De Prueba</span><div class="resident-meta">Hermano · +56 9 0000 0002</div></td>
+                <td data-label="Acciones" class="text-end">
+                  <div class="d-flex justify-content-end gap-1">
+                    <a class="btn btn-sm btn-outline-primary" href="ficha.html" aria-label="Ver ficha de Juan De Prueba Soto"><i class="bi bi-eye"></i></a>
+                    <a class="btn btn-sm btn-quiet" href="#" data-roles="ENFERMERIA ADMINISTRACION" data-demo-action="En la aplicación real se abriría el formulario de datos administrativos." aria-label="Editar ficha de Juan De Prueba Soto"><i class="bi bi-pencil"></i></a>
+                  </div>
+                </td>
+              </tr>
+
+              <tr data-search="Marta Ejemplo Rojas 33333333-3 4 hospitalizado" data-status="HOSPITALIZADO" data-archived="false">
+                <td data-label="Residente">
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="avatar">ME</span>
+                    <div>
+                      <a class="resident-name" href="ficha.html">Marta Ejemplo Rojas</a>
+                      <div class="resident-meta">33.333.333-3 · 91 años <span class="demo-chip ms-1">DEMO</span></div>
+                    </div>
+                  </div>
+                </td>
+                <td data-label="Habitación">4</td>
+                <td data-label="Estado"><span class="badge-soft warning"><span class="status-dot warning"></span>Hospitalizado</span></td>
+                <td data-label="Alergias"><span class="badge-soft muted">Sin registrar</span></td>
+                <td data-label="Contacto principal"><span class="badge-soft warning"><i class="bi bi-telephone-x"></i> Faltante</span><div class="resident-meta">Requiere revisión</div></td>
+                <td data-label="Acciones" class="text-end">
+                  <div class="d-flex justify-content-end gap-1">
+                    <a class="btn btn-sm btn-outline-primary" href="ficha.html" aria-label="Ver ficha de Marta Ejemplo Rojas"><i class="bi bi-eye"></i></a>
+                    <a class="btn btn-sm btn-quiet" href="#" data-roles="ENFERMERIA ADMINISTRACION" data-demo-action="En la aplicación real se abriría el formulario para agregar un contacto." aria-label="Editar ficha de Marta Ejemplo Rojas"><i class="bi bi-pencil"></i></a>
+                  </div>
+                </td>
+              </tr>
+
+              <tr data-search="Pedro Muestra Díaz 44444444-4 7 activo sulfas" data-status="ACTIVO" data-archived="false">
+                <td data-label="Residente">
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="avatar">PM</span>
+                    <div>
+                      <a class="resident-name" href="ficha.html">Pedro Muestra Díaz</a>
+                      <div class="resident-meta">44.444.444-4 · 76 años <span class="demo-chip ms-1">DEMO</span></div>
+                    </div>
+                  </div>
+                </td>
+                <td data-label="Habitación">7</td>
+                <td data-label="Estado"><span class="badge-soft success"><span class="status-dot"></span>Activo</span></td>
+                <td data-label="Alergias"><span class="badge-soft danger"><i class="bi bi-exclamation-triangle"></i> Sulfas</span></td>
+                <td data-label="Contacto principal"><span class="small fw-semibold">Lucía Muestra</span><div class="resident-meta">Esposa · +56 9 0000 0004</div></td>
+                <td data-label="Acciones" class="text-end">
+                  <div class="d-flex justify-content-end gap-1">
+                    <a class="btn btn-sm btn-outline-primary" href="ficha.html" aria-label="Ver ficha de Pedro Muestra Díaz"><i class="bi bi-eye"></i></a>
+                    <a class="btn btn-sm btn-quiet" href="#" data-roles="ENFERMERIA ADMINISTRACION" data-demo-action="En la aplicación real se abriría el formulario de datos administrativos." aria-label="Editar ficha de Pedro Muestra Díaz"><i class="bi bi-pencil"></i></a>
+                  </div>
+                </td>
+              </tr>
+
+              <tr data-search="Elena Simulación Vera 55555555-5 2 activo látex" data-status="ACTIVO" data-archived="false">
+                <td data-label="Residente">
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="avatar">ES</span>
+                    <div>
+                      <a class="resident-name" href="ficha.html">Elena Simulación Vera</a>
+                      <div class="resident-meta">55.555.555-5 · 88 años <span class="demo-chip ms-1">DEMO</span></div>
+                    </div>
+                  </div>
+                </td>
+                <td data-label="Habitación">2</td>
+                <td data-label="Estado"><span class="badge-soft success"><span class="status-dot"></span>Activo</span></td>
+                <td data-label="Alergias"><span class="badge-soft danger"><i class="bi bi-exclamation-triangle"></i> Látex</span></td>
+                <td data-label="Contacto principal"><span class="small fw-semibold">Jorge Simulación</span><div class="resident-meta">Hijo · +56 9 0000 0005</div></td>
+                <td data-label="Acciones" class="text-end">
+                  <div class="d-flex justify-content-end gap-1">
+                    <a class="btn btn-sm btn-outline-primary" href="ficha.html" aria-label="Ver ficha de Elena Simulación Vera"><i class="bi bi-eye"></i></a>
+                    <a class="btn btn-sm btn-quiet" href="#" data-roles="ENFERMERIA ADMINISTRACION" data-demo-action="En la aplicación real se abriría el formulario de datos administrativos." aria-label="Editar ficha de Elena Simulación Vera"><i class="bi bi-pencil"></i></a>
+                  </div>
+                </td>
+              </tr>
+
+              <tr data-search="Carlos Ficticio Muñoz 66666666-6 9 activo" data-status="ACTIVO" data-archived="false">
+                <td data-label="Residente">
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="avatar">CM</span>
+                    <div>
+                      <a class="resident-name" href="ficha.html">Carlos Ficticio Muñoz</a>
+                      <div class="resident-meta">66.666.666-6 · 81 años <span class="demo-chip ms-1">DEMO</span></div>
+                    </div>
+                  </div>
+                </td>
+                <td data-label="Habitación">9</td>
+                <td data-label="Estado"><span class="badge-soft success"><span class="status-dot"></span>Activo</span></td>
+                <td data-label="Alergias"><span class="badge-soft muted">Sin registrar</span></td>
+                <td data-label="Contacto principal"><span class="small fw-semibold">Rosa Ficticio</span><div class="resident-meta">Hija · +56 9 0000 0006</div></td>
+                <td data-label="Acciones" class="text-end">
+                  <div class="d-flex justify-content-end gap-1">
+                    <a class="btn btn-sm btn-outline-primary" href="ficha.html" aria-label="Ver ficha de Carlos Ficticio Muñoz"><i class="bi bi-eye"></i></a>
+                    <a class="btn btn-sm btn-quiet" href="#" data-roles="ENFERMERIA ADMINISTRACION" data-demo-action="En la aplicación real se abriría el formulario de datos administrativos." aria-label="Editar ficha de Carlos Ficticio Muñoz"><i class="bi bi-pencil"></i></a>
+                  </div>
+                </td>
+              </tr>
+
+              <tr data-search="Ana Demostración Lagos 77777777-7 5 activo aines" data-status="ACTIVO" data-archived="false">
+                <td data-label="Residente">
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="avatar">AD</span>
+                    <div>
+                      <a class="resident-name" href="ficha.html">Ana Demostración Lagos</a>
+                      <div class="resident-meta">77.777.777-7 · 73 años <span class="demo-chip ms-1">DEMO</span></div>
+                    </div>
+                  </div>
+                </td>
+                <td data-label="Habitación">5</td>
+                <td data-label="Estado"><span class="badge-soft success"><span class="status-dot"></span>Activo</span></td>
+                <td data-label="Alergias"><span class="badge-soft danger"><i class="bi bi-exclamation-triangle"></i> AINEs</span></td>
+                <td data-label="Contacto principal"><span class="small fw-semibold">María Demostración</span><div class="resident-meta">Sobrina · +56 9 0000 0007</div></td>
+                <td data-label="Acciones" class="text-end">
+                  <div class="d-flex justify-content-end gap-1">
+                    <a class="btn btn-sm btn-outline-primary" href="ficha.html" aria-label="Ver ficha de Ana Demostración Lagos"><i class="bi bi-eye"></i></a>
+                    <a class="btn btn-sm btn-quiet" href="#" data-roles="ENFERMERIA ADMINISTRACION" data-demo-action="En la aplicación real se abriría el formulario de datos administrativos." aria-label="Editar ficha de Ana Demostración Lagos"><i class="bi bi-pencil"></i></a>
+                  </div>
+                </td>
+              </tr>
+
+              <tr data-search="Luis Ejemplo Fuentes 88888888-8 11 activo" data-status="ACTIVO" data-archived="false">
+                <td data-label="Residente">
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="avatar">LE</span>
+                    <div>
+                      <a class="resident-name" href="ficha.html">Luis Ejemplo Fuentes</a>
+                      <div class="resident-meta">88.888.888-8 · 86 años <span class="demo-chip ms-1">DEMO</span></div>
+                    </div>
+                  </div>
+                </td>
+                <td data-label="Habitación">11</td>
+                <td data-label="Estado"><span class="badge-soft success"><span class="status-dot"></span>Activo</span></td>
+                <td data-label="Alergias"><span class="badge-soft muted">Sin registrar</span></td>
+                <td data-label="Contacto principal"><span class="small fw-semibold">Carla Ejemplo</span><div class="resident-meta">Hija · +56 9 0000 0008</div></td>
+                <td data-label="Acciones" class="text-end">
+                  <div class="d-flex justify-content-end gap-1">
+                    <a class="btn btn-sm btn-outline-primary" href="ficha.html" aria-label="Ver ficha de Luis Ejemplo Fuentes"><i class="bi bi-eye"></i></a>
+                    <a class="btn btn-sm btn-quiet" href="#" data-roles="ENFERMERIA ADMINISTRACION" data-demo-action="En la aplicación real se abriría el formulario de datos administrativos." aria-label="Editar ficha de Luis Ejemplo Fuentes"><i class="bi bi-pencil"></i></a>
+                  </div>
+                </td>
+              </tr>
+
+              <tr data-search="Sofía Muestra Rivas 99999999-9 1 egresado" data-status="EGRESADO" data-archived="true">
+                <td data-label="Residente">
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="avatar">SM</span>
+                    <div>
+                      <a class="resident-name" href="ficha.html">Sofía Muestra Rivas</a>
+                      <div class="resident-meta">99.999.999-9 · 90 años <span class="demo-chip ms-1">DEMO</span></div>
+                    </div>
+                  </div>
+                </td>
+                <td data-label="Habitación">1</td>
+                <td data-label="Estado"><span class="badge-soft muted"><span class="status-dot muted"></span>Egresado</span></td>
+                <td data-label="Alergias"><span class="badge-soft muted">Sin registrar</span></td>
+                <td data-label="Contacto principal"><span class="small fw-semibold">Elena Muestra</span><div class="resident-meta">Hija · +56 9 0000 0009</div></td>
+                <td data-label="Acciones" class="text-end">
+                  <div class="d-flex justify-content-end gap-1">
+                    <a class="btn btn-sm btn-outline-primary" href="ficha.html" aria-label="Ver ficha de Sofía Muestra Rivas"><i class="bi bi-eye"></i></a>
+                    <span class="badge-soft muted">Archivada</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div id="sin-resultados" class="empty-state" hidden>
+          <i class="bi bi-search"></i>
+          <strong>No encontramos residentes</strong>
+          <p class="mb-0">Prueba con otro nombre, RUT o habitación, o revisa el filtro de estado.</p>
+        </div>
+
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-3">
+          <span class="text-muted-sm">Los resultados se actualizan a medida que escribes.</span>
+          <span class="text-muted-sm"><i class="bi bi-lock me-1"></i> Listado solo para personal autenticado</span>
+        </div>
+      </section>
+
+      <p class="text-muted-sm text-center mt-4 mb-0">
+        <i class="bi bi-info-circle me-1"></i>
+        Prueba el filtro "Ver archivados" y cambia el rol para comparar lo que ve cada persona.
+      </p>
+    </div>
+  </main>
+
+  <footer class="app-footer">
+    <div class="container-xl d-flex flex-wrap justify-content-between gap-2">
+      <span>ELEAM · Prototipo de gestión de residentes</span>
+      <span>Datos ficticios · Sin valor clínico · No usar en producción</span>
+    </div>
+  </footer>
+
+  <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toast-container"></div>
+  <script src="assets/vendor/bootstrap.bundle.min.js"></script>
+  <script src="assets/demo.js"></script>
+</body>
+</html>

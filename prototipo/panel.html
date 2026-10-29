@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Panel de turno del prototipo ELEAM. Datos ficticios.">
+  <title>Panel · ELEAM</title>
+  <link rel="stylesheet" href="assets/vendor/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/vendor/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="assets/estilos.css">
+</head>
+<body>
+  <a class="skip-link" href="#contenido">Ir al contenido</a>
+  <div class="demo-strip"><i class="bi bi-cone-striped"></i> Prototipo con datos ficticios · No ingreses información real</div>
+
+  <nav class="navbar navbar-expand-lg app-navbar sticky-top" aria-label="Navegación principal">
+    <div class="container-xl">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="panel.html">
+        <span class="brand-mark"><i class="bi bi-heart-pulse"></i></span>
+        <span class="brand-copy"><strong>ELEAM</strong><small>Gestión de residentes</small></span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navPrincipal" aria-controls="navPrincipal" aria-expanded="false" aria-label="Abrir menú">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navPrincipal">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link active" aria-current="page" href="panel.html"><i class="bi bi-grid-1x2"></i> Panel</a></li>
+          <li class="nav-item"><a class="nav-link" href="residentes.html"><i class="bi bi-people"></i> Residentes</a></li>
+          <li class="nav-item" data-roles="DIRECCION ADMINISTRACION"><a class="nav-link" href="auditoria.html"><i class="bi bi-clock-history"></i> Auditoría</a></li>
+          <li class="nav-item" data-roles="ADMINISTRACION"><a class="nav-link" href="usuarios.html"><i class="bi bi-person-gear"></i> Usuarios</a></li>
+        </ul>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          <label class="role-switch">
+            <span>Ver como</span>
+            <select id="role-select" class="form-select form-select-sm" aria-label="Simular rol de usuario">
+              <option value="ENFERMERIA">Enfermería</option>
+              <option value="ADMINISTRACION">Administración</option>
+              <option value="TECNICO">Técnico/a</option>
+              <option value="CUIDADOR">Cuidador/a</option>
+              <option value="DIRECCION">Dirección</option>
+            </select>
+          </label>
+          <div class="dropdown">
+            <button class="btn btn-user dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <span class="avatar avatar-sm" data-role-initials>CD</span>
+              <span class="d-none d-md-inline" data-role-name>Carolina Demo</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><span class="dropdown-item-text small text-muted">Sesión demo · <span data-role-label>Enfermería</span></span></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="#" data-demo-action="En la aplicación real se pediría la contraseña actual y la nueva."><i class="bi bi-key me-2"></i>Cambiar contraseña</a></li>
+              <li><a class="dropdown-item" href="login.html"><i class="bi bi-box-arrow-right me-2"></i>Cerrar sesión</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main id="contenido" class="page-wrap">
+    <div class="container-xl">
+      <div class="page-head">
+        <div>
+          <p class="eyebrow mb-1">Panel de turno</p>
+          <h1><span data-greeting>Buenos días</span>, <span data-role-name>Carolina Demo</span></h1>
+          <p class="lead-sm"><span data-today>Miércoles, 29 de octubre de 2026</span> · Turno mañana · <span data-role-label>Enfermería</span></p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+          <a class="btn btn-outline-primary" href="residentes.html"><i class="bi bi-search me-1"></i> Buscar residente</a>
+          <a class="btn btn-primary" href="#" data-roles="ENFERMERIA ADMINISTRACION" data-demo-action="En la aplicación real se abriría el formulario de ingreso. La información clínica se completa después, solo con Enfermería."><i class="bi bi-plus-lg me-1"></i> Nuevo residente</a>
+        </div>
+      </div>
+
+      <div class="row g-3 mb-3">
+        <div class="col-6 col-lg-3">
+          <div class="stat-card">
+            <span class="stat-icon"><i class="bi bi-people"></i></span>
+            <div><div class="stat-value">24</div><div class="stat-label">Residentes activos</div></div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="stat-card">
+            <span class="stat-icon accent"><i class="bi bi-exclamation-triangle"></i></span>
+            <div><div class="stat-value">9</div><div class="stat-label">Con alergias registradas</div></div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="stat-card">
+            <span class="stat-icon info"><i class="bi bi-box-arrow-in-right"></i></span>
+            <div><div class="stat-value">3</div><div class="stat-label">Ingresos este mes</div></div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="stat-card">
+            <span class="stat-icon warning"><i class="bi bi-telephone-x"></i></span>
+            <div><div class="stat-value">4</div><div class="stat-label">Contactos por revisar</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-lg-8">
+          <section class="panel-card mb-3" aria-labelledby="titulo-alertas">
+            <div class="panel-card-header">
+              <div>
+                <h2 id="titulo-alertas"><i class="bi bi-bell me-1 text-danger"></i> Alertas de cuidado</h2>
+                <p class="panel-card-sub">Información que conviene revisar antes de comenzar el turno.</p>
+              </div>
+              <span class="badge-soft danger">3 pendientes</span>
+            </div>
+
+            <div class="d-grid gap-2">
+              <a class="quick-action" href="ficha.html">
+                <span class="qi accent"><i class="bi bi-exclamation-octagon"></i></span>
+                <span class="flex-grow-1">Rosa Ficticia Pérez <small>Hab. 12 · Alergia a penicilina</small></span>
+                <span class="badge-soft danger">Ver ficha</span>
+              </a>
+              <a class="quick-action" href="ficha.html">
+                <span class="qi accent"><i class="bi bi-droplet-half"></i></span>
+                <span class="flex-grow-1">Pedro Muestra Díaz <small>Hab. 7 · Alergia a sulfas</small></span>
+                <span class="badge-soft danger">Ver ficha</span>
+              </a>
+              <a class="quick-action" href="ficha.html">
+                <span class="qi warning"><i class="bi bi-telephone-x"></i></span>
+                <span class="flex-grow-1">Marta Ejemplo Rojas <small>Hab. 4 · Sin contacto principal registrado</small></span>
+                <span class="badge-soft warning">Revisar</span>
+              </a>
+            </div>
+          </section>
+
+          <section class="panel-card" aria-labelledby="titulo-recientes">
+            <div class="panel-card-header">
+              <div>
+                <h2 id="titulo-recientes">Residentes recientes</h2>
+                <p class="panel-card-sub">Últimos ingresos y actualizaciones de ficha.</p>
+              </div>
+              <a class="btn btn-sm btn-outline-primary" href="residentes.html">Ver todos</a>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table table-eleam mobile-card-table align-middle">
+                <thead>
+                  <tr><th>Residente</th><th>Habitación</th><th>Estado</th><th>Alergias</th><th class="text-end">Ficha</th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td data-label="Residente">
+                      <div class="d-flex align-items-center gap-2">
+                        <span class="avatar">RF</span>
+                        <div><a class="resident-name" href="ficha.html">Rosa Ficticia Pérez</a><div class="resident-meta">11.111.111-1 · 84 años</div></div>
+                      </div>
+                    </td>
+                    <td data-label="Habitación">12</td>
+                    <td data-label="Estado"><span class="badge-soft success"><span class="status-dot"></span>Activo</span></td>
+                    <td data-label="Alergias"><span class="badge-soft danger"><i class="bi bi-exclamation-triangle"></i> Penicilina</span></td>
+                    <td data-label="Ficha" class="text-end"><a class="btn btn-sm btn-quiet" href="ficha.html" aria-label="Ver ficha de Rosa Ficticia Pérez"><i class="bi bi-chevron-right"></i></a></td>
+                  </tr>
+                  <tr>
+                    <td data-label="Residente">
+                      <div class="d-flex align-items-center gap-2">
+                        <span class="avatar">JM</span>
+                        <div><a class="resident-name" href="ficha.html">Juan De Prueba Soto</a><div class="resident-meta">22.222.222-2 · 79 años</div></div>
+                      </div>
+                    </td>
+                    <td data-label="Habitación">3</td>
+                    <td data-label="Estado"><span class="badge-soft success"><span class="status-dot"></span>Activo</span></td>
+                    <td data-label="Alergias"><span class="badge-soft muted">Sin registrar</span></td>
+                    <td data-label="Ficha" class="text-end"><a class="btn btn-sm btn-quiet" href="ficha.html" aria-label="Ver ficha de Juan De Prueba Soto"><i class="bi bi-chevron-right"></i></a></td>
+                  </tr>
+                  <tr>
+                    <td data-label="Residente">
+                      <div class="d-flex align-items-center gap-2">
+                        <span class="avatar">ME</span>
+                        <div><a class="resident-name" href="ficha.html">Marta Ejemplo Rojas</a><div class="resident-meta">33.333.333-3 · 91 años</div></div>
+                      </div>
+                    </td>
+                    <td data-label="Habitación">4</td>
+                    <td data-label="Estado"><span class="badge-soft warning"><span class="status-dot warning"></span>Hospitalizado</span></td>
+                    <td data-label="Alergias"><span class="badge-soft muted">Sin registrar</span></td>
+                    <td data-label="Ficha" class="text-end"><a class="btn btn-sm btn-quiet" href="ficha.html" aria-label="Ver ficha de Marta Ejemplo Rojas"><i class="bi bi-chevron-right"></i></a></td>
+                  </tr>
+                  <tr>
+                    <td data-label="Residente">
+                      <div class="d-flex align-items-center gap-2">
+                        <span class="avatar">PM</span>
+                        <div><a class="resident-name" href="ficha.html">Pedro Muestra Díaz</a><div class="resident-meta">44.444.444-4 · 76 años</div></div>
+                      </div>
+                    </td>
+                    <td data-label="Habitación">7</td>
+                    <td data-label="Estado"><span class="badge-soft success"><span class="status-dot"></span>Activo</span></td>
+                    <td data-label="Alergias"><span class="badge-soft danger"><i class="bi bi-exclamation-triangle"></i> Sulfas</span></td>
+                    <td data-label="Ficha" class="text-end"><a class="btn btn-sm btn-quiet" href="ficha.html" aria-label="Ver ficha de Pedro Muestra Díaz"><i class="bi bi-chevron-right"></i></a></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <div class="col-lg-4">
+          <section class="panel-card mb-3" aria-labelledby="titulo-accesos">
+            <div class="panel-card-header">
+              <h2 id="titulo-accesos">Accesos rápidos</h2>
+            </div>
+            <div class="d-grid gap-2">
+              <a class="quick-action" href="residentes.html">
+                <span class="qi"><i class="bi bi-search"></i></span>
+                <span>Buscar residente <small>Por nombre, RUT o habitación</small></span>
+              </a>
+              <a class="quick-action" href="registro-diario.html" data-roles="ENFERMERIA TECNICO CUIDADOR">
+                <span class="qi"><i class="bi bi-clipboard-plus"></i></span>
+                <span>Registrar cuidado <small>Incremento 2 · prototipo</small></span>
+              </a>
+              <a class="quick-action" href="incidente.html" data-roles="ENFERMERIA TECNICO CUIDADOR">
+                <span class="qi accent"><i class="bi bi-exclamation-triangle"></i></span>
+                <span>Reportar incidente <small>Incremento 3 · prototipo</small></span>
+              </a>
+              <a class="quick-action" href="auditoria.html" data-roles="DIRECCION ADMINISTRACION">
+                <span class="qi warning"><i class="bi bi-clock-history"></i></span>
+                <span>Revisar auditoría <small>Cambios y responsables</small></span>
+              </a>
+              <a class="quick-action" href="usuarios.html" data-roles="ADMINISTRACION">
+                <span class="qi info"><i class="bi bi-person-gear"></i></span>
+                <span>Gestionar usuarios <small>Cuentas, roles y accesos</small></span>
+              </a>
+            </div>
+          </section>
+
+          <section class="panel-card mb-3" data-roles="DIRECCION ADMINISTRACION" aria-labelledby="titulo-actividad">
+            <div class="panel-card-header">
+              <div>
+                <h2 id="titulo-actividad">Actividad reciente</h2>
+                <p class="panel-card-sub">Solo Dirección y Administración.</p>
+              </div>
+              <a class="btn btn-sm btn-quiet" href="auditoria.html" aria-label="Ver toda la auditoría"><i class="bi bi-arrow-up-right"></i></a>
+            </div>
+            <ul class="timeline">
+              <li class="timeline-item">
+                <span class="timeline-dot"></span>
+                <p class="timeline-title">Ficha actualizada · Rosa F. Pérez</p>
+                <p class="timeline-meta">Carolina Demo · hoy, 08:42</p>
+                <p class="timeline-text">Alergias: se agregó "Penicilina".</p>
+              </li>
+              <li class="timeline-item">
+                <span class="timeline-dot"></span>
+                <p class="timeline-title">Contacto agregado · Marta E. Rojas</p>
+                <p class="timeline-meta">Andrés Demo · ayer, 17:10</p>
+              </li>
+              <li class="timeline-item">
+                <span class="timeline-dot muted"></span>
+                <p class="timeline-title">Usuario desactivado · Turno noche</p>
+                <p class="timeline-meta">Andrés Demo · ayer, 16:05</p>
+              </li>
+            </ul>
+          </section>
+
+          <section class="panel-card" data-not-roles="DIRECCION ADMINISTRACION" aria-labelledby="titulo-privacidad">
+            <div class="panel-card-header"><h2 id="titulo-privacidad">Privacidad</h2></div>
+            <p class="text-muted-sm mb-2">Tu rol puede consultar la ficha, pero la auditoría completa está reservada a Dirección y Administración.</p>
+            <div class="note-card">
+              <i class="bi bi-shield-check me-1"></i>
+              Cierra sesión al terminar el turno y no compartas tu cuenta. Los cambios quedan asociados a tu nombre.
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <p class="text-muted-sm text-center mt-4 mb-0">
+        <i class="bi bi-info-circle me-1"></i>
+        Cambia "Ver como" en la barra superior para probar los permisos de cada rol en el prototipo.
+      </p>
+    </div>
+  </main>
+
+  <footer class="app-footer">
+    <div class="container-xl d-flex flex-wrap justify-content-between gap-2">
+      <span>ELEAM · Prototipo de gestión de residentes</span>
+      <span>Datos ficticios · Sin valor clínico · No usar en producción</span>
+    </div>
+  </footer>
+
+  <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toast-container"></div>
+  <script src="assets/vendor/bootstrap.bundle.min.js"></script>
+  <script src="assets/demo.js"></script>
+</body>
+</html>
