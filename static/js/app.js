@@ -43,6 +43,19 @@
     });
   }
 
+  function activateTabFromHash() {
+    if (!window.location.hash || !window.bootstrap || !window.bootstrap.Tab) return;
+    var target =
+      window.location.hash === "#cuidados"
+        ? "#pane-cuidados"
+        : window.location.hash;
+    var trigger = document.querySelector(
+      '[data-bs-toggle="tab"][data-bs-target="' + target + '"]'
+    );
+    if (!trigger || trigger.classList.contains("active")) return;
+    new window.bootstrap.Tab(trigger).show();
+  }
+
   function initAll(root) {
     initPasswordToggles(root);
     initConfirmations(root);
@@ -51,7 +64,10 @@
 
   document.addEventListener("DOMContentLoaded", function () {
     initAll(document);
+    activateTabFromHash();
   });
+
+  window.addEventListener("hashchange", activateTabFromHash);
 
   document.addEventListener("htmx:afterSwap", function (event) {
     initAll(event.detail.target || document);

@@ -67,11 +67,11 @@ Definir para cada dato: quién lo registra, quién lo puede leer o corregir, cu�
 
 Implementar en incrementos pequeños:
 
-1. Inicio de sesión, usuarios, roles y auditoría.
-2. Ficha del residente y contactos.
-3. Registros diarios y plan de cuidados.
-4. Incidentes, consulta e informes básicos.
-5. Pruebas automatizadas, respaldos y documentación operativa.
+1. Inicio de sesión, usuarios, roles y auditoría. **Implementado.**
+2. Ficha del residente y contactos. **Implementado.**
+3. Registros diarios, plan de cuidados, correcciones y revisión de Enfermería. **Implementado, pendiente de validación con el equipo.**
+4. Incidentes, consulta e informes básicos. **Pendiente.**
+5. Pruebas automatizadas, respaldos y documentación operativa. **En curso: 67 pruebas y documentación de los incrementos 1 y 2.**
 
 Construir primero con datos ficticios. Revisar cada entrega con el personal del ELEAM. Registrar los cambios de forma que una corrección no borre silenciosamente el dato original.
 

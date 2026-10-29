@@ -85,7 +85,7 @@
     {% endif %}
   </section>
 
-  <section class="panel-card">
+  <section class="panel-card" id="cuidados">
     <ul class="nav nav-tabs nav-tabs-eleam mb-3" role="tablist">
       <li class="nav-item" role="presentation">
         <button class="nav-link active" id="tab-ficha" data-bs-toggle="tab" data-bs-target="#pane-ficha" type="button" role="tab" aria-controls="pane-ficha" aria-selected="true">
@@ -96,6 +96,12 @@
         <button class="nav-link" id="tab-contactos" data-bs-toggle="tab" data-bs-target="#pane-contactos" type="button" role="tab" aria-controls="pane-contactos" aria-selected="false">
           <i class="bi bi-telephone me-1" aria-hidden="true"></i> Contactos
           <span class="badge-soft primary ms-1">{{ contacts|length }}</span>
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-cuidados" data-bs-toggle="tab" data-bs-target="#pane-cuidados" type="button" role="tab" aria-controls="pane-cuidados" aria-selected="false">
+          <i class="bi bi-clipboard-pulse me-1" aria-hidden="true"></i> Cuidados
+          <span class="badge-soft primary ms-1">{{ active_care_plans|length }}</span>
         </button>
       </li>
       {% if can_view_audit %}
@@ -199,12 +205,40 @@
                 <div class="panel-card tight" style="box-shadow: none;">
                   <div class="panel-card-header">
                     <div>
-                      <h2>Plan de cuidados</h2>
-                      <p class="panel-card-sub">Incremento 2 del proyecto.</p>
+                      <h2>Cuidados</h2>
+                      <p class="panel-card-sub">Plan acordado y últimos registros del turno.</p>
                     </div>
-                    <span class="badge-soft muted">Próximamente</span>
+                    <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="tab" data-bs-target="#pane-cuidados">
+                      <i class="bi bi-arrow-up-right" aria-hidden="true"></i> Ver pestaña
+                    </button>
                   </div>
-                  <p class="text-muted-sm mb-0">En la siguiente etapa se acordarán con el equipo los objetivos, las actividades y la frecuencia de evaluación. Este sistema no reemplaza el criterio profesional ni genera órdenes clínicas.</p>
+                  <div class="row g-3">
+                    <div class="col-md-7">
+                      <div class="section-label">Plan activo</div>
+                      {% if active_care_plans %}
+                        {% with plan=active_care_plans.0 %}
+                          <p class="fw-bold mb-1">{{ plan.title }}</p>
+                          <p class="text-muted-sm mb-0">
+                            {% if plan.review_date %}Próxima revisión: {{ plan.review_date|date:"d/m/Y" }}{% else %}Sin fecha de revisión definida{% endif %}
+                            {% if plan.responsible %} · {{ plan.responsible.get_full_name }}{% endif %}
+                          </p>
+                        {% endwith %}
+                      {% else %}
+                        <p class="text-muted-sm mb-0">Sin plan de cuidados activo.</p>
+                      {% endif %}
+                    </div>
+                    <div class="col-md-5">
+                      <div class="section-label">Registros vigentes</div>
+                      <p class="text-muted-sm mb-0">
+                        {{ care_record_count }} registro{{ care_record_count|pluralize:"s" }}
+                        {% if care_pending_review %} · <span class="badge-soft warning">{{ care_pending_review }} por revisar</span>{% endif %}
+                      </p>
+                    </div>
+                  </div>
+                  <div class="warning-callout mt-3 mb-0">
+                    <i class="bi bi-info-circle me-1" aria-hidden="true"></i>
+                    El plan y los registros apoyan la coordinación del cuidado. No sustituyen el criterio profesional ni generan órdenes clínicas.
+                  </div>
                 </div>
               </div>
             </div>
@@ -305,6 +339,131 @@
         <div class="info-callout mt-3">
           <i class="bi bi-info-circle me-1" aria-hidden="true"></i>
           Si se elimina el contacto principal, el sistema no promueve otro automáticamente: la ficha mostrará una advertencia hasta que se designe uno nuevo.
+        </div>
+      </div>
+
+      <div class="tab-pane fade" id="pane-cuidados" role="tabpanel" aria-labelledby="tab-cuidados" tabindex="0">
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+          <div>
+            <h2 class="h5 mb-1">Plan de cuidados y registros</h2>
+            <p class="text-muted-sm mb-0">El plan lo acuerda Enfermería; los registros los completa el equipo durante el turno.</p>
+          </div>
+          <div class="d-flex flex-wrap gap-2">
+            {% if can_manage_care and not is_archived %}
+              <a class="btn btn-outline-primary" href="{% url 'care:plan_create' resident.pk %}">
+                <i class="bi bi-journal-plus me-1" aria-hidden="true"></i> Nuevo plan
+              </a>
+            {% endif %}
+            {% if can_record_care and not is_archived %}
+              <a class="btn btn-primary" href="{% url 'care:record_create' %}?residente={{ resident.pk }}">
+                <i class="bi bi-plus-lg me-1" aria-hidden="true"></i> Registrar cuidado
+              </a>
+            {% endif %}
+          </div>
+        </div>
+
+        {% if is_archived %}
+          <div class="note-card mb-3">
+            <i class="bi bi-archive me-1" aria-hidden="true"></i>
+            La ficha está archivada. Los cuidados se conservan para consulta, pero no se pueden modificar hasta reactivarla.
+          </div>
+        {% endif %}
+
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+          <h3 class="h6 mb-0">Planes activos</h3>
+          <span class="badge-soft primary">{{ active_care_plans|length }} activo{{ active_care_plans|length|pluralize:"s" }}</span>
+        </div>
+
+        <div class="row g-3 mb-4">
+          {% for plan in active_care_plans %}
+            <div class="col-lg-6">
+              {% include "care/_plan_card.html" with plan=plan %}
+            </div>
+          {% empty %}
+            <div class="col-12">
+              <div class="empty-state">
+                <i class="bi bi-journal-x" aria-hidden="true"></i>
+                <strong>Sin plan de cuidados activo</strong>
+                <p class="mb-0">
+                  {% if can_manage_care and not is_archived %}
+                    Crea un plan cuando el equipo acuerde objetivos y acciones concretas.
+                  {% else %}
+                    Enfermería puede crear un plan cuando el equipo lo acuerde.
+                  {% endif %}
+                </p>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+
+        {% if closed_care_plans %}
+          <details class="mb-4">
+            <summary class="small fw-semibold cursor-pointer">Planes cerrados ({{ closed_care_plans|length }})</summary>
+            <div class="row g-3 mt-1">
+              {% for plan in closed_care_plans %}
+                <div class="col-lg-6">
+                  {% include "care/_plan_card.html" with plan=plan %}
+                </div>
+              {% endfor %}
+            </div>
+          </details>
+        {% endif %}
+
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+          <div>
+            <h3 class="h6 mb-0">Últimos registros de cuidado</h3>
+            <p class="text-muted-sm mb-0">Se muestran los registros vigentes más recientes.</p>
+          </div>
+          <a class="btn btn-sm btn-outline-primary" href="{% url 'care:record_list' %}?residente={{ resident.pk }}&todas=1">
+            <i class="bi bi-clock-history me-1" aria-hidden="true"></i> Ver historial completo
+          </a>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-eleam mobile-card-table align-middle">
+            <thead>
+              <tr><th>Fecha y hora</th><th>Categoría</th><th>Registro</th><th>Quién</th><th>Estado</th><th class="text-end"></th></tr>
+            </thead>
+            <tbody>
+              {% for record in recent_care_records %}
+                <tr>
+                  <td data-label="Fecha y hora" class="mono">{{ record.recorded_at|date:"d/m/Y" }}<br><span class="text-muted-sm">{{ record.recorded_at|date:"H:i" }} · {{ record.get_shift_display }}</span></td>
+                  <td data-label="Categoría"><span class="badge-soft primary">{{ record.get_category_display }}</span></td>
+                  <td data-label="Registro">{{ record.description|truncatechars:80 }}</td>
+                  <td data-label="Quién">{{ record.created_by.get_full_name|default:"—" }}</td>
+                  <td data-label="Estado">
+                    {% if record.review_pending %}
+                      <span class="badge-soft warning">Requiere revisión</span>
+                    {% elif record.is_reviewed %}
+                      <span class="badge-soft success">Revisado</span>
+                    {% else %}
+                      <span class="badge-soft info">Vigente</span>
+                    {% endif %}
+                  </td>
+                  <td data-label="Ver" class="text-end">
+                    <a class="btn btn-sm btn-quiet" href="{{ record.get_absolute_url }}" aria-label="Ver registro">
+                      <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                    </a>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="6">
+                    <div class="empty-state py-3">
+                      <i class="bi bi-clipboard-x" aria-hidden="true"></i>
+                      <strong>Sin registros de cuidado</strong>
+                      <p class="mb-0">Los registros del turno aparecerán aquí.</p>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="info-callout mt-3">
+          <i class="bi bi-shield-lock me-1" aria-hidden="true"></i>
+          Los registros no se eliminan. Una corrección crea una versión nueva y deja la anterior marcada como corregida, con usuario, fecha y motivo.
         </div>
       </div>
 

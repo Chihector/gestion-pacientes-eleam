@@ -1,4 +1,4 @@
-# Matriz de roles y permisos
+# Matriz de roles y permisos — incrementos 1 y 2
 
 ## Principios
 
@@ -14,14 +14,14 @@
 | Rol | Para quién | Propósito |
 |---|---|---|
 | Dirección | Dirección del establecimiento | Supervisión y lectura completa, incluida la auditoría. No modifica fichas. |
-| Enfermería | Enfermera/o responsable clínico | Mantiene la ficha clínica, los datos administrativos y los contactos. |
-| Técnico/a | Técnico/a en enfermería | Consulta la ficha y, en etapas posteriores, registra cuidados e incidentes. |
-| Cuidador/a | Cuidadores y cuidadores | Consulta la ficha y, en etapas posteriores, registra cuidados e incidentes. |
-| Administración | Personal administrativo | Mantiene datos administrativos, contactos y usuarios; revisa auditoría. |
+| Enfermería | Enfermera/o responsable clínico | Mantiene la ficha clínica, los datos administrativos y los contactos; gestiona planes, revisa y corrige cuidados. |
+| Técnico/a | Técnico/a en enfermería | Consulta la ficha, registra cuidados y corrige sus propios registros. |
+| Cuidador/a | Cuidadores y cuidadores | Consulta la ficha, registra cuidados y corrige sus propios registros. |
+| Administración | Personal administrativo | Mantiene datos administrativos, contactos y usuarios; revisa auditoría y consulta cuidados. |
 
-> Los roles Técnico/a y Cuidador/a tienen los mismos permisos en el incremento 1. Se mantienen separados para reportes y para futuras reglas más específicas.
+> Los roles Técnico/a y Cuidador/a tienen los mismos permisos en estos incrementos. Se mantienen separados para reportes y para futuras reglas más específicas.
 
-## Permisos del incremento 1
+## Permisos vigentes (incrementos 1 y 2)
 
 | Acción | Dirección | Enfermería | Técnico/a | Cuidador/a | Administración |
 |---|:---:|:---:|:---:|:---:|:---:|
@@ -36,6 +36,12 @@
 | Editar información clínica | ❌ | ✅ | ❌ | ❌ | ❌ |
 | Crear, editar y eliminar contactos | ❌ | ✅ | ❌ | ❌ | ✅ |
 | Archivar o reactivar residente | ❌ | ✅ | ❌ | ❌ | ✅ |
+| Ver planes y registros de cuidados | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Registrar un cuidado por turno | ❌ | ✅ | ✅ | ✅ | ❌ |
+| Corregir un registro | ❌ | ✅ (todos) | ✅ (propios) | ✅ (propios) | ❌ |
+| Revisar un registro marcado | ❌ | ✅ | ❌ | ❌ | ❌ |
+| Crear o editar planes de cuidados | ❌ | ✅ | ❌ | ❌ | ❌ |
+| Cerrar o reactivar un plan | ❌ | ✅ | ❌ | ❌ | ❌ |
 | Ver auditoría | ✅ | ❌ | ❌ | ❌ | ✅ |
 | Gestionar usuarios y roles | ❌ | ❌ | ❌ | ❌ | ✅ |
 | Restablecer contraseña de otro usuario | ❌ | ❌ | ❌ | ❌ | ✅ |
@@ -47,15 +53,11 @@
 
 | Acción | Dirección | Enfermería | Técnico/a | Cuidador/a | Administración |
 |---|:---:|:---:|:---:|:---:|:---:|
-| Registrar cuidados diarios | ❌ | ✅ | ✅ | ✅ | ❌ |
-| Leer registros diarios | ✅ | ✅ | ✅ | ✅ | ❌ |
 | Reportar incidentes | ❌ | ✅ | ✅ | ✅ | ❌ |
 | Revisar y cerrar incidentes | ✅ | ✅ | ❌ | ❌ | ❌ |
-| Editar plan de cuidados | ❌ | ✅ | ❌ | ❌ | ❌ |
-| Leer plan de cuidados | ✅ | ✅ | ✅ | ✅ | ❌ |
 | Exportar reportes autorizados | ✅ | ✅ | ❌ | ❌ | ✅ |
 
-Estas filas son una propuesta para discutir con el ELEAM antes de implementarlas; no están activas en el incremento 1.
+Estas filas son una propuesta para discutir con el ELEAM antes de implementarlas; no están activas en los incrementos 1 y 2.
 
 ## Reglas adicionales
 
@@ -64,11 +66,14 @@ Estas filas son una propuesta para discutir con el ELEAM antes de implementarlas
 3. **Los contactos se pueden eliminar** solo con permiso de Enfermería o Administración; la eliminación queda auditada con el snapshot anterior.
 4. **Las contraseñas nunca se muestran ni se registran** en la auditoría. Solo se registra el hecho de que se cambiaron.
 5. **La auditoría es de solo lectura** para Dirección y Administración; nadie la edita ni la elimina desde la aplicación.
-6. **Un superusuario no reemplaza los roles:** si una persona usa el admin técnico, sus acciones también deben quedar registradas y revisarse.
+6. **Un superusuario no reemplaza los roles:** si una persona usa el admin técnico, sus acciones también deben quedar registradas y revisarse. Los planes y registros de cuidado son de solo lectura en ese admin; las correcciones se hacen desde la aplicación.
+7. **Los registros de cuidado no se editan ni se eliminan:** una corrección crea una nueva versión, exige un motivo y deja la anterior marcada como `CORREGIDO`. Solo el autor o Enfermería pueden corregir; Enfermería puede corregir cualquier registro vigente.
+8. **La revisión de Enfermería solo aplica a registros marcados:** no se puede revisar un registro que no lo requiera, uno ya revisado o uno corregido. La revisión guarda revisor, fecha y observaciones.
+9. **Los planes de cuidado los gestiona solo Enfermería:** se cierran con un motivo de al menos 10 caracteres y se pueden reactivar; no se eliminan. Una ficha archivada bloquea cambios en sus planes y registros.
 
 ## Verificación
 
-La matriz se prueba automáticamente en `accounts/tests/`, `residents/tests/` y `audit/tests/`. Cada combinación crítica (rol × acción) debe tener al menos una prueba que confirme el acceso permitido o el rechazo con HTTP 403.
+La matriz se prueba automáticamente en `accounts/tests.py`, `residents/tests.py`, `care/tests.py` y `audit/tests.py`. La suite completa tiene **67 pruebas**. Cada combinación crítica (rol × acción) debe tener al menos una prueba que confirme el acceso permitido o el rechazo con HTTP 403.
 
 ## Decisiones pendientes con el ELEAM
 
@@ -78,3 +83,7 @@ La matriz se prueba automáticamente en `accounts/tests/`, `residents/tests/` y 
 - [ ] ¿La auditoría debe ser visible para Enfermería sobre sus propios registros?
 - [ ] ¿Se requiere doble aprobación para archivar una ficha?
 - [ ] ¿Se usarán grupos de trabajo por turno además de los roles?
+- [ ] ¿Las categorías de cuidado y los límites de turno (07–15, 15–23, 23–07) coinciden con la operación real?
+- [ ] ¿Qué registros requieren revisión obligatoria de Enfermería y en qué plazo?
+- [ ] ¿Se debe permitir corregir registros de días anteriores o solo del turno actual?
+- [ ] ¿Quién puede cerrar un plan además de Enfermería y qué motivo mínimo se exige?

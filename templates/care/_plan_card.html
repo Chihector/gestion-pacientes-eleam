@@ -1,0 +1,87 @@
+{% load static %}
+<div class="panel-card tight h-100" style="box-shadow: none;">
+  <div class="d-flex justify-content-between align-items-start gap-2">
+    <div>
+      <h3 class="h6 mb-1">{{ plan.title }}</h3>
+      <p class="text-muted-sm mb-0">
+        {% if plan.responsible %}Responsable: {{ plan.responsible.get_full_name }}{% else %}Sin responsable asignado{% endif %}
+      </p>
+    </div>
+    {% if plan.is_open %}
+      <span class="badge-soft success"><span class="status-dot"></span> Activo</span>
+    {% else %}
+      <span class="badge-soft muted">Cerrado</span>
+    {% endif %}
+  </div>
+
+  <div class="data-grid mt-2">
+    <div class="data-item"><span class="data-label">Inicio</span><span class="data-value">{{ plan.start_date|date:"d/m/Y" }}</span></div>
+    <div class="data-item"><span class="data-label">Próxima revisión</span><span class="data-value">{{ plan.review_date|date:"d/m/Y"|default:"Sin fecha" }}</span></div>
+  </div>
+
+  <div class="section-label mt-3">Objetivo</div>
+  <p class="mb-0">{{ plan.objective|linebreaksbr }}</p>
+
+  <details class="mt-2">
+    <summary class="small fw-semibold cursor-pointer">Ver acciones acordadas</summary>
+    <p class="text-muted-sm mt-2 mb-0">{{ plan.actions|linebreaksbr }}</p>
+  </details>
+
+  {% if plan.notes %}
+    <div class="section-label mt-3">Observaciones</div>
+    <p class="text-muted-sm mb-0">{{ plan.notes|linebreaksbr }}</p>
+  {% endif %}
+
+  {% if plan.closure_reason %}
+    <div class="note-card mt-3">
+      <i class="bi bi-archive me-1" aria-hidden="true"></i>
+      Motivo del cierre: {{ plan.closure_reason }}
+    </div>
+  {% endif %}
+
+  {% if can_manage_care and not is_archived %}
+    <div class="contact-actions mt-3">
+      <a class="btn btn-sm btn-outline-primary" href="{% url 'care:plan_update' plan.pk %}">
+        <i class="bi bi-pencil" aria-hidden="true"></i> Editar
+      </a>
+      {% if plan.is_open %}
+        <button class="btn btn-sm btn-quiet text-danger" type="button" data-bs-toggle="modal" data-bs-target="#modalCerrarPlan{{ plan.pk }}">
+          <i class="bi bi-archive" aria-hidden="true"></i> Cerrar plan
+        </button>
+      {% else %}
+        <form method="post" action="{% url 'care:plan_reopen' plan.pk %}" data-confirm="¿Reactivar este plan de cuidados?">
+          {% csrf_token %}
+          <button class="btn btn-sm btn-quiet" type="submit">
+            <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i> Reactivar
+          </button>
+        </form>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  {% if plan.is_open and can_manage_care and not is_archived %}
+    <div class="modal fade" id="modalCerrarPlan{{ plan.pk }}" tabindex="-1" aria-labelledby="tituloCerrarPlan{{ plan.pk }}" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content" style="border-radius: 18px; border: 1px solid var(--eleam-border);">
+          <div class="modal-header">
+            <h2 class="modal-title h5" id="tituloCerrarPlan{{ plan.pk }}">Cerrar plan de cuidados</h2>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <form method="post" action="{% url 'care:plan_close' plan.pk %}">
+            {% csrf_token %}
+            <div class="modal-body">
+              <p>El plan <strong>{{ plan.title }}</strong> dejará de estar activo, pero se conservará en el historial junto con sus registros.</p>
+              <label class="form-label" for="motivo-cierre-{{ plan.pk }}">Motivo del cierre</label>
+              <textarea class="form-control" id="motivo-cierre-{{ plan.pk }}" name="closure_reason" rows="3" required minlength="10" maxlength="500" placeholder="Ej.: Objetivo alcanzado; se acuerda nuevo plan con el equipo."></textarea>
+              <div class="form-text">Mínimo 10 caracteres. Queda registrado con tu nombre.</div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-quiet" data-bs-dismiss="modal">Cancelar</button>
+              <button type="submit" class="btn btn-danger">Cerrar plan</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+</div>

@@ -162,9 +162,42 @@
     </div>
 
     <div class="col-lg-4">
+      <section class="panel-card mb-3" aria-labelledby="titulo-cuidados">
+        <div class="panel-card-header">
+          <div>
+            <h2 id="titulo-cuidados"><i class="bi bi-clipboard-pulse me-1" aria-hidden="true"></i> Cuidados de hoy</h2>
+            <p class="panel-card-sub">Registros y revisiones del turno.</p>
+          </div>
+          <a class="btn btn-sm btn-quiet" href="{% url 'care:record_list' %}" aria-label="Ver cuidados">
+            <i class="bi bi-arrow-up-right" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="data-grid">
+          <div class="data-item"><span class="data-label">Registros</span><span class="data-value">{{ care_today_count }}</span></div>
+          <div class="data-item"><span class="data-label">Por revisar</span><span class="data-value">{{ care_pending_review }}</span></div>
+          <div class="data-item"><span class="data-label">Planes activos</span><span class="data-value">{{ active_plan_count }}</span></div>
+        </div>
+        {% if care_pending_review %}
+          <div class="warning-callout mt-3">
+            <i class="bi bi-hourglass-split me-1" aria-hidden="true"></i>
+            Hay {{ care_pending_review }} registro{{ care_pending_review|pluralize:"s" }} pendiente{{ care_pending_review|pluralize:"s" }} de revisión.
+            {% if user.can_review_care %}<a class="fw-semibold" href="{% url 'care:record_list' %}?pendientes=1">Revisar ahora</a>.{% endif %}
+          </div>
+        {% endif %}
+        {% if user.can_record_care %}
+          <a class="btn btn-primary w-100 mt-3" href="{% url 'care:record_create' %}">
+            <i class="bi bi-plus-lg me-1" aria-hidden="true"></i> Registrar cuidado
+          </a>
+        {% endif %}
+      </section>
+
       <section class="panel-card mb-3" aria-labelledby="titulo-accesos">
         <div class="panel-card-header"><h2 id="titulo-accesos">Accesos rápidos</h2></div>
         <div class="d-grid gap-2">
+          <a class="quick-action" href="{% url 'care:record_list' %}">
+            <span class="qi info"><i class="bi bi-clipboard-pulse" aria-hidden="true"></i></span>
+            <span>Cuidados del turno <small>Registros y revisiones pendientes</small></span>
+          </a>
           <a class="quick-action" href="{% url 'residents:list' %}">
             <span class="qi"><i class="bi bi-search" aria-hidden="true"></i></span>
             <span>Buscar residente <small>Por nombre, RUT o habitación</small></span>

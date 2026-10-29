@@ -6,6 +6,7 @@ from django.utils import timezone
 from django.views.generic import TemplateView
 
 from audit.models import AuditLog
+from care.models import CarePlan, DailyCareRecord
 from residents.models import Contact, Resident
 
 
@@ -52,7 +53,21 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 AuditLog.objects.select_related("actor").order_by("-created_at")[:6]
             )
 
-        context["today"] = timezone.localdate()
+        today = timezone.localdate()
+        current_records = DailyCareRecord.objects.filter(
+            status=DailyCareRecord.Status.VIGENTE
+        )
+        context["care_today_count"] = current_records.filter(
+            recorded_at__date=today
+        ).count()
+        context["care_pending_review"] = current_records.filter(
+            requires_nursing_review=True, reviewed_at__isnull=True
+        ).count()
+        context["active_plan_count"] = CarePlan.objects.filter(
+            status=CarePlan.Status.ACTIVO, resident__is_active=True
+        ).count()
+
+        context["today"] = today
         context["greeting_name"] = (
             self.request.user.get_short_name() or self.request.user.email
         )

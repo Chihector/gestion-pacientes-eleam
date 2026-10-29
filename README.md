@@ -1,6 +1,6 @@
 # ELEAM · Gestión de residentes
 
-Aplicación web para apoyar el registro y la consulta de información de residentes de un ELEAM chileno. Este repositorio contiene el **primer incremento funcional**: inicio de sesión, usuarios y roles, auditoría, ficha de residente y contactos.
+Aplicación web para apoyar el registro y la consulta de información de residentes de un ELEAM chileno. Este repositorio contiene los **dos primeros incrementos funcionales**: inicio de sesión, usuarios y roles, auditoría, ficha de residente, contactos y registro diario de cuidados con plan, correcciones y revisión de Enfermería.
 
 > **Privacidad:** usa solo datos ficticios en desarrollo, pruebas y demostraciones. No ingreses nombres, RUT, direcciones, teléfonos ni información de salud de personas reales. Antes de un piloto se deben validar los requisitos legales, de seguridad y de privacidad aplicables.
 
@@ -12,14 +12,15 @@ Aplicación web para apoyar el registro y la consulta de información de residen
 | 2. Definir alcance y reglas | Documentada en `docs/` |
 | 3. Prototipo navegable | Disponible en `prototipo/` (datos ficticios) |
 | 4. MVP · incremento 1 | Implementado y probado técnicamente; pendiente de revisión con el equipo |
-| Incrementos 2 y 3 | Registros diarios, plan de cuidados e incidentes: aún no implementados |
+| 5. MVP · incremento 2 | Registros por turno, plan de cuidados, correcciones y revisión: implementado y probado; pendiente de validación con el equipo |
+| 6. MVP · incremento 3 | Incidentes, informes y exportaciones: aún no implementado |
 
 Documentos de referencia:
 
 - [Hoja de ruta](HOJA_DE_RUTA.md)
 - [Tecnologías recomendadas](TECNOLOGIAS.md)
 - [Matriz de permisos](docs/MATRIZ_PERMISOS.md)
-- [Historias de usuario del incremento 1](docs/HISTORIAS_DE_USUARIO.md)
+- [Historias de usuario de los incrementos 1 y 2](docs/HISTORIAS_DE_USUARIO.md)
 - [Modelo de datos](docs/MODELO_DE_DATOS.md)
 
 ## Qué incluye el incremento 1
@@ -36,9 +37,21 @@ Documentos de referencia:
 - Contacto principal único por residente, con eliminación confirmada y auditada.
 - Gestión de usuarios por Administración, con protección contra la desactivación de la propia cuenta.
 - Auditoría de creación, modificación, archivado, reactivación, eliminación de contactos, desactivación de usuarios y cambios de contraseña.
-- Datos ficticios de demostración y 43 pruebas automatizadas.
+- Datos ficticios de demostración.
 
-**Fuera de alcance por ahora:** registros diarios, plan de cuidados, incidentes, informes, exportaciones, portal de familias, facturación, inventario, integraciones y aplicación móvil nativa. El sistema no diagnostica, no recomienda tratamientos y no genera órdenes clínicas.
+## Qué incluye el incremento 2
+
+- Bandeja de cuidados en `/cuidados/` con filtros por fecha, turno, categoría, residente o texto, pendientes de revisión y registros corregidos.
+- Registro de cuidados por turno con residente, plan relacionado, fecha y hora, turno, categoría, descripción y observaciones.
+- Los registros **no se editan ni se eliminan**: una corrección crea una versión nueva, exige un motivo y deja la versión anterior visible como `CORREGIDO`.
+- Revisión de Enfermería para los registros marcados, con revisor, fecha y observaciones; la revisión y la corrección quedan en auditoría.
+- Planes de cuidados por residente con necesidad, objetivo, acciones acordadas, responsable, fechas y observaciones.
+- Cierre de planes con motivo obligatorio y reactivación auditada; no se eliminan.
+- Pestaña “Cuidados” en la ficha del residente y panel “Cuidados de hoy” con registros y pendientes.
+- Permisos: Enfermería gestiona planes, revisa y corrige cualquier registro; Técnico/a y Cuidador/a registran y corrigen sus propios registros; Dirección y Administración solo consultan.
+- Datos ficticios adicionales y **67 pruebas automatizadas** en la suite completa.
+
+**Fuera de alcance por ahora:** incidentes, informes, exportaciones, portal de familias, facturación, inventario, integraciones y aplicación móvil nativa. El sistema no diagnostica, no recomienda tratamientos, no define prioridades clínicas y no genera planes automáticamente.
 
 ## Stack
 
@@ -106,11 +119,11 @@ python manage.py runserver
 
 | Correo | Rol | Puede hacer |
 |---|---|---|
-| `administracion@example.test` | Administración | Residentes, contactos, usuarios y auditoría |
-| `direccion@example.test` | Dirección | Consultar fichas y auditoría |
-| `enfermeria@example.test` | Enfermería | Residentes, contactos, datos administrativos y clínicos, auditoría no |
-| `tecnico@example.test` | Técnico/a | Consultar fichas en modo lectura |
-| `cuidador@example.test` | Cuidador/a | Consultar fichas en modo lectura |
+| `administracion@example.test` | Administración | Residentes, contactos, usuarios y auditoría; consulta cuidados |
+| `direccion@example.test` | Dirección | Consultar fichas, cuidados y auditoría |
+| `enfermeria@example.test` | Enfermería | Residentes, datos clínicos, planes, revisión y corrección de cuidados |
+| `tecnico@example.test` | Técnico/a | Consultar fichas y registrar o corregir sus propios cuidados |
+| `cuidador@example.test` | Cuidador/a | Consultar fichas y registrar o corregir sus propios cuidados |
 
 El comando es idempotente, marca las fichas con `is_demo=True` y vuelve a dejar las contraseñas demo conocidas. Por seguridad:
 
@@ -183,6 +196,10 @@ python manage.py migrate
 | Editar información clínica | No | Sí | No | No | No |
 | Gestionar contactos | No | Sí | No | No | Sí |
 | Archivar/reactivar fichas | No | Sí | No | No | Sí |
+| Ver planes y registros de cuidados | Sí | Sí | Sí | Sí | Sí |
+| Registrar cuidados | No | Sí | Sí | Sí | No |
+| Corregir registros | No | Sí (todos) | Sí (propios) | Sí (propios) | No |
+| Gestionar y revisar cuidados | No | Sí | No | No | No |
 | Ver auditoría completa | Sí | No | No | No | Sí |
 | Gestionar usuarios | No | No | No | No | Sí |
 
@@ -195,7 +212,11 @@ La matriz detallada está en [docs/MATRIZ_PERMISOS.md](docs/MATRIZ_PERMISOS.md).
 - No se guardan contraseñas ni hashes en la auditoría; los cambios de contraseña se registran como evento explícito.
 - Las fichas no se eliminan: se archivan y se pueden reactivar.
 - Los contactos se eliminan con confirmación y el evento conserva los datos anteriores.
-- Los formularios de residentes y contactos no permiten cargar archivos ni fotos en este incremento.
+- Los registros de cuidado no se editan ni se eliminan: una corrección crea una nueva versión, marca la anterior como corregida y conserva el motivo.
+- Los planes de cuidado no se eliminan: se cierran con motivo y se pueden reactivar; ambas acciones quedan auditadas.
+- La revisión de Enfermería guarda quién revisó, cuándo y qué observaciones dejó.
+- Los planes y registros de cuidado son de solo lectura en el admin técnico de Django: se crean, corrigen y revisan desde la aplicación auditada.
+- Los formularios de residentes, contactos y cuidados no permiten cargar archivos ni fotos en estos incrementos.
 - La base de datos y los respaldos deben tratarse como información sensible en producción.
 - No se deben enviar datos de residentes a herramientas de IA ni a servicios externos sin una evaluación previa.
 
@@ -205,16 +226,20 @@ La matriz detallada está en [docs/MATRIZ_PERMISOS.md](docs/MATRIZ_PERMISOS.md).
 pytest
 ```
 
-La suite cubre, entre otros:
+La suite completa tiene **67 pruebas** y cubre, entre otros:
 
 - Normalización y validación de RUT chileno.
 - Creación de residentes con RUT válido y rechazo de duplicados.
-- Permisos por rol en vistas administrativas, clínicas, de usuarios y auditoría.
+- Permisos por rol en vistas administrativas, clínicas, de usuarios, cuidados y auditoría.
 - Búsqueda, filtro de archivados y respuesta parcial HTMX.
 - Archivado/reactivación y su registro en auditoría.
 - Contacto principal único, creación y eliminación auditada.
 - Inicio y cierre de sesión, contraseñas y protección de la propia cuenta.
 - Registro de cambios con valores anterior/nuevo y ausencia de contraseñas.
+- Registro de cuidados por turno, filtros de la bandeja y validaciones de fecha, residente y plan.
+- Corrección con nueva versión, motivo obligatorio, conservación del original y bloqueo de doble corrección.
+- Revisión de Enfermería solo para registros marcados, con revisor y fecha.
+- Planes de cuidados, cierre con motivo, reactivación y bloqueo en fichas archivadas.
 - Datos demo idempotentes y protección contra mezclar datos reales.
 
 ## Estructura del proyecto
@@ -224,6 +249,7 @@ config/        Configuración y rutas raíz
 core/          Panel, mixins de permisos y formularios base
 accounts/      Usuario personalizado, roles, login y gestión de cuentas
 residents/     Residentes, contactos, RUT y comando seed_demo
+care/          Planes de cuidados, registros por turno, correcciones y revisión
 audit/         Auditoría, middleware, signals y consulta de eventos
 templates/     Plantillas Django
 static/        CSS, JS y librerías front-end incluidas
@@ -234,18 +260,19 @@ prototipo/     Prototipo estático navegable con datos ficticios
 ## Antes de un piloto con datos reales
 
 1. Validar los flujos con Dirección, Enfermería, Técnicos, Cuidadores y Administración.
-2. Revisar la matriz de permisos y las obligaciones legales de protección de datos.
-3. Definir responsables de cuentas, respaldos, soporte y respuesta ante incidentes.
-4. Configurar `DJANGO_DEBUG=False`, una `DJANGO_SECRET_KEY` robusta, HTTPS, HSTS y PostgreSQL administrado.
-5. Desactivar `DEMO_MODE` y eliminar todos los datos ficticios.
-6. Definir retención, respaldo y restauración; probar una restauración real.
-7. Capacitar al personal y acordar un procedimiento manual de continuidad.
-8. No cargar datos reales hasta completar estas verificaciones.
+2. Validar con el equipo las categorías, los turnos, los campos clínicos, el criterio de revisión y el flujo de corrección antes de un piloto.
+3. Revisar la matriz de permisos y las obligaciones legales de protección de datos.
+4. Definir responsables de cuentas, respaldos, soporte y respuesta ante incidentes.
+5. Configurar `DJANGO_DEBUG=False`, una `DJANGO_SECRET_KEY` robusta, HTTPS, HSTS y PostgreSQL administrado.
+6. Desactivar `DEMO_MODE` y eliminar todos los datos ficticios.
+7. Definir retención, respaldo y restauración; probar una restauración real.
+8. Capacitar al personal y acordar un procedimiento manual de continuidad.
+9. No cargar datos reales hasta completar estas verificaciones.
 
 ## Próximos incrementos
 
-1. Registro diario de cuidados y plan de cuidados acordado con el equipo.
-2. Incidentes, acciones tomadas y reportes básicos.
-3. Exportaciones autorizadas, respaldos documentados y preparación del piloto.
+1. Incidentes, acciones tomadas y reportes básicos.
+2. Exportaciones autorizadas, respaldos documentados y preparación del piloto.
+3. Validación de los formularios de cuidados con el equipo y ajustes antes del piloto.
 
 Este software es una base técnica. No reemplaza el criterio clínico ni constituye por sí solo un sistema listo para producción.

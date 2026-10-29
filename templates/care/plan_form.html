@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+  <nav aria-label="Ruta de navegación" class="mb-3">
+    <ol class="breadcrumb small mb-0">
+      <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Panel</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'residents:list' %}">Residentes</a></li>
+      <li class="breadcrumb-item"><a href="{{ resident.get_absolute_url }}">{{ resident.full_name }}</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
+    </ol>
+  </nav>
+
+  <div class="page-head">
+    <div>
+      <p class="eyebrow mb-1">Plan de cuidados</p>
+      <h1>{{ title }}</h1>
+      <p class="lead-sm">{{ subtitle }}</p>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-lg-8">
+      <section class="panel-card">
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger" role="alert">
+              <i class="bi bi-exclamation-octagon me-1" aria-hidden="true"></i>
+              {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
+            </div>
+          {% endif %}
+
+          <div class="row g-3">
+            {% for field in form %}
+              <div class="{% if 'textarea' in field.field.widget.template_name %}col-12{% else %}col-md-6{% endif %}">
+                {% include "partials/field.html" with field=field %}
+              </div>
+            {% endfor %}
+          </div>
+
+          <div class="form-actions">
+            <a href="{{ resident.get_absolute_url }}#cuidados" class="btn btn-quiet">Cancelar</a>
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-check-lg me-1" aria-hidden="true"></i> {{ submit_label }}
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+
+    <div class="col-lg-4">
+      <section class="panel-card mb-3">
+        <div class="panel-card-header">
+          <h2>{{ resident.full_name }}</h2>
+        </div>
+        <div class="data-grid">
+          <div class="data-item"><span class="data-label">Habitación</span><span class="data-value">{{ resident.room|default:"—" }}</span></div>
+          <div class="data-item"><span class="data-label">Edad</span><span class="data-value">{{ resident.age }} años</span></div>
+        </div>
+        {% if resident.has_allergies %}
+          <div class="allergy-banner mt-3">
+            <i class="bi bi-exclamation-octagon-fill" aria-hidden="true"></i>
+            <div><strong>{{ resident.allergies }}</strong><div class="small">Verificar antes de administrar medicamentos.</div></div>
+          </div>
+        {% endif %}
+      </section>
+
+      <section class="panel-card mb-3">
+        <div class="panel-card-header"><h2>Antes de guardar</h2></div>
+        <ul class="text-muted-sm mb-0 ps-3">
+          <li>El plan debe acordarse con el equipo; no lo inventes a partir de una sugerencia automática.</li>
+          <li>El objetivo tiene que ser observable y útil para el turno.</li>
+          <li>Las acciones deben indicar qué se hace, quién y con qué frecuencia.</li>
+          <li>Define una fecha de revisión para evitar planes que queden sin evaluación.</li>
+        </ul>
+      </section>
+
+      <section class="panel-card">
+        <div class="panel-card-header"><h2>Alcance</h2></div>
+        <div class="warning-callout mb-0">
+          <i class="bi bi-info-circle me-1" aria-hidden="true"></i>
+          Este sistema registra el plan acordado. No diagnostica, no recomienda tratamientos y no genera órdenes clínicas.
+        </div>
+      </section>
+    </div>
+  </div>
+{% endblock %}

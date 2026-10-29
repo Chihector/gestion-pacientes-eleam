@@ -117,6 +117,22 @@ class User(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
     def can_view_residents(self) -> bool:
         return True
 
+    @property
+    def can_manage_care_plans(self) -> bool:
+        return self.is_superuser or self.role == Role.ENFERMERIA
+
+    @property
+    def can_record_care(self) -> bool:
+        return self.is_superuser or self.role in {
+            Role.ENFERMERIA,
+            Role.TECNICO,
+            Role.CUIDADOR,
+        }
+
+    @property
+    def can_review_care(self) -> bool:
+        return self.is_superuser or self.role == Role.ENFERMERIA
+
 
 def active_admin_count(exclude_pk: int | None = None) -> int:
     queryset = User.objects.filter(is_active=True).filter(

@@ -9,6 +9,7 @@ from django.views.generic import CreateView, DeleteView, DetailView, ListView, U
 
 from accounts.models import Role
 from audit.models import AuditLog
+from care.models import CarePlan, DailyCareRecord
 from core.mixins import RoleRequiredMixin
 
 from .forms import ContactForm, ResidentAdminForm, ResidentClinicalForm
@@ -93,6 +94,30 @@ class ResidentDetailView(LoginRequiredMixin, DetailView):
         context["can_archive"] = self.request.user.can_archive_residents
         context["is_archived"] = not resident.is_active
         context["can_view_audit"] = self.request.user.can_view_audit
+
+        care_plans = resident.care_plans.select_related("responsible").order_by(
+            "status", "-start_date", "-pk"
+        )
+        context["care_plans"] = care_plans
+        context["active_care_plans"] = [
+            plan for plan in care_plans if plan.status == CarePlan.Status.ACTIVO
+        ]
+        context["closed_care_plans"] = [
+            plan for plan in care_plans if plan.status == CarePlan.Status.CERRADO
+        ]
+        context["recent_care_records"] = resident.daily_records.select_related(
+            "created_by"
+        ).filter(status=DailyCareRecord.Status.VIGENTE)[:8]
+        context["care_record_count"] = resident.daily_records.filter(
+            status=DailyCareRecord.Status.VIGENTE
+        ).count()
+        context["care_pending_review"] = resident.daily_records.filter(
+            status=DailyCareRecord.Status.VIGENTE,
+            requires_nursing_review=True,
+            reviewed_at__isnull=True,
+        ).count()
+        context["can_manage_care"] = self.request.user.can_manage_care_plans
+        context["can_record_care"] = self.request.user.can_record_care
 
         if self.request.user.can_view_audit:
             contact_ids = [str(pk) for pk in contacts.values_list("pk", flat=True)]

@@ -43,6 +43,11 @@
               <i class="bi bi-people" aria-hidden="true"></i> Residentes
             </a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link {% if 'care:' in request.resolver_match.view_name %}active{% endif %}" href="{% url 'care:record_list' %}" {% if 'care:' in request.resolver_match.view_name %}aria-current="page"{% endif %}>
+              <i class="bi bi-clipboard-pulse" aria-hidden="true"></i> Cuidados
+            </a>
+          </li>
           {% if user.can_view_audit %}
             <li class="nav-item">
               <a class="nav-link {% if 'audit:' in request.resolver_match.view_name %}active{% endif %}" href="{% url 'audit:list' %}" {% if 'audit:' in request.resolver_match.view_name %}aria-current="page"{% endif %}>

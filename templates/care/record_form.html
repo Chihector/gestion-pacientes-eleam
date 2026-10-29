@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+  <nav aria-label="Ruta de navegación" class="mb-3">
+    <ol class="breadcrumb small mb-0">
+      <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Panel</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'care:record_list' %}">Cuidados</a></li>
+      {% if is_correction %}
+        <li class="breadcrumb-item"><a href="{{ original.get_absolute_url }}">Registro del {{ original.recorded_at|date:"d/m/Y H:i" }}</a></li>
+      {% endif %}
+      <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
+    </ol>
+  </nav>
+
+  <div class="page-head">
+    <div>
+      <p class="eyebrow mb-1">{% if is_correction %}Corrección{% else %}Registro por turno{% endif %}</p>
+      <h1>{{ title }}</h1>
+      <p class="lead-sm">{{ subtitle }}</p>
+    </div>
+  </div>
+
+  {% if is_correction %}
+    <section class="panel-card mb-3" aria-labelledby="titulo-original">
+      <div class="panel-card-header">
+        <div>
+          <h2 id="titulo-original">Registro original que se corrige</h2>
+          <p class="panel-card-sub">{{ original.resident.full_name }} · {{ original.recorded_at|date:"d/m/Y H:i" }} · {{ original.get_category_display }}</p>
+        </div>
+        <span class="badge-soft warning"><i class="bi bi-pencil-square" aria-hidden="true"></i> Se conservará</span>
+      </div>
+      <div class="row g-3">
+        <div class="col-md-8">
+          <div class="section-label">Descripción original</div>
+          <p class="mb-0">{{ original.description|linebreaksbr }}</p>
+          {% if original.observations %}
+            <div class="section-label mt-3">Observaciones originales</div>
+            <p class="text-muted-sm mb-0">{{ original.observations|linebreaksbr }}</p>
+          {% endif %}
+        </div>
+        <div class="col-md-4">
+          <div class="note-card">
+            <i class="bi bi-info-circle me-1" aria-hidden="true"></i>
+            El registro original <strong>no se borra</strong>. Al guardar se crea una versión nueva y la anterior queda marcada como corregida.
+          </div>
+        </div>
+      </div>
+    </section>
+  {% endif %}
+
+  <div class="row g-3">
+    <div class="col-lg-8">
+      <section class="panel-card">
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger" role="alert">
+              <i class="bi bi-exclamation-octagon me-1" aria-hidden="true"></i>
+              {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
+            </div>
+          {% endif %}
+
+          <div class="row g-3">
+            {% for field in form %}
+              <div class="{% if field.field.widget.input_type == 'checkbox' %}col-12{% elif 'textarea' in field.field.widget.template_name %}col-12{% else %}col-md-6{% endif %}">
+                {% include "partials/field.html" with field=field %}
+              </div>
+            {% endfor %}
+          </div>
+
+          <div class="form-actions">
+            {% if is_correction %}
+              <a href="{{ original.get_absolute_url }}" class="btn btn-quiet">Cancelar</a>
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check-lg me-1" aria-hidden="true"></i> {{ submit_label }}
+              </button>
+            {% else %}
+              <a href="{% url 'care:record_list' %}" class="btn btn-quiet">Cancelar</a>
+              <button type="submit" class="btn btn-outline-primary" name="save_and_new" value="1">
+                <i class="bi bi-plus-lg me-1" aria-hidden="true"></i> Guardar y registrar otro
+              </button>
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check-lg me-1" aria-hidden="true"></i> {{ submit_label }}
+              </button>
+            {% endif %}
+          </div>
+        </form>
+      </section>
+    </div>
+
+    <div class="col-lg-4">
+      <section class="panel-card mb-3">
+        <div class="panel-card-header"><h2>Qué registrar</h2></div>
+        <ul class="text-muted-sm mb-0 ps-3">
+          <li>Hechos concretos: qué se hizo, cuánto, a qué hora y cómo respondió la persona.</li>
+          <li>Lo necesario para que el próximo turno continúe el cuidado.</li>
+          <li>Si algo requiere revisión, marca la casilla y explica por qué en observaciones.</li>
+        </ul>
+      </section>
+
+      <section class="panel-card mb-3">
+        <div class="panel-card-header"><h2>Qué no registrar</h2></div>
+        <div class="danger-callout mb-0">
+          <i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i>
+          Diagnósticos, indicaciones de tratamiento, opiniones sobre la persona o datos de terceros que no correspondan al cuidado.
+        </div>
+        <p class="text-muted-sm mt-3 mb-0">
+          El sistema no decide tratamientos ni prioriza clínicamente. Si hay una duda de salud, avisa a Enfermería y registra el hecho.
+        </p>
+      </section>
+
+      <section class="panel-card">
+        <div class="panel-card-header"><h2>Trazabilidad</h2></div>
+        <p class="text-muted-sm mb-0">
+          El registro queda asociado a tu nombre. Las correcciones crean una versión nueva y nunca eliminan la anterior.
+        </p>
+      </section>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+{% block title %}Registro de cuidado{% endblock %}
+
+{% block content %}
+  <nav aria-label="Ruta de navegación" class="mb-3">
+    <ol class="breadcrumb small mb-0">
+      <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Panel</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'care:record_list' %}">Cuidados</a></li>
+      <li class="breadcrumb-item"><a href="{{ record.resident.get_absolute_url }}">{{ record.resident.full_name }}</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Registro del {{ record.recorded_at|date:"d/m/Y H:i" }}</li>
+    </ol>
+  </nav>
+
+  {% if record.status == "CORREGIDO" %}
+    <div class="warning-callout mb-3" role="alert">
+      <i class="bi bi-pencil-square me-1" aria-hidden="true"></i>
+      <strong>Este registro fue corregido.</strong> Se conserva como respaldo y no debe usarse como versión vigente.
+      {% if correction %}
+        <a class="fw-semibold" href="{{ correction.get_absolute_url }}">Ver la versión vigente</a>.
+      {% endif %}
+    </div>
+  {% endif %}
+
+  <section class="panel-card mb-3">
+    <div class="detail-hero">
+      <div class="detail-person">
+        <span class="avatar avatar-lg" aria-hidden="true">{{ record.resident.initials }}</span>
+        <div>
+          <p class="eyebrow mb-1">
+            Registro de cuidado
+            {% if record.resident.is_demo %}<span class="demo-chip ms-1">DEMO</span>{% endif %}
+          </p>
+          <h1>{{ record.get_category_display }} · {{ record.resident.full_name }}</h1>
+          <p class="detail-meta mb-0">
+            {{ record.recorded_at|date:"d/m/Y H:i" }} <span class="divider">·</span> Turno {{ record.get_shift_display }}
+            <span class="divider">·</span> Hab. {{ record.resident.room|default:"—" }}
+            <span class="divider">·</span>
+            {% if record.status == "CORREGIDO" %}
+              <span class="badge-soft muted"><i class="bi bi-pencil" aria-hidden="true"></i> Corregido</span>
+            {% elif record.review_pending %}
+              <span class="badge-soft warning"><i class="bi bi-hourglass-split" aria-hidden="true"></i> Requiere revisión</span>
+            {% elif record.is_reviewed %}
+              <span class="badge-soft success"><i class="bi bi-check2-circle" aria-hidden="true"></i> Revisado</span>
+            {% else %}
+              <span class="badge-soft info">Vigente</span>
+            {% endif %}
+          </p>
+        </div>
+      </div>
+      <div class="detail-actions">
+        {% if can_correct %}
+          <a class="btn btn-outline-primary" href="{% url 'care:record_correct' record.pk %}">
+            <i class="bi bi-pencil-square me-1" aria-hidden="true"></i> Corregir registro
+          </a>
+        {% endif %}
+        <a class="btn btn-quiet" href="{% url 'care:record_list' %}?residente={{ record.resident_id }}&todas=1">
+          <i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Historial del residente
+        </a>
+      </div>
+    </div>
+
+    {% if record.supersedes %}
+      <div class="note-card mt-3">
+        <i class="bi bi-arrow-return-right me-1" aria-hidden="true"></i>
+        Esta versión corrige el registro del
+        <a href="{{ record.supersedes.get_absolute_url }}">{{ record.supersedes.recorded_at|date:"d/m/Y H:i" }}</a>.
+        Motivo: <strong>{{ record.correction_reason }}</strong>
+      </div>
+    {% endif %}
+  </section>
+
+  <div class="row g-3">
+    <div class="col-lg-8">
+      <section class="panel-card mb-3" aria-labelledby="titulo-descripcion">
+        <div class="panel-card-header">
+          <div>
+            <h2 id="titulo-descripcion">Qué se registró</h2>
+            <p class="panel-card-sub">Hechos observados durante el turno.</p>
+          </div>
+          <span class="badge-soft primary">{{ record.get_category_display }}</span>
+        </div>
+        <p class="mb-0">{{ record.description|linebreaksbr }}</p>
+
+        {% if record.observations %}
+          <hr>
+          <div class="section-label">Observaciones para el equipo</div>
+          <p class="mb-0">{{ record.observations|linebreaksbr }}</p>
+        {% endif %}
+
+        {% if record.care_plan %}
+          <hr>
+          <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div>
+              <div class="section-label mb-1">Plan de cuidados relacionado</div>
+              <p class="mb-0 fw-semibold">{{ record.care_plan.title }}</p>
+              <p class="text-muted-sm mb-0">{{ record.care_plan.get_status_display }} {% if record.care_plan.review_date %}· revisión {{ record.care_plan.review_date|date:"d/m/Y" }}{% endif %}</p>
+            </div>
+            <span class="badge-soft {% if record.care_plan.status == 'ACTIVO' %}success{% else %}muted{% endif %}">{{ record.care_plan.get_status_display }}</span>
+          </div>
+        {% endif %}
+      </section>
+
+      {% if original or correction %}
+        <section class="panel-card" aria-labelledby="titulo-historial">
+          <div class="panel-card-header">
+            <div>
+              <h2 id="titulo-historial">Historial de este registro</h2>
+              <p class="panel-card-sub">Las correcciones no reemplazan silenciosamente el dato original.</p>
+            </div>
+          </div>
+          <ul class="timeline">
+            {% if original %}
+              <li class="timeline-item">
+                <span class="timeline-dot muted"></span>
+                <p class="timeline-title">Versión anterior · {{ original.recorded_at|date:"d/m/Y H:i" }}</p>
+                <p class="timeline-meta">{{ original.created_by.get_full_name|default:"—" }} · {{ original.get_category_display }}</p>
+                <p class="timeline-text mb-1">{{ original.description|truncatechars:180 }}</p>
+                <a class="small fw-semibold" href="{{ original.get_absolute_url }}">Ver registro anterior</a>
+              </li>
+            {% endif %}
+            <li class="timeline-item">
+              <span class="timeline-dot"></span>
+              <p class="timeline-title">Esta versión · {{ record.recorded_at|date:"d/m/Y H:i" }}</p>
+              <p class="timeline-meta">{{ record.created_by.get_full_name|default:"—" }} · {{ record.get_category_display }}</p>
+              <p class="timeline-text mb-1">{{ record.description|truncatechars:180 }}</p>
+              {% if record.correction_reason %}<p class="text-muted-sm mb-0">Motivo: {{ record.correction_reason }}</p>{% endif %}
+            </li>
+            {% if correction %}
+              <li class="timeline-item">
+                <span class="timeline-dot accent"></span>
+                <p class="timeline-title">Corrección posterior · {{ correction.recorded_at|date:"d/m/Y H:i" }}</p>
+                <p class="timeline-meta">{{ correction.created_by.get_full_name|default:"—" }} · {{ correction.get_category_display }}</p>
+                <p class="timeline-text mb-1">{{ correction.description|truncatechars:180 }}</p>
+                <a class="small fw-semibold" href="{{ correction.get_absolute_url }}">Ver versión vigente</a>
+              </li>
+            {% endif %}
+          </ul>
+        </section>
+      {% endif %}
+    </div>
+
+    <div class="col-lg-4">
+      <section class="panel-card mb-3" id="revision" aria-labelledby="titulo-revision">
+        <div class="panel-card-header">
+          <div>
+            <h2 id="titulo-revision">Revisión de Enfermería</h2>
+            <p class="panel-card-sub">Solo Enfermería puede validar el registro.</p>
+          </div>
+          {% if record.is_reviewed %}<span class="badge-soft success">Revisado</span>{% endif %}
+        </div>
+
+        {% if record.is_reviewed %}
+          <div class="success-callout mb-0">
+            <i class="bi bi-check2-circle me-1" aria-hidden="true"></i>
+            Revisado por <strong>{{ record.reviewed_by.get_full_name|default:record.reviewed_by.email }}</strong>
+            el {{ record.reviewed_at|date:"d/m/Y H:i" }}.
+          </div>
+          {% if record.review_notes %}
+            <div class="section-label mt-3">Observaciones de la revisión</div>
+            <p class="text-muted-sm mb-0">{{ record.review_notes|linebreaksbr }}</p>
+          {% endif %}
+        {% elif record.status == "CORREGIDO" %}
+          <div class="warning-callout mb-0">
+            <i class="bi bi-pencil-square me-1" aria-hidden="true"></i>
+            Este registro fue reemplazado. La revisión debe hacerse sobre la versión vigente.
+          </div>
+        {% elif record.requires_nursing_review and can_review %}
+          <div class="warning-callout">
+            <i class="bi bi-hourglass-split me-1" aria-hidden="true"></i>
+            El equipo pidió revisar este registro.
+          </div>
+          <form method="post" action="{% url 'care:record_review' record.pk %}">
+            {% csrf_token %}
+            <label class="form-label" for="review-notes">Observaciones de la revisión (opcional)</label>
+            <textarea class="form-control" id="review-notes" name="review_notes" rows="3" maxlength="1000" placeholder="Ej.: Se verificó con el turno; la información es correcta."></textarea>
+            <button type="submit" class="btn btn-primary w-100 mt-2">
+              <i class="bi bi-check2-square me-1" aria-hidden="true"></i> Marcar como revisado
+            </button>
+          </form>
+        {% elif record.requires_nursing_review %}
+          <div class="warning-callout mb-0">
+            <i class="bi bi-hourglass-split me-1" aria-hidden="true"></i>
+            Pendiente de revisión por Enfermería.
+          </div>
+        {% else %}
+          <p class="text-muted-sm mb-0">Este registro no requiere revisión adicional.</p>
+        {% endif %}
+      </section>
+
+      <section class="panel-card" aria-labelledby="titulo-metadatos">
+        <div class="panel-card-header"><h2 id="titulo-metadatos">Trazabilidad</h2></div>
+        <div class="data-grid">
+          <div class="data-item"><span class="data-label">Registrado por</span><span class="data-value">{{ record.created_by.get_full_name|default:"—" }}</span></div>
+          <div class="data-item"><span class="data-label">Ingresado el</span><span class="data-value">{{ record.created_at|date:"d/m/Y H:i" }}</span></div>
+          <div class="data-item"><span class="data-label">Última actualización</span><span class="data-value">{{ record.updated_at|date:"d/m/Y H:i" }}</span></div>
+          <div class="data-item"><span class="data-label">Turno</span><span class="data-value">{{ record.get_shift_display }}</span></div>
+          <div class="data-item"><span class="data-label">Estado</span><span class="data-value">{{ record.get_status_display }}</span></div>
+          <div class="data-item"><span class="data-label">Identificador</span><span class="data-value mono">#{{ record.pk }}</span></div>
+        </div>
+        <div class="note-card mt-3">
+          <i class="bi bi-shield-lock me-1" aria-hidden="true"></i>
+          Cada cambio queda en la auditoría con usuario, fecha y valores anterior/nuevo.
+        </div>
+      </section>
+    </div>
+  </div>
+{% endblock %}

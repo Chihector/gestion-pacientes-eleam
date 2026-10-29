@@ -8,13 +8,15 @@ Reglas de seguridad:
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, timedelta
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
+from django.utils import timezone
 
 from accounts.models import Role, User
+from care.models import CarePlan, DailyCareRecord, shift_for_time
 from residents.models import Contact, Resident
 from residents.rut import calculate_dv
 
@@ -291,6 +293,115 @@ DEMO_RESIDENTS = [
     },
 ]
 
+# Planes de cuidado ficticios. Se identifican por residente y título para
+# mantener el comando idempotente.
+DEMO_CARE_PLANS = [
+    {
+        "body": "11222333",
+        "title": "Riesgo de caídas",
+        "need": "Se levanta de noche sin apoyo y ha tenido tropiezos al caminar.",
+        "objective": "Mantener desplazamientos seguros durante el día y la noche.",
+        "actions": (
+            "Acompañar al baño durante la noche; dejar el timbre al alcance; "
+            "registrar cada salida de la cama."
+        ),
+        "review_in_days": 7,
+    },
+    {
+        "body": "13456789",
+        "title": "Apoyo en alimentación e hidratación",
+        "need": "En algunos turnos deja parte de la ración y olvida beber agua.",
+        "objective": "Mantener una ingesta suficiente y registrar lo observado.",
+        "actions": (
+            "Ofrecer agua entre comidas; registrar la cantidad aceptada; avisar "
+            "a Enfermería si rechaza dos comidas seguidas."
+        ),
+        "review_in_days": 14,
+    },
+    {
+        "body": "16789012",
+        "title": "Movilidad y prevención de rigidez",
+        "need": "Presenta artrosis severa y requiere apoyo para vestirse y desplazarse.",
+        "objective": "Mantener movilidad según tolerancia y detectar molestias.",
+        "actions": (
+            "Acompañar en movilización suave; alternar descanso; registrar dolor "
+            "o rechazo a moverse y avisar a Enfermería."
+        ),
+        "review_in_days": 10,
+    },
+]
+
+# Registros ficticios de las últimas horas. Se cargan solo si no existen
+# registros demo, para no duplicarlos al repetir el comando.
+DEMO_CARE_RECORDS = [
+    {
+        "body": "11222333",
+        "hours_ago": 2,
+        "category": DailyCareRecord.Category.ALIMENTACION,
+        "description": (
+            "Aceptó el 100% de la ración servida. Permaneció sentada durante "
+            "la comida y no presentó tos."
+        ),
+        "observations": "Se le recuerda beber agua entre comidas.",
+        "requires_nursing_review": True,
+        "author": "tecnico@example.test",
+    },
+    {
+        "body": "11222333",
+        "hours_ago": 6,
+        "category": DailyCareRecord.Category.MOVILIDAD,
+        "description": (
+            "Caminó acompañada por el pasillo durante unos 10 minutos, con "
+            "apoyo de andador. Sin tropiezos."
+        ),
+        "observations": "Se detuvo una vez a descansar. Continúa estable.",
+        "author": "cuidador@example.test",
+        "reviewed": True,
+        "review_notes": "Se revisa con el turno; sin observaciones.",
+    },
+    {
+        "body": "13456789",
+        "hours_ago": 3,
+        "category": DailyCareRecord.Category.HIDRATACION,
+        "description": "Bebió 200 ml de agua durante la mañana. Aceptó sin dificultad.",
+        "observations": "",
+        "author": "cuidador@example.test",
+    },
+    {
+        "body": "16789012",
+        "hours_ago": 8,
+        "category": DailyCareRecord.Category.HIGIENE,
+        "description": (
+            "Se realizó aseo parcial con apoyo. Colaboró durante el procedimiento."
+        ),
+        "observations": "Prefiere agua tibia.",
+        "author": "tecnico@example.test",
+    },
+    {
+        "body": "11222333",
+        "hours_ago": 26,
+        "category": DailyCareRecord.Category.HIDRATACION,
+        "description": "Registró ingesta de 50 ml de agua en el turno.",
+        "observations": "",
+        "author": "tecnico@example.test",
+        "correction_description": "Registró ingesta de 150 ml de agua en el turno.",
+        "correction_reason": (
+            "Se corrige la cantidad: la botella tenía 150 ml y no 50 ml."
+        ),
+    },
+    {
+        "body": "13456789",
+        "hours_ago": 27,
+        "category": DailyCareRecord.Category.SUENO,
+        "description": (
+            "Durmió sin interrupciones durante la noche. Se levantó una vez al "
+            "baño con apoyo."
+        ),
+        "observations": "",
+        "author": "cuidador@example.test",
+    },
+]
+
 
 class Command(BaseCommand):
     help = "Crea usuarios y residentes ficticios para demostrar el sistema."
@@ -319,6 +430,7 @@ class Command(BaseCommand):
                 "No uses --force en un entorno con información real."
             )
 
+        users_by_email = {}
         users_created = 0
         users_updated = 0
         for data in DEMO_USERS:
@@ -333,11 +445,13 @@ class Command(BaseCommand):
             )
             user.set_password(DEMO_PASSWORD)
             user.save(update_fields=["password", "updated_at"])
+            users_by_email[data["email"]] = user
             if created:
                 users_created += 1
             else:
                 users_updated += 1
 
+        residents_by_body = {}
         residents_created = 0
         residents_updated = 0
         contacts_created = 0
@@ -357,6 +471,7 @@ class Command(BaseCommand):
                 rut=rut,
                 defaults=defaults,
             )
+            residents_by_body[body] = resident
             if created:
                 residents_created += 1
             else:
@@ -377,6 +492,94 @@ class Command(BaseCommand):
                 if contact_created:
                     contacts_created += 1
 
+        nurse = users_by_email["enfermeria@example.test"]
+        today = timezone.localdate()
+        plans_created = 0
+        plans_updated = 0
+        for data in DEMO_CARE_PLANS:
+            resident = residents_by_body[data["body"]]
+            plan, created = CarePlan.objects.update_or_create(
+                resident=resident,
+                title=data["title"],
+                defaults={
+                    "need": data["need"],
+                    "objective": data["objective"],
+                    "actions": data["actions"],
+                    "responsible": nurse,
+                    "start_date": today - timedelta(days=30),
+                    "review_date": today + timedelta(days=data["review_in_days"]),
+                    "status": CarePlan.Status.ACTIVO,
+                },
+            )
+            if created:
+                plan.created_by = nurse
+                plan.updated_by = nurse
+                plan.save(
+                    update_fields=["created_by", "updated_by", "updated_at"]
+                )
+                plans_created += 1
+            else:
+                plans_updated += 1
+
+        records_created = 0
+        if not DailyCareRecord.objects.filter(resident__is_demo=True).exists():
+            now = timezone.now()
+            for data in DEMO_CARE_RECORDS:
+                resident = residents_by_body[data["body"]]
+                author = users_by_email[data["author"]]
+                recorded_at = now - timedelta(hours=data["hours_ago"])
+                corrected = bool(data.get("correction_description"))
+                record = DailyCareRecord.objects.create(
+                    resident=resident,
+                    recorded_at=recorded_at,
+                    shift=shift_for_time(recorded_at),
+                    category=data["category"],
+                    description=data["description"],
+                    observations=data.get("observations", ""),
+                    requires_nursing_review=data.get(
+                        "requires_nursing_review", False
+                    ),
+                    created_by=author,
+                    updated_by=author,
+                    status=(
+                        DailyCareRecord.Status.CORREGIDO
+                        if corrected
+                        else DailyCareRecord.Status.VIGENTE
+                    ),
+                )
+                records_created += 1
+
+                if data.get("reviewed"):
+                    record.reviewed_by = nurse
+                    record.reviewed_at = now - timedelta(minutes=20)
+                    record.review_notes = data.get("review_notes", "")
+                    record.save(
+                        update_fields=[
+                            "reviewed_by",
+                            "reviewed_at",
+                            "review_notes",
+                            "updated_by",
+                            "updated_at",
+                        ]
+                    )
+
+                if corrected:
+                    corrected_at = recorded_at + timedelta(minutes=30)
+                    DailyCareRecord.objects.create(
+                        resident=resident,
+                        recorded_at=corrected_at,
+                        shift=shift_for_time(corrected_at),
+                        category=data["category"],
+                        description=data["correction_description"],
+                        observations=data.get("observations", ""),
+                        requires_nursing_review=False,
+                        created_by=author,
+                        updated_by=author,
+                        supersedes=record,
+                        correction_reason=data["correction_reason"],
+                    )
+                    records_created += 1
+
         self.stdout.write(self.style.SUCCESS("Datos de demostración cargados."))
         self.stdout.write(
             f"Usuarios: {users_created} creados, {users_updated} actualizados. "
@@ -385,6 +588,10 @@ class Command(BaseCommand):
         self.stdout.write(
             f"Residentes: {residents_created} creados, {residents_updated} actualizados. "
             f"Contactos nuevos: {contacts_created}."
+        )
+        self.stdout.write(
+            f"Planes de cuidado: {plans_created} creados, {plans_updated} actualizados. "
+            f"Registros de cuidado nuevos: {records_created}."
         )
         self.stdout.write(
             "Cuentas: administracion@ / direccion@ / enfermeria@ / tecnico@ / "

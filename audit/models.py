@@ -48,6 +48,8 @@ class AuditLog(models.Model):
         PASSWORD_RESET = "PASSWORD_RESET", "Contraseña restablecida"
         DEACTIVATE = "DEACTIVATE", "Usuario desactivado"
         REACTIVATE = "REACTIVATE", "Usuario reactivado"
+        CORRECTION = "CORRECTION", "Corregido"
+        REVIEW = "REVIEW", "Revisado"
 
     actor = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -96,6 +98,8 @@ class AuditLog(models.Model):
             self.Action.PASSWORD_RESET: "muted",
             self.Action.DEACTIVATE: "danger",
             self.Action.REACTIVATE: "success",
+            self.Action.CORRECTION: "warning",
+            self.Action.REVIEW: "info",
         }.get(self.action, "muted")
 
     @property
