@@ -70,8 +70,9 @@ Los archivos de Bootstrap, Bootstrap Icons y HTMX están incluidos en `static/ve
 Si el entorno ya está instalado, haz doble clic en **`iniciar.bat`**. El lanzador:
 
 1. Verifica que exista el entorno virtual.
-2. Crea y carga los datos ficticios si falta `db.sqlite3`.
-3. Abre el navegador en `http://127.0.0.1:8000/cuenta/login/`.
+2. Aplica las migraciones pendientes en cada inicio.
+3. Crea la base y carga los datos ficticios si falta `db.sqlite3`.
+4. Abre el navegador en `http://127.0.0.1:8000/cuenta/login/`.
 
 Para detenerlo, presiona `Ctrl+C` o cierra la ventana negra. Si Windows muestra un aviso de SmartScreen, elige "Más información" → "Ejecutar de todas formas"; el archivo solo ejecuta el servidor local.
 
