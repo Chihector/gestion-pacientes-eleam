@@ -8,13 +8,18 @@
       <h1>Residentes</h1>
       <p class="lead-sm">Busca por nombre, RUT o habitación. Las fichas archivadas no aparecen por defecto.</p>
     </div>
-    {% if can_create %}
-      <div>
+    <div class="d-flex gap-2 flex-wrap">
+      {% if can_export %}
+        <a class="btn btn-outline-primary" href="{% url 'residents:export' %}?q={{ q }}&estado={{ estado }}&archivados={% if incluir_archivados %}1{% endif %}">
+          <i class="bi bi-download me-1" aria-hidden="true"></i> Exportar nómina
+        </a>
+      {% endif %}
+      {% if can_create %}
         <a class="btn btn-primary" href="{% url 'residents:create' %}">
           <i class="bi bi-plus-lg me-1" aria-hidden="true"></i> Nuevo residente
         </a>
-      </div>
-    {% endif %}
+      {% endif %}
+    </div>
   </div>
 
   <section class="panel-card mb-3" aria-labelledby="titulo-busqueda">

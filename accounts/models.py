@@ -133,6 +133,22 @@ class User(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
     def can_review_care(self) -> bool:
         return self.is_superuser or self.role == Role.ENFERMERIA
 
+    @property
+    def can_export_residents(self) -> bool:
+        return self.is_superuser or self.role in {
+            Role.DIRECCION,
+            Role.ADMINISTRACION,
+            Role.ENFERMERIA,
+        }
+
+    @property
+    def can_export_care(self) -> bool:
+        return self.is_superuser or self.role in {Role.DIRECCION, Role.ENFERMERIA}
+
+    @property
+    def can_export_incidents(self) -> bool:
+        return self.is_superuser or self.role in {Role.DIRECCION, Role.ENFERMERIA}
+
 
 def active_admin_count(exclude_pk: int | None = None) -> int:
     queryset = User.objects.filter(is_active=True).filter(

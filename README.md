@@ -1,6 +1,6 @@
 # ELEAM · Gestión de residentes
 
-Aplicación web para apoyar el registro y la consulta de información de residentes de un ELEAM chileno. Este repositorio contiene los **dos primeros incrementos funcionales**: inicio de sesión, usuarios y roles, auditoría, ficha de residente, contactos y registro diario de cuidados con plan, correcciones y revisión de Enfermería.
+Aplicación web para apoyar el registro y la consulta de información de residentes de un ELEAM chileno. Este repositorio contiene **tres incrementos funcionales**: inicio de sesión, usuarios y roles, auditoría, ficha de residente, cuidados con plan, correcciones y revisión de Enfermería, e incidentes con seguimiento e informes básicos.
 
 > **Privacidad:** usa solo datos ficticios en desarrollo, pruebas y demostraciones. No ingreses nombres, RUT, direcciones, teléfonos ni información de salud de personas reales. Antes de un piloto se deben validar los requisitos legales, de seguridad y de privacidad aplicables.
 
@@ -11,17 +11,20 @@ Aplicación web para apoyar el registro y la consulta de información de residen
 | 1. Entender el problema | Documentada, pendiente de validación con el equipo |
 | 2. Definir alcance y reglas | Documentada en `docs/` |
 | 3. Prototipo navegable | Disponible en `prototipo/` (datos ficticios) |
-| 4. MVP · incremento 1 | Implementado y probado técnicamente; pendiente de revisión con el equipo |
-| 5. MVP · incremento 2 | Registros por turno, plan de cuidados, correcciones y revisión: implementado y probado; pendiente de validación con el equipo |
-| 6. MVP · incremento 3 | Incidentes, informes y exportaciones: aún no implementado |
+| 4. Construir el MVP | Incrementos funcionales 1, 2 y 3 implementados; suite automatizada disponible |
+| 5. Preparar el piloto (etapa actual) | Pendiente completar validación institucional, revisión legal/seguridad y preparación operativa |
+| 6. Piloto controlado | Aún no iniciado |
+| 7. Operación y mejora | Posterior al piloto |
 
 Documentos de referencia:
 
 - [Hoja de ruta](HOJA_DE_RUTA.md)
 - [Tecnologías recomendadas](TECNOLOGIAS.md)
 - [Matriz de permisos](docs/MATRIZ_PERMISOS.md)
-- [Historias de usuario de los incrementos 1 y 2](docs/HISTORIAS_DE_USUARIO.md)
+- [Historias de usuario de los incrementos 1, 2 y 3](docs/HISTORIAS_DE_USUARIO.md)
 - [Modelo de datos](docs/MODELO_DE_DATOS.md)
+- [Instalación local en Windows](docs/INSTALACION_LOCAL.md)
+- [Plan para publicación web](docs/PUBLICACION_WEB.md)
 
 ## Qué incluye el incremento 1
 
@@ -31,6 +34,7 @@ Documentos de referencia:
 - Sesiones de 8 horas y expiración al cerrar el navegador.
 - Panel con alertas de alergias, residentes sin contacto principal y actividad reciente.
 - Búsqueda de residentes por nombre, RUT o habitación, con filtro de archivados y actualización parcial con HTMX.
+- Exportación CSV de la nómina de residentes, con filtros aplicados y auditoría; disponible para Dirección, Enfermería y Administración.
 - Ficha administrativa, información clínica relevante y contactos.
 - Edición separada: Administración y Enfermería mantienen datos administrativos; solo Enfermería modifica alergias, antecedentes y observaciones.
 - Archivado y reactivación de fichas sin eliminarlas.
@@ -49,9 +53,19 @@ Documentos de referencia:
 - Cierre de planes con motivo obligatorio y reactivación auditada; no se eliminan.
 - Pestaña “Cuidados” en la ficha del residente y panel “Cuidados de hoy” con registros y pendientes.
 - Permisos: Enfermería gestiona planes, revisa y corrige cualquier registro; Técnico/a y Cuidador/a registran y corrigen sus propios registros; Dirección y Administración solo consultan.
-- Datos ficticios adicionales y **67 pruebas automatizadas** en la suite completa.
+- Datos ficticios adicionales y 67 pruebas automatizadas de los incrementos 1 y 2.
 
-**Fuera de alcance por ahora:** incidentes, informes, exportaciones, portal de familias, facturación, inventario, integraciones y aplicación móvil nativa. El sistema no diagnostica, no recomienda tratamientos, no define prioridades clínicas y no genera planes automáticamente.
+## Qué incluye el incremento 3
+
+- Registro confidencial de incidentes con residente, fecha, tipo, lugar, gravedad percibida, hechos, acciones inmediatas y notificaciones.
+- Consulta de incidentes por Enfermería, Técnico/a, Cuidador/a y Dirección; Administración no accede al módulo ni a sus eventos detallados de auditoría.
+- Cierre con seguimiento obligatorio por Enfermería o Dirección; el reporte original se conserva y el cierre queda auditado.
+- Informes agregados por período, tipo, gravedad percibida y estado para Enfermería y Dirección. No exportan datos.
+- El panel muestra incidentes abiertos a roles autorizados.
+
+El flujo y los campos se basan en el prototipo y en los permisos propuestos; requieren validación con el ELEAM. El módulo no reemplaza el aviso inmediato, los protocolos institucionales ni la evaluación profesional.
+
+La exportación CSV disponible se limita a la nómina de residentes. Los informes de incidentes no exportan datos y otras exportaciones aún requieren definición y autorización institucional. También quedan fuera de alcance el portal de familias, facturación, inventario, integraciones y aplicación móvil nativa. El sistema no diagnostica, no recomienda tratamientos, no define prioridades clínicas y no genera planes automáticamente.
 
 ## Stack
 
@@ -67,14 +81,16 @@ Los archivos de Bootstrap, Bootstrap Icons y HTMX están incluidos en `static/ve
 
 ## Inicio rápido en Windows
 
-Si el entorno ya está instalado, haz doble clic en **`iniciar.bat`**. El lanzador:
+Para preparar una copia local en un PC nuevo, sigue [Instalación local](docs/INSTALACION_LOCAL.md). Ejecuta una vez **`instalar.bat`** y luego abre **`iniciar.bat`**. El lanzador:
 
-1. Verifica que exista el entorno virtual.
-2. Aplica las migraciones pendientes en cada inicio.
-3. Crea la base y carga los datos ficticios si falta `db.sqlite3`.
+1. Usa el entorno Python de `%USERPROFILE%\.venvs\eleam`, creado por el instalador.
+2. Aplica las migraciones pendientes.
+3. Si falta `db.sqlite3`, crea la base local y carga datos ficticios.
 4. Abre el navegador en `http://127.0.0.1:8000/cuenta/login/`.
 
 Para detenerlo, presiona `Ctrl+C` o cierra la ventana negra. Si Windows muestra un aviso de SmartScreen, elige "Más información" → "Ejecutar de todas formas"; el archivo solo ejecuta el servidor local.
+
+Esta modalidad mantiene datos separados por PC y solo escucha conexiones locales. Para compartir la aplicación entre varios PCs hay que preparar un despliegue central; consulta el [plan de publicación web](docs/PUBLICACION_WEB.md).
 
 ## Instalación local
 
@@ -85,9 +101,8 @@ Recomendación: crear el entorno virtual **fuera de OneDrive** para evitar sincr
 ```powershell
 cd "C:\ruta\al\proyecto\Gestion pacientes eleam"
 
-py -m venv C:\Users\<usuario>\.venvs\eleam
+py -3.11 -m venv C:\Users\<usuario>\.venvs\eleam
 C:\Users\<usuario>\.venvs\eleam\Scripts\Activate.ps1
-python -m pip install --upgrade pip
 python -m pip install -r requirements-dev.txt
 
 python manage.py migrate
@@ -224,10 +239,12 @@ La matriz detallada está en [docs/MATRIZ_PERMISOS.md](docs/MATRIZ_PERMISOS.md).
 ## Pruebas
 
 ```powershell
-pytest
+python -m pytest
+python -m pytest accounts/tests.py
+python -m pytest accounts/tests.py::test_login_uses_email
 ```
 
-La suite completa tiene **67 pruebas** y cubre, entre otros:
+La suite automatizada tiene actualmente **83 pruebas** y cubre, entre otros:
 
 - Normalización y validación de RUT chileno.
 - Creación de residentes con RUT válido y rechazo de duplicados.
@@ -270,10 +287,13 @@ prototipo/     Prototipo estático navegable con datos ficticios
 8. Capacitar al personal y acordar un procedimiento manual de continuidad.
 9. No cargar datos reales hasta completar estas verificaciones.
 
-## Próximos incrementos
+## Siguientes pasos: preparación del piloto
 
-1. Incidentes, acciones tomadas y reportes básicos.
-2. Exportaciones autorizadas, respaldos documentados y preparación del piloto.
-3. Validación de los formularios de cuidados con el equipo y ajustes antes del piloto.
+Los incrementos funcionales 1, 2 y 3 ya están implementados. El trabajo siguiente corresponde a la etapa 5 de `HOJA_DE_RUTA.md`, no a un nuevo incremento funcional:
+
+1. Probar `instalar.bat` en un PC Windows limpio con datos ficticios; verificar arranque, actualización y conservación de la base local.
+2. Elegir el modo de uso: una copia local independiente por PC o una instalación central para que varios equipos compartan datos. Para el segundo caso, seguir [Plan para publicar la aplicación web](docs/PUBLICACION_WEB.md).
+3. Validar con el ELEAM flujos y permisos; completar revisión legal y de seguridad, respaldos restaurables, capacitación y procedimiento de continuidad.
+4. Iniciar un piloto controlado solo después de cumplir los criterios de preparación de la hoja de ruta.
 
 Este software es una base técnica. No reemplaza el criterio clínico ni constituye por sí solo un sistema listo para producción.

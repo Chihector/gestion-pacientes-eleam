@@ -17,6 +17,11 @@
           <i class="bi bi-plus-lg me-1" aria-hidden="true"></i> Nuevo residente
         </a>
       {% endif %}
+      {% if user.role != "ADMINISTRACION" or user.is_superuser %}
+        <a class="btn btn-danger" href="{% url 'incidents:create' %}">
+          <i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i> Reportar incidente
+        </a>
+      {% endif %}
     </div>
   </div>
 
@@ -190,6 +195,19 @@
           </a>
         {% endif %}
       </section>
+
+      {% if user.role != "ADMINISTRACION" or user.is_superuser %}
+        <section class="panel-card mb-3" aria-labelledby="titulo-incidentes">
+          <div class="panel-card-header">
+            <div><h2 id="titulo-incidentes">Incidentes abiertos</h2><p class="panel-card-sub">Seguimiento pendiente, sin sustituir el protocolo institucional.</p></div>
+            <a class="btn btn-sm btn-quiet" href="{% url 'incidents:list' %}" aria-label="Ver incidentes"><i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>
+          </div>
+          <div class="stat-card mb-3"><span class="stat-icon warning"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i></span><div><div class="stat-value">{{ open_incident_count }}</div><div class="stat-label">Abiertos</div></div></div>
+          {% if user.role == "ENFERMERIA" or user.role == "TECNICO" or user.role == "CUIDADOR" or user.is_superuser %}
+            <a class="btn btn-danger w-100" href="{% url 'incidents:create' %}">Reportar incidente</a>
+          {% endif %}
+        </section>
+      {% endif %}
 
       <section class="panel-card mb-3" aria-labelledby="titulo-accesos">
         <div class="panel-card-header"><h2 id="titulo-accesos">Accesos rápidos</h2></div>

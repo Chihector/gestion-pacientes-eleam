@@ -8,6 +8,7 @@ from .views import (
     ResidentClinicalUpdateView,
     ResidentCreateView,
     ResidentDetailView,
+    ResidentExportView,
     ResidentListView,
     ResidentUpdateView,
 )
@@ -17,6 +18,7 @@ app_name = "residents"
 urlpatterns = [
     path("", ResidentListView.as_view(), name="list"),
     path("nuevo/", ResidentCreateView.as_view(), name="create"),
+    path("exportar/", ResidentExportView.as_view(), name="export"),
     path("<int:pk>/", ResidentDetailView.as_view(), name="detail"),
     path("<int:pk>/editar/", ResidentUpdateView.as_view(), name="update"),
     path(

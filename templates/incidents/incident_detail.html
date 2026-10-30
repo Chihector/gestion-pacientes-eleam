@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Incidente · {{ incident.get_incident_type_display }}{% endblock %}
+
+{% block content %}
+  <nav aria-label="Ruta de navegación" class="mb-3">
+    <ol class="breadcrumb small mb-0">
+      <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Panel</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'incidents:list' %}">Incidentes</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Detalle</li>
+    </ol>
+  </nav>
+
+  <div class="page-head">
+    <div>
+      <p class="eyebrow mb-1">Reporte confidencial · {{ incident.occurred_at|date:"d/m/Y H:i" }}</p>
+      <h1>{{ incident.get_incident_type_display }} · {{ incident.resident.full_name }}</h1>
+      <p class="lead-sm">Hab. {{ incident.resident.room|default:"—" }} · Reportó {{ incident.created_by.get_full_name|default:"—" }} · {{ incident.created_at|date:"d/m/Y H:i" }}</p>
+    </div>
+    <span class="badge-soft {% if incident.is_open %}warning{% else %}success{% endif %}">{{ incident.get_status_display }}</span>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-lg-8">
+      <section class="panel-card mb-3">
+        <div class="panel-card-header"><h2>Hechos y acciones</h2><span class="badge-soft {% if incident.severity == 'GRAVE' %}danger{% elif incident.severity == 'MODERADO' %}warning{% else %}info{% endif %}">Gravedad percibida: {{ incident.get_severity_display }}</span></div>
+        <div class="data-grid mb-3">
+          <div class="data-item"><span class="data-label">Lugar</span><span class="data-value">{{ incident.location|default:"—" }}</span></div>
+          <div class="data-item"><span class="data-label">Personas presentes</span><span class="data-value">{{ incident.witnesses|default:"—" }}</span></div>
+          <div class="data-item"><span class="data-label">Aviso a</span><span class="data-value">{{ incident.notified_to|default:"—" }}</span></div>
+        </div>
+        <div class="section-label">¿Qué ocurrió?</div><p>{{ incident.description|linebreaksbr }}</p>
+        <div class="section-label mt-3">Acciones inmediatas tomadas</div><p class="mb-0">{{ incident.actions_taken|linebreaksbr }}</p>
+        <hr>
+        <div class="d-flex flex-wrap gap-2">
+          {% if incident.notify_family %}<span class="badge-soft warning">Notificar familia/representante</span>{% endif %}
+          {% if incident.notify_direction %}<span class="badge-soft warning">Notificar Dirección</span>{% endif %}
+          {% if not incident.notify_family and not incident.notify_direction %}<span class="text-muted-sm">Sin notificaciones adicionales marcadas.</span>{% endif %}
+        </div>
+      </section>
+      {% if not incident.is_open %}
+        <section class="panel-card">
+          <div class="panel-card-header"><h2>Seguimiento y cierre</h2><span class="badge-soft success">{{ incident.closed_at|date:"d/m/Y H:i" }}</span></div>
+          <p>{{ incident.close_reason|linebreaksbr }}</p>
+          <p class="text-muted-sm mb-0">Cerró {{ incident.closed_by.get_full_name|default:"—" }}.</p>
+        </section>
+      {% elif can_close %}
+        <section class="panel-card">
+          <div class="panel-card-header"><h2>Cerrar incidente</h2></div>
+          <form method="post" action="{% url 'incidents:close' incident.pk %}" novalidate>
+            {% csrf_token %}
+            {% include "partials/field.html" with field=close_form.close_reason %}
+            <button class="btn btn-primary" type="submit">Guardar seguimiento y cerrar</button>
+          </form>
+        </section>
+      {% endif %}
+    </div>
+    <div class="col-lg-4">
+      <section class="panel-card">
+        <div class="danger-callout"><i class="bi bi-shield-lock me-1" aria-hidden="true"></i>Información sensible. No compartir por canales personales. Este reporte no reemplaza la comunicación inmediata ni el protocolo institucional.</div>
+      </section>
+    </div>
+  </div>
+{% endblock %}

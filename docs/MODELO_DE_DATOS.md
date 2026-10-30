@@ -1,4 +1,4 @@
-# Modelo de datos — Incrementos 1 y 2
+# Modelo de datos — Incrementos 1, 2 y 3
 
 ## Principios
 
@@ -20,7 +20,9 @@ erDiagram
     USER ||--o{ CARE_PLAN : "responsable / crea"
     RESIDENT ||--o{ CARE_PLAN : "tiene"
     USER ||--o{ DAILY_CARE_RECORD : "crea / corrige / revisa"
+    USER ||--o{ INCIDENT : "reporta / cierra"
     RESIDENT ||--o{ DAILY_CARE_RECORD : "tiene"
+    RESIDENT ||--o{ INCIDENT : "tiene"
     CARE_PLAN ||--o{ DAILY_CARE_RECORD : "orienta"
     DAILY_CARE_RECORD ||--o| DAILY_CARE_RECORD : "corrige"
     RESIDENT ||--o{ AUDITLOG : "origina (referencia lógica)"
@@ -111,6 +113,29 @@ erDiagram
         string status
         bigint supersedes_id FK
         text correction_reason
+        datetime created_at
+        datetime updated_at
+        bigint created_by_id FK
+        bigint updated_by_id FK
+    }
+
+    INCIDENT {
+        bigint id PK
+        bigint resident_id FK
+        datetime occurred_at
+        string incident_type
+        string location
+        string severity
+        text description
+        text actions_taken
+        string witnesses
+        string notified_to
+        boolean notify_family
+        boolean notify_direction
+        string status
+        text close_reason
+        bigint closed_by_id FK
+        datetime closed_at
         datetime created_at
         datetime updated_at
         bigint created_by_id FK
@@ -284,6 +309,27 @@ erDiagram
 6. La retención de la auditoría debe definirse con asesoría legal; no se purga automáticamente en el MVP.
 7. Las correcciones y revisiones de cuidados se registran sin borrar el evento anterior; el historial permite reconstruir qué cambió y quién lo hizo.
 
+### `incidents.Incident` — reporte de incidente (incremento 3)
+
+| Campo | Tipo | Obligatorio | Reglas |
+|---|---|:---:|---|
+| `resident` | FK | Sí | Solo se puede seleccionar una ficha activa al reportar; la relación protege la conservación del historial. |
+| `occurred_at` | fecha/hora | Sí | No futura (margen de cinco minutos) ni anterior al ingreso. |
+| `incident_type` | selección | Sí | Caída, lesión sin caída, error de medicación, desorientación, salida no autorizada, agresión u otro. |
+| `location` | texto (150) | No | Lugar del incidente. |
+| `severity` | selección | Sí | Leve, moderado o grave percibido; no es una clasificación clínica. |
+| `description` | texto | Sí | Hechos objetivos; mínimo 10 caracteres. |
+| `actions_taken` | texto | Sí | Acciones inmediatas; mínimo 10 caracteres. |
+| `witnesses` | texto (500) | No | Personas presentes; evitar datos innecesarios. |
+| `notified_to` | texto (150) | No | A quién se avisó. |
+| `notify_family`, `notify_direction` | booleano | Sí | Indicadores de notificación/seguimiento, no envían comunicaciones. |
+| `status` | selección | Sí | `ABIERTO` o `CERRADO`. |
+| `close_reason` | texto | No | Seguimiento requerido al cerrar; mínimo 10 caracteres. |
+| `closed_by`, `closed_at` | FK/fecha-hora | No | Se asignan al cerrar por Enfermería o Dirección. |
+| `created_by`, `updated_by`, fechas | FK/fecha-hora | Sí | Autoría y auditoría automática. |
+
+**Reglas:** solo Enfermería, Técnico/a y Cuidador/a reportan; Enfermería, Técnico/a, Cuidador/a y Dirección consultan; solo Enfermería y Dirección cierran y acceden a informes agregados. Administración no puede consultar incidentes ni sus eventos detallados de auditoría. Los reportes no se editan ni eliminan desde la aplicación. El formulario no sustituye avisos inmediatos ni protocolos institucionales. Campos y reglas quedan pendientes de validación con el ELEAM.
+
 ## Clasificación de datos
 
 | Categoría | Ejemplos | Protección mínima |
@@ -305,7 +351,7 @@ erDiagram
 - **Inmutabilidad:** un registro de cuidado no se actualiza ni se borra; la corrección crea otra fila y conserva la anterior.
 - **Revisión:** el estado pendiente se deriva de `requires_nursing_review=True`, `reviewed_at` vacío y `status=VIGENTE`.
 - **Planes:** un plan cerrado no se elimina; se conserva para el historial y puede reactivarse con auditoría.
-- **Exportación:** no incluida en estos incrementos. Si se agrega, debe tener permisos, registro de auditoría y límites de columnas.
+- **Exportación:** la nómina de residentes se puede descargar como CSV para Dirección, Enfermería y Administración; la descarga audita filtros y total. El archivo contiene datos personales y requiere controles de acceso y manejo definidos por el ELEAM. No se exportan cuidados ni incidentes. Las exportaciones adicionales no están implementadas.
 - **Respaldo:** la base de producción (PostgreSQL) se respalda cifrada; las restauraciones se prueban.
 
 ## Decisiones pendientes
@@ -318,5 +364,6 @@ erDiagram
 - [ ] ¿Quién puede corregir registros de otra persona además de Enfermería?
 - [ ] ¿Cuánto tiempo se conservan ficha, contactos, cuidados y auditoría después del egreso o fallecimiento?
 - [ ] ¿Se requiere registrar tutores o representantes legales con vigencia?
-- [ ] ¿Qué datos se pueden exportar y quién autoriza cada exportación?
+- [ ] ¿Se mantienen los campos y roles de la exportación CSV actual de residentes y qué reglas aplican a los archivos descargados?
+- [ ] ¿Se necesitan otras exportaciones y quién autoriza cada una?
 - [ ] ¿Se necesita historial de habitaciones o traslados?

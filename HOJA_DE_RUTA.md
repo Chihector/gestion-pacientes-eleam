@@ -69,19 +69,25 @@ Implementar en incrementos pequeños:
 
 1. Inicio de sesión, usuarios, roles y auditoría. **Implementado.**
 2. Ficha del residente y contactos. **Implementado.**
-3. Registros diarios, plan de cuidados, correcciones y revisión de Enfermería. **Implementado y probado técnicamente (67 pruebas); pendiente de validación con el equipo.**
-4. Incidentes, consulta e informes básicos. **Pendiente.**
-5. Pruebas automatizadas, respaldos y documentación operativa. **En curso: 67 pruebas y documentación de los incrementos 1 y 2.**
+3. Registros diarios, plan de cuidados, correcciones y revisión de Enfermería. **Implementado y probado técnicamente; pendiente de validación con el equipo.**
+4. Incidentes, consulta e informes básicos. **Implementado y probado técnicamente; pendiente de validación con el equipo.**
+5. Pruebas automatizadas, respaldos y documentación operativa. **En curso: 83 pruebas pasan en el entorno actual; instalación local portable documentada; respaldos y operación para piloto pendientes.**
 
 Construir primero con datos ficticios. Revisar cada entrega con el personal del ELEAM. Registrar los cambios de forma que una corrección no borre silenciosamente el dato original.
 
 ## Etapa 5: pruebas y preparación del piloto
 
+**Estado actual del proyecto:** los incrementos funcionales 1, 2 y 3 están implementados. El trabajo actual es verificar con el ELEAM las reglas y permisos, y completar la preparación legal, de seguridad y operación; no hay un incremento funcional 4 definido todavía.
+
 - Probar permisos: cada rol ve y modifica solo lo autorizado.
 - Probar casos normales y errores: campos incompletos, duplicados, correcciones y usuarios desactivados.
+- Probar `instalar.bat` en un PC Windows limpio y comprobar el arranque y la actualización sin perder la base local.
+- Añadir o confirmar pruebas automatizadas de permisos, filtros y auditoría de la exportación CSV de residentes.
 - Probar que el historial de cambios es consultable por personal autorizado.
+- Revisar el alcance de la exportación CSV de residentes, sus campos, permisos y tratamiento de los archivos descargados.
 - Ensayar una restauración desde un respaldo.
 - Preparar un procedimiento manual temporal si se cae el sistema o internet.
+- Decidir si el piloto usará un PC local por usuario o un servidor central para acceso compartido. La instalación actual es local a un PC; la publicación web aún debe prepararse.
 - Capacitar a usuarios y definir un canal para reportar problemas.
 - Validar los requisitos legales y de seguridad con personas competentes antes de cargar datos reales.
 
@@ -114,10 +120,13 @@ Construir primero con datos ficticios. Revisar cada entrega con el personal del 
 - [ ] Requisitos de conservación, acceso, corrección y eliminación de datos.
 - [ ] Responsable de soporte y respuesta ante incidentes.
 
-### Funcionales y operacionales (Incrementos 1 y 2)
+### Funcionales y operacionales (cuidados e incidentes)
 
 - [ ] Validación con el equipo de las categorías de cuidados acordadas.
 - [ ] Validación de los rangos de turno (mañana 07–15, tarde 15–23, noche 23–07) según la rutina del ELEAM.
 - [ ] Criterios y plazos de revisión obligatoria por parte de Enfermería.
 - [ ] Ventana de tiempo permitida para que el autor corrija un registro antes del cierre de turno.
 - [ ] Criterios de cierre y reapertura de planes de cuidados con el equipo clínico.
+- [ ] Validar los campos, gravedad percibida, seguimiento, roles de acceso y cierre de incidentes.
+- [ ] Acordar qué indicadores agregados son útiles y quién puede consultarlos.
+- [ ] Confirmar con el ELEAM si se mantiene la exportación CSV de residentes y qué reglas operativas aplican a los archivos descargados.

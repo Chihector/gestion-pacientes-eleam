@@ -8,6 +8,7 @@ from .views import (
     DailyCareRecordCorrectView,
     DailyCareRecordCreateView,
     DailyCareRecordDetailView,
+    DailyCareRecordExportView,
     DailyCareRecordListView,
     DailyCareRecordReviewView,
 )
@@ -17,6 +18,7 @@ app_name = "care"
 urlpatterns = [
     path("", DailyCareRecordListView.as_view(), name="record_list"),
     path("nuevo/", DailyCareRecordCreateView.as_view(), name="record_create"),
+    path("exportar/", DailyCareRecordExportView.as_view(), name="record_export"),
     path("<int:pk>/", DailyCareRecordDetailView.as_view(), name="record_detail"),
     path(
         "<int:pk>/corregir/",

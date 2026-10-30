@@ -48,6 +48,13 @@
               <i class="bi bi-clipboard-pulse" aria-hidden="true"></i> Cuidados
             </a>
           </li>
+          {% if user.is_authenticated and user.role != "ADMINISTRACION" or user.is_superuser %}
+            <li class="nav-item">
+              <a class="nav-link {% if 'incidents:' in request.resolver_match.view_name %}active{% endif %}" href="{% url 'incidents:list' %}" {% if 'incidents:' in request.resolver_match.view_name %}aria-current="page"{% endif %}>
+                <i class="bi bi-exclamation-triangle" aria-hidden="true"></i> Incidentes
+              </a>
+            </li>
+          {% endif %}
           {% if user.can_view_audit %}
             <li class="nav-item">
               <a class="nav-link {% if 'audit:' in request.resolver_match.view_name %}active{% endif %}" href="{% url 'audit:list' %}" {% if 'audit:' in request.resolver_match.view_name %}aria-current="page"{% endif %}>

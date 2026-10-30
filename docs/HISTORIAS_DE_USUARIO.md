@@ -1,6 +1,8 @@
-# Historias de usuario — Incrementos 1 y 2
+# Historias de usuario — Incrementos 1, 2 y 3
 
-Este documento define el alcance funcional de los dos primeros incrementos. Está escrito para validarlo con el equipo del ELEAM antes de ampliarlo. Todas las pruebas y demos usan **datos ficticios**.
+Este documento define el alcance funcional de los tres primeros incrementos. Está escrito para validarlo con el equipo del ELEAM antes de ampliarlo. Todas las pruebas y demos usan **datos ficticios**.
+
+**Estado:** los incrementos 1, 2 y 3 están implementados. El proyecto está en la etapa de preparación del piloto; las historias marcadas como implementadas describen comportamiento técnico y todavía requieren validación institucional donde se indica.
 
 ## Alcance del incremento 1
 
@@ -10,6 +12,7 @@ Incluye:
 - Gestión de usuarios por parte de Administración.
 - Auditoría de creación, modificación, archivado, desactivación y cambio de contraseña.
 - Búsqueda y consulta de residentes.
+- Exportación CSV de la nómina de residentes para Dirección, Enfermería y Administración; la descarga queda auditada.
 - Ficha administrativa, información clínica relevante (alergias y antecedentes) y contactos.
 - Creación, edición, archivado y reactivación de residentes.
 - Datos ficticios de demostración y pruebas automatizadas.
@@ -37,7 +40,13 @@ No incluye todavía:
 
 - Diagnósticos, recomendaciones automáticas, prioridades clínicas ni generación de planes por IA.
 - Firma electrónica avanzada, receta electrónica o integración con dispositivos clínicos.
-- Incidentes, informes, exportaciones y portal de familias.
+- Exportaciones de cuidados e incidentes y portal de familias.
+
+## Alcance del incremento 3
+
+Incluye reporte confidencial de incidentes, seguimiento y cierre por roles autorizados, consulta y reportes agregados en un período. Los informes son solo de lectura y no exportan datos. Los roles y campos implementados siguen la propuesta del prototipo y deben validarse con el equipo del ELEAM.
+
+No reemplaza los avisos inmediatos, protocolos institucionales, evaluación profesional ni obligaciones legales de notificación.
 
 ## Actores
 
@@ -353,7 +362,64 @@ No incluye todavía:
 
 **Prioridad:** media.
 
-## Requisitos no funcionales de los incrementos 1 y 2
+### US-21 — Reportar un incidente
+
+**Como** Enfermería, Técnico/a o Cuidador/a **quiero** registrar un incidente y las acciones inmediatas **para** dejar un antecedente trazable y apoyar el seguimiento.
+
+**Criterios de aceptación**
+
+- [x] Se registra residente, fecha/hora, tipo, lugar, gravedad percibida, hechos, acciones tomadas, personas presentes y notificaciones pertinentes.
+- [x] Solo se seleccionan residentes con ficha activa y la fecha no puede ser futura ni anterior al ingreso.
+- [x] La descripción y las acciones exigen texto suficiente y objetivo.
+- [x] El reporte queda asociado al autor y a auditoría.
+- [x] Dirección, Enfermería, Técnico/a y Cuidador/a pueden consultar; Administración no accede al módulo.
+- [x] El aviso y los protocolos institucionales no se sustituyen por guardar el formulario.
+
+**Prioridad:** alta.
+
+### US-22 — Dar seguimiento y cerrar un incidente
+
+**Como** Enfermería o Dirección **quiero** registrar el seguimiento y cerrar un incidente **para** conservar una respuesta trazable sin sobrescribir el reporte original.
+
+**Criterios de aceptación**
+
+- [x] Solo Enfermería o Dirección pueden cerrar.
+- [x] El cierre requiere un motivo/seguimiento y guarda actor y fecha.
+- [x] El reporte original se conserva y el cierre queda en auditoría.
+- [x] Un incidente cerrado no se vuelve a cerrar ni se modifica desde la aplicación.
+
+**Prioridad:** alta.
+
+### US-23 — Consultar informes básicos de incidentes
+
+**Como** Enfermería o Dirección **quiero** ver conteos por período, tipo, gravedad percibida y estado **para** apoyar la revisión operativa.
+
+**Criterios de aceptación**
+
+- [x] Se puede seleccionar un período válido.
+- [x] Se muestran totales, abiertos, cerrados y distribuciones por tipo y gravedad percibida.
+- [x] Solo Enfermería y Dirección acceden a los informes.
+- [x] El informe es agregado, no exporta datos y no realiza conclusiones clínicas.
+
+**Prioridad:** media.
+
+## Funcionalidad adicional implementada
+
+**Como** Dirección, Enfermería o Administración **quiero** descargar la nómina filtrada de residentes **para** realizar tareas autorizadas.
+
+### US-24 — Exportar la nómina de residentes
+
+**Criterios de aceptación implementados en el código**
+
+- [x] Solo Dirección, Enfermería y Administración pueden acceder a la exportación CSV.
+- [x] Se aplican los filtros de búsqueda, estado y fichas archivadas de la lista de residentes.
+- [x] La descarga registra en auditoría los filtros utilizados y el total de fichas exportadas.
+- [x] La nómina incluye RUT, nombres y apellidos, nombre preferido, nacimiento, edad, sexo, habitación, previsión, estado, fecha de ingreso y nombre, parentesco y teléfono del contacto principal; el archivo es sensible.
+- [x] No existe exportación de registros de cuidados ni de reportes de incidentes.
+
+**Pendiente de validación institucional:** confirmar que los roles, campos exportados y manejo de archivos descargados son adecuados antes de usar datos reales.
+
+## Requisitos no funcionales de los incrementos 1, 2 y 3
 
 - **Privacidad:** datos ficticios en desarrollo, pruebas y demos; sin nombres ni RUT reales en repositorios, logs o tickets.
 - **Seguridad:** HTTPS en producción, cookies seguras, CSRF, sesiones con vencimiento, contraseñas con algoritmo seguro.
@@ -367,12 +433,15 @@ No incluye todavía:
 - **Respaldo:** la base de datos de producción debe tener respaldos automáticos y una restauración probada antes del piloto.
 - **Criterio profesional:** el sistema no diagnostica, no prioriza clínicamente, no recomienda tratamientos ni genera planes automáticamente.
 
-## Definición de terminado (incrementos 1 y 2)
+## Definición de terminado (incrementos 1, 2 y 3)
 
-- [x] Todas las historias de prioridad alta implementadas (US-01 a US-20 cubiertas técnicamente).
-- [x] Matriz de permisos cubierta por pruebas automatizadas (67 pruebas en la suite pytest).
+- [x] Historias US-01 a US-23 implementadas y cubiertas técnicamente por pruebas.
+- [x] Exportación CSV de residentes implementada según US-24; su cobertura automatizada está pendiente de confirmar.
+- [x] Matriz de permisos cubierta por pruebas automatizadas en la suite pytest.
 - [x] Datos ficticios cargables con un comando seguro (`seed_demo`).
 - [x] README con instalación, lanzador de Windows (`iniciar.bat`), ejecución y pruebas.
 - [ ] Revisión de la interfaz con al menos una persona de Enfermería y una de Administración.
 - [ ] Validación de categorías, turnos, campos, revisión y corrección con el equipo del ELEAM.
 - [ ] Revisión legal y de seguridad antes de usar datos reales.
+- [ ] Validar los campos, roles y criterios de seguimiento de incidentes con el ELEAM.
+- [ ] Añadir o confirmar pruebas automatizadas de permisos, filtros y auditoría de la exportación CSV.

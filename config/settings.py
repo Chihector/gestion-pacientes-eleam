@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     "audit",
     "residents",
     "care",
+    "incidents",
 ]
 
 MIDDLEWARE = [

@@ -5,8 +5,10 @@ from django.db.models import Prefetch
 from django.utils import timezone
 from django.views.generic import TemplateView
 
+from accounts.models import Role
 from audit.models import AuditLog
 from care.models import CarePlan, DailyCareRecord
+from incidents.models import Incident
 from residents.models import Contact, Resident
 
 
@@ -49,9 +51,13 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         )
 
         if self.request.user.can_view_audit:
-            context["recent_logs"] = (
-                AuditLog.objects.select_related("actor").order_by("-created_at")[:6]
-            )
+            logs = AuditLog.objects.select_related("actor")
+            if (
+                self.request.user.role == Role.ADMINISTRACION
+                and not self.request.user.is_superuser
+            ):
+                logs = logs.exclude(model_label="incidents.Incident")
+            context["recent_logs"] = logs.order_by("-created_at")[:6]
 
         today = timezone.localdate()
         current_records = DailyCareRecord.objects.filter(
@@ -65,6 +71,9 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         ).count()
         context["active_plan_count"] = CarePlan.objects.filter(
             status=CarePlan.Status.ACTIVO, resident__is_active=True
+        ).count()
+        context["open_incident_count"] = Incident.objects.filter(
+            status=Incident.Status.OPEN
         ).count()
 
         context["today"] = today

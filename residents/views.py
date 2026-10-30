@@ -1,14 +1,19 @@
 from __future__ import annotations
 
+import csv
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Prefetch, Q
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, reverse
+from django.utils import timezone
 from django.views import View
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
 from accounts.models import Role
 from audit.models import AuditLog
+from audit.services import log_action
 from care.models import CarePlan, DailyCareRecord
 from core.mixins import RoleRequiredMixin
 
@@ -74,6 +79,7 @@ class ResidentListView(LoginRequiredMixin, ListView):
         context["total"] = self.get_queryset().count()
         context["statuses"] = Resident.Status.choices
         context["can_create"] = self.request.user.can_edit_resident_admin
+        context["can_export"] = self.request.user.can_export_residents
         return context
 
 
@@ -329,3 +335,102 @@ class ContactDeleteView(RoleRequiredMixin, DeleteView):
 
     def get_success_url(self):
         return reverse("residents:detail", kwargs={"pk": self.resident.pk})
+
+
+class ResidentExportView(RoleRequiredMixin, View):
+    allowed_roles = (Role.DIRECCION, Role.ADMINISTRACION, Role.ENFERMERIA)
+
+    def get(self, request, *args, **kwargs):
+        queryset = (
+            Resident.objects.select_related("updated_by")
+            .prefetch_related(
+                Prefetch(
+                    "contacts",
+                    queryset=Contact.objects.filter(is_primary=True),
+                    to_attr="primary_contacts",
+                )
+            )
+        )
+
+        query = request.GET.get("q", "").strip()
+        status = request.GET.get("estado", "").strip()
+        include_archived = request.GET.get("archivados") in {
+            "1",
+            "true",
+            "on",
+        }
+
+        if not include_archived:
+            queryset = queryset.filter(is_active=True)
+        if status in Resident.Status.values:
+            queryset = queryset.filter(status=status)
+        if query:
+            compact = query.replace(".", "").replace(" ", "")
+            queryset = queryset.filter(
+                Q(first_name__icontains=query)
+                | Q(last_name__icontains=query)
+                | Q(preferred_name__icontains=query)
+                | Q(room__icontains=query)
+                | Q(rut__icontains=compact)
+            )
+
+        residents_list = list(queryset.order_by("last_name", "first_name"))
+
+        log_action(
+            action=AuditLog.Action.EXPORT,
+            actor=request.user,
+            model_label="residents.Resident",
+            object_repr=f"Nómina de residentes ({len(residents_list)} registros)",
+            changes={
+                "filtros": {
+                    "q": query,
+                    "estado": status,
+                    "incluir_archivados": include_archived,
+                },
+                "total": len(residents_list),
+            },
+        )
+
+        response = HttpResponse(content_type="text/csv; charset=utf-8")
+        filename = f"nomina_residentes_{timezone.now():%Y%m%d_%H%M}.csv"
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        response.write("\ufeff")
+
+        writer = csv.writer(response)
+        writer.writerow([
+            "RUT",
+            "Nombres",
+            "Apellidos",
+            "Nombre preferido",
+            "Fecha de nacimiento",
+            "Edad",
+            "Sexo",
+            "Habitación",
+            "Previsión",
+            "Estado",
+            "Fecha de ingreso",
+            "Contacto principal",
+            "Parentesco",
+            "Teléfono contacto",
+        ])
+
+        for r in residents_list:
+            primary = r.primary_contacts[0] if getattr(r, "primary_contacts", None) else None
+            writer.writerow([
+                r.rut_formatted,
+                r.first_name,
+                r.last_name,
+                r.preferred_name or "",
+                r.birth_date.strftime("%d/%m/%Y") if r.birth_date else "",
+                r.age if r.birth_date else "",
+                r.get_sex_display(),
+                r.room or "",
+                r.get_health_insurance_display(),
+                r.get_status_display(),
+                r.admission_date.strftime("%d/%m/%Y") if r.admission_date else "",
+                primary.name if primary else "",
+                primary.relationship if primary else "",
+                primary.phone if primary else "",
+            ])
+
+        return response

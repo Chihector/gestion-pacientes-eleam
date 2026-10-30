@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import csv
 from datetime import date
 
 from django.contrib import messages
@@ -7,6 +8,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.db.models import Q
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, reverse
 from django.utils import timezone
 from django.views import View
@@ -20,6 +22,7 @@ from django.views.generic import (
 
 from accounts.models import Role
 from audit.models import AuditLog
+from audit.services import log_action
 from core.mixins import RoleRequiredMixin
 from residents.models import Resident
 
@@ -283,6 +286,7 @@ class DailyCareRecordListView(LoginRequiredMixin, ListView):
             status=CarePlan.Status.ACTIVO, resident__is_active=True
         ).count()
         context["can_record"] = self.request.user.can_record_care
+        context["can_export"] = self.request.user.can_export_care
 
         user = self.request.user
         for record in context["records"]:
@@ -495,3 +499,120 @@ class DailyCareRecordReviewView(RoleRequiredMixin, View):
         )
         messages.success(request, "Registro revisado por Enfermería.")
         return redirect("care:record_detail", pk=record.pk)
+
+
+class DailyCareRecordExportView(RoleRequiredMixin, View):
+    allowed_roles = (Role.DIRECCION, Role.ENFERMERIA)
+
+    def get(self, request, *args, **kwargs):
+        queryset = DailyCareRecord.objects.select_related(
+            "resident", "care_plan", "created_by", "reviewed_by"
+        )
+        fecha = request.GET.get("fecha", "").strip()
+        show_all_dates = fecha == "todas" or request.GET.get("todas") in {"1", "true", "on"}
+        target_date = None
+        if not show_all_dates:
+            try:
+                target_date = date.fromisoformat(fecha) if fecha else timezone.localdate()
+            except ValueError:
+                target_date = timezone.localdate()
+            queryset = queryset.filter(recorded_at__date=target_date)
+
+        shift = request.GET.get("turno", "").strip()
+        if shift in DailyCareRecord.Shift.values:
+            queryset = queryset.filter(shift=shift)
+
+        category = request.GET.get("categoria", "").strip()
+        if category in DailyCareRecord.Category.values:
+            queryset = queryset.filter(category=category)
+
+        resident_id = request.GET.get("residente", "").strip()
+        if resident_id.isdigit():
+            queryset = queryset.filter(resident_id=resident_id)
+
+        query = request.GET.get("q", "").strip()
+        if query:
+            compact = query.replace(".", "").replace(" ", "")
+            queryset = queryset.filter(
+                Q(resident__first_name__icontains=query)
+                | Q(resident__last_name__icontains=query)
+                | Q(resident__preferred_name__icontains=query)
+                | Q(resident__rut__icontains=compact)
+                | Q(description__icontains=query)
+            )
+
+        only_pending = request.GET.get("pendientes") in {"1", "true", "on"}
+        if only_pending:
+            queryset = queryset.filter(
+                requires_nursing_review=True, reviewed_at__isnull=True
+            )
+
+        include_corrected = request.GET.get("corregidos") in {"1", "true", "on"}
+        if not include_corrected:
+            queryset = queryset.filter(status=DailyCareRecord.Status.VIGENTE)
+
+        records_list = list(queryset.order_by("-recorded_at", "-pk"))
+
+        log_action(
+            action=AuditLog.Action.EXPORT,
+            actor=request.user,
+            model_label="care.DailyCareRecord",
+            object_repr=f"Registros de cuidados ({len(records_list)} registros)",
+            changes={
+                "filtros": {
+                    "fecha": fecha,
+                    "turno": shift,
+                    "categoria": category,
+                    "residente": resident_id,
+                    "q": query,
+                    "pendientes": only_pending,
+                    "corregidos": include_corrected,
+                },
+                "total": len(records_list),
+            },
+        )
+
+        response = HttpResponse(content_type="text/csv; charset=utf-8")
+        filename = f"registros_cuidados_{timezone.now():%Y%m%d_%H%M}.csv"
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        response.write("\ufeff")
+
+        writer = csv.writer(response)
+        writer.writerow([
+            "ID",
+            "Fecha y hora",
+            "Turno",
+            "RUT Residente",
+            "Residente",
+            "Categoría",
+            "Descripción",
+            "Observaciones",
+            "Requiere revisión",
+            "Revisado",
+            "Fecha revisión",
+            "Revisor",
+            "Observaciones revisión",
+            "Registrado por",
+            "Estado",
+        ])
+
+        for rec in records_list:
+            writer.writerow([
+                rec.pk,
+                rec.recorded_at.strftime("%d/%m/%Y %H:%M") if rec.recorded_at else "",
+                rec.get_shift_display(),
+                rec.resident.rut_formatted,
+                rec.resident.get_full_name(),
+                rec.get_category_display(),
+                rec.description,
+                rec.notes or "",
+                "Sí" if rec.requires_nursing_review else "No",
+                "Sí" if rec.reviewed_at else "No",
+                rec.reviewed_at.strftime("%d/%m/%Y %H:%M") if rec.reviewed_at else "",
+                rec.reviewed_by.get_full_name() if rec.reviewed_by else "",
+                rec.review_notes or "",
+                rec.created_by.get_full_name() if rec.created_by else "",
+                rec.get_status_display(),
+            ])
+
+        return response

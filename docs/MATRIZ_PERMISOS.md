@@ -1,4 +1,4 @@
-# Matriz de roles y permisos — incrementos 1 y 2
+# Matriz de roles y permisos — incrementos 1, 2 y 3
 
 ## Principios
 
@@ -21,7 +21,7 @@
 
 > Los roles Técnico/a y Cuidador/a tienen los mismos permisos en estos incrementos. Se mantienen separados para reportes y para futuras reglas más específicas.
 
-## Permisos vigentes (incrementos 1 y 2)
+## Permisos implementados (pendientes de validación institucional)
 
 | Acción | Dirección | Enfermería | Técnico/a | Cuidador/a | Administración |
 |---|:---:|:---:|:---:|:---:|:---:|
@@ -42,22 +42,29 @@
 | Revisar un registro marcado | ❌ | ✅ | ❌ | ❌ | ❌ |
 | Crear o editar planes de cuidados | ❌ | ✅ | ❌ | ❌ | ❌ |
 | Cerrar o reactivar un plan | ❌ | ✅ | ❌ | ❌ | ❌ |
+| Reportar un incidente | ❌ | ✅ | ✅ | ✅ | ❌ |
+| Consultar reportes de incidentes | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Cerrar un incidente con seguimiento | ✅ | ✅ | ❌ | ❌ | ❌ |
+| Ver informes agregados de incidentes | ✅ | ✅ | ❌ | ❌ | ❌ |
 | Ver auditoría | ✅ | ❌ | ❌ | ❌ | ✅ |
 | Gestionar usuarios y roles | ❌ | ❌ | ❌ | ❌ | ✅ |
 | Restablecer contraseña de otro usuario | ❌ | ❌ | ❌ | ❌ | ✅ |
 | Acceder al admin técnico de Django | Solo superusuario | ❌ | ❌ | ❌ | ❌ |
+| Exportar nómina de residentes (CSV) | ✅ | ✅ | ❌ | ❌ | ✅ |
 
 **Nota:** la información clínica es de solo lectura para Dirección, Técnico/a, Cuidador/a y Administración. Solo Enfermería la modifica. Esto reduce el riesgo de cambios no clínicos en alergias o antecedentes.
 
-## Permisos previstos para etapas posteriores
+Administración conserva acceso a la auditoría general, pero los eventos detallados de incidentes se excluyen tanto de la auditoría como de la actividad reciente del panel para evitar que esa vía revele reportes a un rol sin acceso al módulo.
+
+La aplicación implementa una exportación CSV de la nómina de residentes para Dirección, Enfermería y Administración. La descarga registra los filtros y el total exportado en auditoría. Los campos y el manejo de los archivos deben validarse con el ELEAM antes de usar datos reales. No se exportan cuidados ni incidentes.
+
+## Permisos propuestos para etapas posteriores
 
 | Acción | Dirección | Enfermería | Técnico/a | Cuidador/a | Administración |
 |---|:---:|:---:|:---:|:---:|:---:|
-| Reportar incidentes | ❌ | ✅ | ✅ | ✅ | ❌ |
-| Revisar y cerrar incidentes | ✅ | ✅ | ❌ | ❌ | ❌ |
-| Exportar reportes autorizados | ✅ | ✅ | ❌ | ❌ | ✅ |
+| Exportar otros reportes autorizados | Por definir | Por definir | ❌ | ❌ | Por definir |
 
-Estas filas son una propuesta para discutir con el ELEAM antes de implementarlas; no están activas en los incrementos 1 y 2.
+Las exportaciones adicionales requieren definir autorización, campos, límites y auditoría con el ELEAM.
 
 ## Reglas adicionales
 
@@ -73,7 +80,7 @@ Estas filas son una propuesta para discutir con el ELEAM antes de implementarlas
 
 ## Verificación
 
-La matriz se prueba automáticamente en `accounts/tests.py`, `residents/tests.py`, `care/tests.py` y `audit/tests.py`. La suite completa tiene **67 pruebas**. Cada combinación crítica (rol × acción) debe tener al menos una prueba que confirme el acceso permitido o el rechazo con HTTP 403.
+La matriz se prueba automáticamente en `accounts/tests.py`, `residents/tests.py`, `care/tests.py`, `incidents/tests.py` y `audit/tests.py`. Cada combinación crítica (rol × acción) debe tener al menos una prueba que confirme el acceso permitido o el rechazo con HTTP 403.
 
 ## Decisiones pendientes con el ELEAM
 

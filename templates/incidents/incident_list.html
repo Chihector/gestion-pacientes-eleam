@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Incidentes{% endblock %}
+
+{% block content %}
+  <nav aria-label="Ruta de navegación" class="mb-3">
+    <ol class="breadcrumb small mb-0">
+      <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Panel</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Incidentes</li>
+    </ol>
+  </nav>
+
+  <div class="page-head">
+    <div>
+      <p class="eyebrow mb-1">Incremento 3 · Acceso restringido</p>
+      <h1>Incidentes</h1>
+      <p class="lead-sm">Reportes confidenciales para seguimiento; no reemplazan protocolos institucionales ni avisos inmediatos.</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+      {% if can_view_reports %}
+        <a class="btn btn-outline-secondary" href="{% url 'incidents:export' %}?desde={{ request.GET.desde }}&hasta={{ request.GET.hasta }}&tipo={{ request.GET.tipo }}&estado={{ request.GET.estado }}">
+          <i class="bi bi-download me-1" aria-hidden="true"></i>Exportar
+        </a>
+        <a class="btn btn-outline-primary" href="{% url 'incidents:reports' %}"><i class="bi bi-bar-chart me-1" aria-hidden="true"></i>Informes</a>
+      {% endif %}
+      {% if can_report %}
+        <a class="btn btn-danger" href="{% url 'incidents:create' %}"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Reportar incidente</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <section class="panel-card mb-3" aria-labelledby="filtros-title">
+    <div class="panel-card-header">
+      <div><h2 id="filtros-title">Filtrar reportes</h2><p class="panel-card-sub">El acceso y la consulta quedan restringidos por rol.</p></div>
+      <span class="badge-soft danger"><i class="bi bi-lock" aria-hidden="true"></i> Confidencial</span>
+    </div>
+    <form method="get" class="row g-2 align-items-end">
+      {% for field in filter_form %}
+        <div class="col-6 col-lg-3">{% include "partials/field.html" with field=field %}</div>
+      {% endfor %}
+      <div class="col-12 col-lg-3 d-grid"><button class="btn btn-primary" type="submit"><i class="bi bi-funnel me-1" aria-hidden="true"></i>Filtrar</button></div>
+      <div class="col-12">
+        {% for error in filter_form.non_field_errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+        <a class="link-subtle small" href="{% url 'incidents:list' %}">Limpiar filtros</a>
+      </div>
+    </form>
+  </section>
+
+  <section class="panel-card">
+    <div class="panel-card-header">
+      <div><h2>Reportes</h2><p class="panel-card-sub">{{ paginator.count }} incidente{{ paginator.count|pluralize:"s" }} encontrados.</p></div>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-eleam mobile-card-table align-middle">
+        <thead><tr><th>Fecha</th><th>Residente</th><th>Tipo</th><th>Gravedad percibida</th><th>Estado</th><th>Reportó</th><th></th></tr></thead>
+        <tbody>
+          {% for incident in incidents %}
+            <tr>
+              <td data-label="Fecha">{{ incident.occurred_at|date:"d/m/Y H:i" }}</td>
+              <td data-label="Residente">{{ incident.resident.full_name }}<div class="resident-meta">Hab. {{ incident.resident.room|default:"—" }}</div></td>
+              <td data-label="Tipo">{{ incident.get_incident_type_display }}</td>
+              <td data-label="Gravedad percibida"><span class="badge-soft {% if incident.severity == 'GRAVE' %}danger{% elif incident.severity == 'MODERADO' %}warning{% else %}info{% endif %}">{{ incident.get_severity_display }}</span></td>
+              <td data-label="Estado"><span class="badge-soft {% if incident.is_open %}warning{% else %}success{% endif %}">{{ incident.get_status_display }}</span></td>
+              <td data-label="Reportó">{{ incident.created_by.get_full_name|default:"—" }}</td>
+              <td data-label="Acciones" class="text-end"><a class="btn btn-sm btn-quiet" href="{{ incident.get_absolute_url }}">Ver reporte</a></td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="7"><div class="empty-state"><i class="bi bi-exclamation-circle" aria-hidden="true"></i><strong>No hay reportes para estos filtros</strong><p class="mb-0">Ajusta el período o los criterios de búsqueda.</p></div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% include "partials/pagination.html" %}
+  </section>
+{% endblock %}

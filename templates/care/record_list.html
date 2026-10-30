@@ -18,13 +18,18 @@
         Consulta, revisa y corrige sin borrar el registro original.
       </p>
     </div>
-    {% if can_record %}
-      <div>
+    <div class="d-flex gap-2 flex-wrap">
+      {% if can_export %}
+        <a class="btn btn-outline-primary" href="{% url 'care:record_export' %}?fecha={{ fecha_value }}&todas={% if show_all_dates %}1{% endif %}&turno={{ shift }}&categoria={{ category }}&residente={{ resident_filter }}&q={{ q }}&pendientes={% if only_pending %}1{% endif %}&corregidos={% if include_corrected %}1{% endif %}">
+          <i class="bi bi-download me-1" aria-hidden="true"></i> Exportar registros
+        </a>
+      {% endif %}
+      {% if can_record %}
         <a class="btn btn-primary" href="{% url 'care:record_create' %}">
           <i class="bi bi-plus-lg me-1" aria-hidden="true"></i> Registrar cuidado
         </a>
-      </div>
-    {% endif %}
+      {% endif %}
+    </div>
   </div>
 
   <div class="row g-3 mb-3">

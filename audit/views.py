@@ -16,6 +16,8 @@ class AuditListView(RoleRequiredMixin, ListView):
 
     def get_queryset(self):
         queryset = super().get_queryset().select_related("actor")
+        if self.request.user.role == Role.ADMINISTRACION and not self.request.user.is_superuser:
+            queryset = queryset.exclude(model_label="incidents.Incident")
         query = self.request.GET.get("q", "").strip()
         action = self.request.GET.get("accion", "").strip()
         model_label = self.request.GET.get("modelo", "").strip()
@@ -36,9 +38,12 @@ class AuditListView(RoleRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["actions"] = AuditLog.Action.choices
-        context["model_labels"] = (
-            AuditLog.objects.values_list("model_label", flat=True).distinct().order_by("model_label")
-        )
+        model_labels = AuditLog.objects.all()
+        if self.request.user.role == Role.ADMINISTRACION and not self.request.user.is_superuser:
+            model_labels = model_labels.exclude(model_label="incidents.Incident")
+        context["model_labels"] = model_labels.values_list(
+            "model_label", flat=True
+        ).distinct().order_by("model_label")
         context["filters"] = {
             "q": self.request.GET.get("q", ""),
             "accion": self.request.GET.get("accion", ""),

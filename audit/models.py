@@ -50,6 +50,8 @@ class AuditLog(models.Model):
         REACTIVATE = "REACTIVATE", "Usuario reactivado"
         CORRECTION = "CORRECTION", "Corregido"
         REVIEW = "REVIEW", "Revisado"
+        CLOSE = "CLOSE", "Cerrado"
+        EXPORT = "EXPORT", "Exportado"
 
     actor = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -100,6 +102,8 @@ class AuditLog(models.Model):
             self.Action.REACTIVATE: "success",
             self.Action.CORRECTION: "warning",
             self.Action.REVIEW: "info",
+            self.Action.CLOSE: "success",
+            self.Action.EXPORT: "info",
         }.get(self.action, "muted")
 
     @property

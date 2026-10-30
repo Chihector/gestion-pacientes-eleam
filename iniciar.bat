@@ -3,14 +3,14 @@ setlocal
 chcp 65001 >nul
 cd /d "%~dp0"
 
-set "PY=C:\Users\hecto\.venvs\eleam\Scripts\python.exe"
+set "PY=%USERPROFILE%\.venvs\eleam\Scripts\python.exe"
 
 if not exist "%PY%" (
     echo.
     echo No se encontro el entorno virtual de Python en:
     echo   %PY%
     echo.
-    echo Revisa la seccion "Instalacion local" del README.md.
+    echo Ejecuta primero instalar.bat. Consulta docs\INSTALACION_LOCAL.md.
     pause
     exit /b 1
 )
