@@ -43,7 +43,7 @@ def make_incident(resident, reporter, **overrides):
     return Incident.objects.create(**data)
 
 
-@pytest.mark.parametrize("role", [Role.ENFERMERIA, Role.TECNICO, Role.CUIDADOR])
+@pytest.mark.parametrize("role", [Role.ENFERMERA_JEFE, Role.ENFERMERIA, Role.TECNICO, Role.CUIDADOR])
 def test_authorized_care_roles_can_report_incidents(
     client, make_user, resident, role
 ):
@@ -67,7 +67,7 @@ def test_authorized_care_roles_can_report_incidents(
     ).exists()
 
 
-@pytest.mark.parametrize("role", [Role.DIRECCION, Role.ADMINISTRACION])
+@pytest.mark.parametrize("role", [Role.DIRECCION, Role.ADMINISTRACION, Role.MEDICO])
 def test_only_care_roles_can_create_incidents(
     client, make_user, resident, role
 ):
@@ -83,9 +83,9 @@ def test_only_care_roles_can_create_incidents(
 
 
 def test_incident_form_rejects_future_dates_and_short_descriptions(
-    client, nurse_user, resident
+    client, head_nurse_user, resident
 ):
-    client.force_login(nurse_user)
+    client.force_login(head_nurse_user)
     future = (timezone.localtime() + timedelta(days=1)).strftime(
         "%Y-%m-%dT%H:%M"
     )
@@ -102,11 +102,11 @@ def test_incident_form_rejects_future_dates_and_short_descriptions(
 
 
 def test_archived_resident_cannot_be_selected_for_new_incident(
-    client, nurse_user, resident
+    client, head_nurse_user, resident
 ):
     resident.is_active = False
     resident.save()
-    client.force_login(nurse_user)
+    client.force_login(head_nurse_user)
 
     response = client.post(
         reverse("incidents:create"), incident_payload(resident)
@@ -118,9 +118,9 @@ def test_archived_resident_cannot_be_selected_for_new_incident(
 
 
 def test_incident_list_is_forbidden_to_administration(
-    client, admin_user, resident, nurse_user
+    client, admin_user, resident, head_nurse_user
 ):
-    make_incident(resident, nurse_user)
+    make_incident(resident, head_nurse_user)
     client.force_login(admin_user)
 
     response = client.get(reverse("incidents:list"))
@@ -128,7 +128,7 @@ def test_incident_list_is_forbidden_to_administration(
     assert response.status_code == 403
 
 
-@pytest.mark.parametrize("role", [Role.ENFERMERIA, Role.DIRECCION])
+@pytest.mark.parametrize("role", [Role.DIRECCION, Role.MEDICO, Role.ENFERMERA_JEFE])
 def test_nursing_and_direction_can_close_with_audited_reason(
     client, make_user, resident, caregiver_user, role
 ):
@@ -169,9 +169,9 @@ def test_caregiver_cannot_close_incident(client, caregiver_user, resident):
     assert incident.status == Incident.Status.OPEN
 
 
-def test_close_requires_a_reason(client, nurse_user, resident, caregiver_user):
+def test_close_requires_a_reason(client, head_nurse_user, resident, caregiver_user):
     incident = make_incident(resident, caregiver_user)
-    client.force_login(nurse_user)
+    client.force_login(head_nurse_user)
 
     response = client.post(
         reverse("incidents:close", kwargs={"pk": incident.pk}),
@@ -189,7 +189,7 @@ def test_close_requires_a_reason(client, nurse_user, resident, caregiver_user):
 
 
 def test_reports_are_restricted_and_count_only_selected_period(
-    client, nurse_user, technician_user, resident
+    client, head_nurse_user, technician_user, resident
 ):
     today = timezone.localdate()
     current_time = timezone.make_aware(datetime.combine(today, time(12, 0)))
@@ -202,7 +202,7 @@ def test_reports_are_restricted_and_count_only_selected_period(
         occurred_at=old_time,
         severity=Incident.Severity.SERIOUS,
     )
-    client.force_login(nurse_user)
+    client.force_login(head_nurse_user)
 
     response = client.get(reverse("incidents:reports"), {"desde": today.isoformat(), "hasta": today.isoformat()})
 
@@ -221,10 +221,10 @@ def test_non_report_roles_cannot_access_incident_reports(
 
 
 def test_invalid_incident_list_filters_do_not_show_unfiltered_data(
-    client, nurse_user, caregiver_user, resident
+    client, head_nurse_user, caregiver_user, resident
 ):
     make_incident(resident, caregiver_user)
-    client.force_login(nurse_user)
+    client.force_login(head_nurse_user)
 
     response = client.get(
         reverse("incidents:list"),

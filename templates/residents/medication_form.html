@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+  <nav aria-label="Ruta de navegación" class="mb-3">
+    <ol class="breadcrumb small mb-0">
+      <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Panel</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'residents:list' %}">Residentes</a></li>
+      <li class="breadcrumb-item"><a href="{{ resident.get_absolute_url }}">{{ resident.full_name }}</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
+    </ol>
+  </nav>
+
+  <div class="page-head">
+    <div>
+      <p class="eyebrow mb-1">Medicamentos y remedios</p>
+      <h1>{{ title }}</h1>
+      <p class="lead-sm">Prescripción, dosis, horarios e indicaciones para {{ resident.full_name }}.</p>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-lg-8">
+      <section class="panel-card">
+        <div class="note-card mb-3">
+          <i class="bi bi-person-circle me-1" aria-hidden="true"></i>
+          <strong>{{ resident.full_name }}</strong><br>
+          <span class="text-muted-sm">{{ resident.rut_formatted }} · Hab. {{ resident.room|default:"—" }}</span>
+        </div>
+
+        {% if resident.has_allergies %}
+          <div class="allergy-banner mb-3 py-2">
+            <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+            <div>
+              <strong>Alergias conocidas: {{ resident.allergies }}</strong>
+              <div class="small">Verifica compatibilidad antes de prescribir o administrar.</div>
+            </div>
+          </div>
+        {% endif %}
+
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger" role="alert">{% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}</div>
+          {% endif %}
+
+          <div class="row g-3">
+            <div class="col-md-7">
+              {% include "partials/field.html" with field=form.name %}
+            </div>
+            <div class="col-md-5">
+              {% include "partials/field.html" with field=form.dose %}
+            </div>
+
+            <div class="col-md-6">
+              {% include "partials/field.html" with field=form.frequency %}
+            </div>
+            <div class="col-md-3">
+              {% include "partials/field.html" with field=form.route %}
+            </div>
+            <div class="col-md-3">
+              {% include "partials/field.html" with field=form.status %}
+            </div>
+
+            <div class="col-12">
+              {% include "partials/field.html" with field=form.prescribed_by %}
+            </div>
+
+            <div class="col-md-6">
+              {% include "partials/field.html" with field=form.start_date %}
+            </div>
+            <div class="col-md-6">
+              {% include "partials/field.html" with field=form.end_date %}
+            </div>
+
+            <div class="col-12">
+              {% include "partials/field.html" with field=form.instructions %}
+            </div>
+
+            <div class="col-12">
+              {% include "partials/field.html" with field=form.notes %}
+            </div>
+          </div>
+
+          <div class="form-actions mt-4">
+            <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1" aria-hidden="true"></i> {{ submit_label }}</button>
+            <a href="{{ resident.get_absolute_url }}#salud" class="btn btn-quiet">Cancelar</a>
+          </div>
+        </form>
+      </section>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="panel-card">
+        <div class="panel-card-header"><h2>Administración segura</h2></div>
+        <ul class="text-muted-sm mb-3 ps-3">
+          <li>Solo el personal de <strong>Enfermería</strong> puede registrar, ajustar o suspender medicamentos.</li>
+          <li>Los medicamentos se pueden <strong>editar en cualquier momento</strong> posterior para ajustar la dosis, horario o suspenderlos.</li>
+          <li>Cada cambio de dosis o indicación queda auditado con fecha y responsable.</li>
+          <li>Los cuidadores y técnicos verán esta información para asegurar el cumplimiento del tratamiento.</li>
+        </ul>
+        <div class="warning-callout mb-0">
+          <i class="bi bi-shield-lock me-1" aria-hidden="true"></i>
+          Ingresa solo prescripciones médicas vigentes y confirmadas.
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

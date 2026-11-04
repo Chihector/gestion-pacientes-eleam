@@ -6,6 +6,11 @@ _MODEL_LABELS = {
     "accounts.User": "Usuario",
     "residents.Resident": "Residente",
     "residents.Contact": "Contacto",
+    "residents.Disease": "Enfermedad / Diagnóstico",
+    "residents.Medication": "Medicamento / Remedio",
+    "care.CarePlan": "Plan de cuidados",
+    "care.DailyCareRecord": "Registro diario de cuidado",
+    "incidents.IncidentReport": "Reporte de incidente",
 }
 
 

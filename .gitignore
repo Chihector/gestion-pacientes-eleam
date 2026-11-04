@@ -41,3 +41,5 @@ desktop.ini
 *.sqlite3
 *.dump
 *.bak
+.initialized
+respaldos/

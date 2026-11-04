@@ -10,6 +10,8 @@ from core.models import TimeStampedModel
 
 class Role(models.TextChoices):
     DIRECCION = "DIRECCION", "Dirección"
+    MEDICO = "MEDICO", "Médico"
+    ENFERMERA_JEFE = "ENFERMERA_JEFE", "Enfermera/o Jefe"
     ENFERMERIA = "ENFERMERIA", "Enfermería"
     TECNICO = "TECNICO", "Técnico/a"
     CUIDADOR = "CUIDADOR", "Cuidador/a"
@@ -99,19 +101,58 @@ class User(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
 
     @property
     def can_edit_resident_admin(self) -> bool:
-        return self.is_superuser or self.role in {Role.ENFERMERIA, Role.ADMINISTRACION}
+        return self.is_superuser or self.role in {
+            Role.DIRECCION,
+            Role.MEDICO,
+            Role.ENFERMERA_JEFE,
+            Role.ADMINISTRACION,
+        }
 
     @property
     def can_edit_resident_clinical(self) -> bool:
-        return self.is_superuser or self.role == Role.ENFERMERIA
+        return self.is_superuser or self.role in {
+            Role.MEDICO,
+            Role.ENFERMERA_JEFE,
+            Role.ENFERMERIA,
+        }
+
+    @property
+    def can_view_resident_clinical(self) -> bool:
+        """Ver información clínica completa (antecedentes, diagnósticos, medicamentos)."""
+        return self.is_superuser or self.role in {
+            Role.DIRECCION,
+            Role.MEDICO,
+            Role.ENFERMERA_JEFE,
+            Role.ENFERMERIA,
+            Role.TECNICO,
+            Role.CUIDADOR,
+            Role.ADMINISTRACION,
+        }
 
     @property
     def can_manage_contacts(self) -> bool:
-        return self.is_superuser or self.role in {Role.ENFERMERIA, Role.ADMINISTRACION}
+        return self.is_superuser or self.role in {
+            Role.MEDICO,
+            Role.ENFERMERA_JEFE,
+            Role.ADMINISTRACION,
+        }
 
     @property
     def can_archive_residents(self) -> bool:
-        return self.is_superuser or self.role in {Role.ENFERMERIA, Role.ADMINISTRACION}
+        return self.is_superuser or self.role in {
+            Role.MEDICO,
+            Role.ENFERMERA_JEFE,
+            Role.ADMINISTRACION,
+        }
+
+    @property
+    def can_manage_ingreso_egreso(self) -> bool:
+        """Gestionar ingreso/egreso (cambiar estado ACTIVO/HOSPITALIZADO/EGRESADO/FALLECIDO)."""
+        return self.is_superuser or self.role in {
+            Role.DIRECCION,
+            Role.MEDICO,
+            Role.ENFERMERA_JEFE,
+        }
 
     @property
     def can_view_residents(self) -> bool:
@@ -119,35 +160,105 @@ class User(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
 
     @property
     def can_manage_care_plans(self) -> bool:
-        return self.is_superuser or self.role == Role.ENFERMERIA
+        """Crear y editar planes de cuidados."""
+        return self.is_superuser or self.role in {
+            Role.ENFERMERA_JEFE,
+            Role.ENFERMERIA,
+        }
+
+    @property
+    def can_close_care_plans(self) -> bool:
+        """Cerrar o reactivar planes de cuidados (solo Enfermera/o Jefe)."""
+        return self.is_superuser or self.role == Role.ENFERMERA_JEFE
 
     @property
     def can_record_care(self) -> bool:
         return self.is_superuser or self.role in {
+            Role.ENFERMERA_JEFE,
             Role.ENFERMERIA,
             Role.TECNICO,
             Role.CUIDADOR,
         }
 
     @property
+    def can_correct_own_care(self) -> bool:
+        """Corregir sus propios registros de cuidado."""
+        return self.is_superuser or self.role in {
+            Role.ENFERMERA_JEFE,
+            Role.ENFERMERIA,
+            Role.TECNICO,
+            Role.CUIDADOR,
+        }
+
+    @property
+    def can_correct_any_care(self) -> bool:
+        """Corregir cualquier registro de cuidado (Enfermera/o Jefe)."""
+        return self.is_superuser or self.role == Role.ENFERMERA_JEFE
+
+    @property
     def can_review_care(self) -> bool:
-        return self.is_superuser or self.role == Role.ENFERMERIA
+        return self.is_superuser or self.role == Role.ENFERMERA_JEFE
+
+    @property
+    def can_edit_care_observations(self) -> bool:
+        """Editar observaciones/comentarios en registros de cuidado (TENS)."""
+        return self.is_superuser or self.role in {
+            Role.ENFERMERA_JEFE,
+            Role.ENFERMERIA,
+            Role.TECNICO,
+        }
+
+    @property
+    def can_report_incident(self) -> bool:
+        return self.is_superuser or self.role in {
+            Role.ENFERMERA_JEFE,
+            Role.ENFERMERIA,
+            Role.TECNICO,
+            Role.CUIDADOR,
+        }
+
+    @property
+    def can_view_incidents(self) -> bool:
+        return self.is_superuser or self.role in {
+            Role.DIRECCION,
+            Role.MEDICO,
+            Role.ENFERMERA_JEFE,
+            Role.ENFERMERIA,
+            Role.TECNICO,
+            Role.CUIDADOR,
+        }
+
+    @property
+    def can_close_incident(self) -> bool:
+        return self.is_superuser or self.role in {
+            Role.DIRECCION,
+            Role.MEDICO,
+            Role.ENFERMERA_JEFE,
+        }
+
+    @property
+    def can_view_incident_reports(self) -> bool:
+        return self.is_superuser or self.role in {
+            Role.DIRECCION,
+            Role.MEDICO,
+            Role.ENFERMERA_JEFE,
+        }
 
     @property
     def can_export_residents(self) -> bool:
         return self.is_superuser or self.role in {
             Role.DIRECCION,
             Role.ADMINISTRACION,
-            Role.ENFERMERIA,
+            Role.ENFERMERA_JEFE,
         }
 
     @property
     def can_export_care(self) -> bool:
-        return self.is_superuser or self.role in {Role.DIRECCION, Role.ENFERMERIA}
+        return self.is_superuser or self.role in {Role.DIRECCION, Role.ENFERMERA_JEFE}
 
     @property
     def can_export_incidents(self) -> bool:
-        return self.is_superuser or self.role in {Role.DIRECCION, Role.ENFERMERIA}
+        return self.is_superuser or self.role in {Role.DIRECCION, Role.ENFERMERA_JEFE}
 
 
 def active_admin_count(exclude_pk: int | None = None) -> int:

@@ -17,8 +17,8 @@ from audit.services import log_action
 from care.models import CarePlan, DailyCareRecord
 from core.mixins import RoleRequiredMixin
 
-from .forms import ContactForm, ResidentAdminForm, ResidentClinicalForm
-from .models import Contact, Resident
+from .forms import ContactForm, DiseaseForm, MedicationForm, ResidentAdminForm, ResidentClinicalForm
+from .models import Contact, Disease, Medication, Resident
 
 
 class ResidentListView(LoginRequiredMixin, ListView):
@@ -125,12 +125,33 @@ class ResidentDetailView(LoginRequiredMixin, DetailView):
         context["can_manage_care"] = self.request.user.can_manage_care_plans
         context["can_record_care"] = self.request.user.can_record_care
 
+        diseases = list(resident.diseases.all())
+        medications = list(resident.medications.all())
+        context["diseases"] = diseases
+        context["active_diseases"] = [
+            d for d in diseases if d.status != Disease.Status.RESUELTA
+        ]
+        context["medications"] = medications
+        context["active_medications"] = [
+            m for m in medications if m.status in {Medication.Status.ACTIVO, Medication.Status.SOS}
+        ]
+
         if self.request.user.can_view_audit:
             contact_ids = [str(pk) for pk in contacts.values_list("pk", flat=True)]
+            disease_ids = [str(d.pk) for d in diseases]
+            medication_ids = [str(m.pk) for m in medications]
             query = Q(model_label="residents.Resident", object_id=str(resident.pk))
             if contact_ids:
                 query |= Q(
                     model_label="residents.Contact", object_id__in=contact_ids
+                )
+            if disease_ids:
+                query |= Q(
+                    model_label="residents.Disease", object_id__in=disease_ids
+                )
+            if medication_ids:
+                query |= Q(
+                    model_label="residents.Medication", object_id__in=medication_ids
                 )
             context["audit_logs"] = (
                 AuditLog.objects.filter(query)
@@ -141,7 +162,7 @@ class ResidentDetailView(LoginRequiredMixin, DetailView):
 
 
 class ResidentCreateView(RoleRequiredMixin, CreateView):
-    allowed_roles = (Role.ENFERMERIA, Role.ADMINISTRACION)
+    allowed_roles = (Role.ENFERMERA_JEFE, Role.ADMINISTRACION)
     model = Resident
     form_class = ResidentAdminForm
     template_name = "residents/resident_form.html"
@@ -180,7 +201,7 @@ class ActiveResidentRequiredMixin:
 class ResidentUpdateView(
     RoleRequiredMixin, ActiveResidentRequiredMixin, UpdateView
 ):
-    allowed_roles = (Role.ENFERMERIA, Role.ADMINISTRACION)
+    allowed_roles = (Role.DIRECCION, Role.MEDICO, Role.ENFERMERA_JEFE, Role.ADMINISTRACION)
     model = Resident
     form_class = ResidentAdminForm
     template_name = "residents/resident_form.html"
@@ -199,7 +220,7 @@ class ResidentUpdateView(
 class ResidentClinicalUpdateView(
     RoleRequiredMixin, ActiveResidentRequiredMixin, UpdateView
 ):
-    allowed_roles = (Role.ENFERMERIA,)
+    allowed_roles = (Role.MEDICO, Role.ENFERMERA_JEFE, Role.ENFERMERIA)
     model = Resident
     form_class = ResidentClinicalForm
     template_name = "residents/resident_form.html"
@@ -217,7 +238,7 @@ class ResidentClinicalUpdateView(
 
 
 class ResidentArchiveView(RoleRequiredMixin, View):
-    allowed_roles = (Role.ENFERMERIA, Role.ADMINISTRACION)
+    allowed_roles = (Role.MEDICO, Role.ENFERMERA_JEFE, Role.ADMINISTRACION)
 
     def post(self, request, pk, *args, **kwargs):
         resident = get_object_or_404(Resident, pk=pk)
@@ -237,7 +258,7 @@ class ResidentArchiveView(RoleRequiredMixin, View):
 
 
 class ContactCreateView(RoleRequiredMixin, CreateView):
-    allowed_roles = (Role.ENFERMERIA, Role.ADMINISTRACION)
+    allowed_roles = (Role.MEDICO, Role.ENFERMERA_JEFE, Role.ADMINISTRACION)
     model = Contact
     form_class = ContactForm
     template_name = "residents/contact_form.html"
@@ -270,7 +291,7 @@ class ContactCreateView(RoleRequiredMixin, CreateView):
 
 
 class ContactUpdateView(RoleRequiredMixin, UpdateView):
-    allowed_roles = (Role.ENFERMERIA, Role.ADMINISTRACION)
+    allowed_roles = (Role.MEDICO, Role.ENFERMERA_JEFE, Role.ADMINISTRACION)
     model = Contact
     form_class = ContactForm
     template_name = "residents/contact_form.html"
@@ -304,7 +325,7 @@ class ContactUpdateView(RoleRequiredMixin, UpdateView):
 
 
 class ContactDeleteView(RoleRequiredMixin, DeleteView):
-    allowed_roles = (Role.ENFERMERIA, Role.ADMINISTRACION)
+    allowed_roles = (Role.MEDICO, Role.ENFERMERA_JEFE, Role.ADMINISTRACION)
     model = Contact
     template_name = "residents/contact_confirm_delete.html"
     context_object_name = "contact"
@@ -337,8 +358,210 @@ class ContactDeleteView(RoleRequiredMixin, DeleteView):
         return reverse("residents:detail", kwargs={"pk": self.resident.pk})
 
 
+class DiseaseCreateView(RoleRequiredMixin, CreateView):
+    allowed_roles = (Role.MEDICO, Role.ENFERMERA_JEFE, Role.ENFERMERIA)
+    model = Disease
+    form_class = DiseaseForm
+    template_name = "residents/disease_form.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.resident = get_object_or_404(Resident, pk=kwargs["resident_pk"])
+        if not self.resident.is_active:
+            messages.warning(
+                request,
+                "La ficha está archivada. Reactívala antes de agregar o modificar enfermedades.",
+            )
+            return redirect("residents:detail", pk=self.resident.pk)
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["resident"] = self.resident
+        context["title"] = "Agregar enfermedad o condición"
+        context["submit_label"] = "Guardar enfermedad"
+        return context
+
+    def form_valid(self, form):
+        form.instance.resident = self.resident
+        response = super().form_valid(form)
+        messages.success(self.request, "Enfermedad o condición médica guardada.")
+        return response
+
+    def get_success_url(self):
+        return f"{reverse('residents:detail', kwargs={'pk': self.resident.pk})}#salud"
+
+
+class DiseaseUpdateView(RoleRequiredMixin, UpdateView):
+    allowed_roles = (Role.MEDICO, Role.ENFERMERA_JEFE, Role.ENFERMERIA)
+    model = Disease
+    form_class = DiseaseForm
+    template_name = "residents/disease_form.html"
+    context_object_name = "disease"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        self.resident = self.object.resident
+        if not self.resident.is_active:
+            messages.warning(
+                request,
+                "La ficha está archivada. Reactívala antes de modificar enfermedades.",
+            )
+            return redirect("residents:detail", pk=self.resident.pk)
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["resident"] = self.resident
+        context["title"] = "Editar enfermedad o condición"
+        context["submit_label"] = "Guardar cambios"
+        return context
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(self.request, "Enfermedad o condición actualizada correctamente.")
+        return response
+
+    def get_success_url(self):
+        return f"{reverse('residents:detail', kwargs={'pk': self.resident.pk})}#salud"
+
+
+class DiseaseDeleteView(RoleRequiredMixin, DeleteView):
+    allowed_roles = (Role.MEDICO, Role.ENFERMERA_JEFE, Role.ENFERMERIA)
+    model = Disease
+    template_name = "residents/disease_confirm_delete.html"
+    context_object_name = "disease"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        self.resident = self.object.resident
+        if not self.resident.is_active:
+            messages.warning(
+                request,
+                "La ficha está archivada. Reactívala antes de modificar enfermedades.",
+            )
+            return redirect("residents:detail", pk=self.resident.pk)
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["resident"] = self.resident
+        return context
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(
+            self.request,
+            "Enfermedad eliminada. La acción quedó registrada en la auditoría.",
+        )
+        return response
+
+    def get_success_url(self):
+        return f"{reverse('residents:detail', kwargs={'pk': self.resident.pk})}#salud"
+
+
+class MedicationCreateView(RoleRequiredMixin, CreateView):
+    allowed_roles = (Role.MEDICO, Role.ENFERMERA_JEFE, Role.ENFERMERIA)
+    model = Medication
+    form_class = MedicationForm
+    template_name = "residents/medication_form.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.resident = get_object_or_404(Resident, pk=kwargs["resident_pk"])
+        if not self.resident.is_active:
+            messages.warning(
+                request,
+                "La ficha está archivada. Reactívala antes de agregar medicamentos.",
+            )
+            return redirect("residents:detail", pk=self.resident.pk)
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["resident"] = self.resident
+        context["title"] = "Agregar medicamento / remedio"
+        context["submit_label"] = "Guardar medicamento"
+        return context
+
+    def form_valid(self, form):
+        form.instance.resident = self.resident
+        response = super().form_valid(form)
+        messages.success(self.request, "Medicamento registrado correctamente.")
+        return response
+
+    def get_success_url(self):
+        return f"{reverse('residents:detail', kwargs={'pk': self.resident.pk})}#salud"
+
+
+class MedicationUpdateView(RoleRequiredMixin, UpdateView):
+    allowed_roles = (Role.MEDICO, Role.ENFERMERA_JEFE, Role.ENFERMERIA)
+    model = Medication
+    form_class = MedicationForm
+    template_name = "residents/medication_form.html"
+    context_object_name = "medication"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        self.resident = self.object.resident
+        if not self.resident.is_active:
+            messages.warning(
+                request,
+                "La ficha está archivada. Reactívala antes de modificar medicamentos.",
+            )
+            return redirect("residents:detail", pk=self.resident.pk)
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["resident"] = self.resident
+        context["title"] = "Editar medicamento / remedio"
+        context["submit_label"] = "Guardar cambios"
+        return context
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(self.request, "Medicamento actualizado correctamente.")
+        return response
+
+    def get_success_url(self):
+        return f"{reverse('residents:detail', kwargs={'pk': self.resident.pk})}#salud"
+
+
+class MedicationDeleteView(RoleRequiredMixin, DeleteView):
+    allowed_roles = (Role.MEDICO, Role.ENFERMERA_JEFE, Role.ENFERMERIA)
+    model = Medication
+    template_name = "residents/medication_confirm_delete.html"
+    context_object_name = "medication"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        self.resident = self.object.resident
+        if not self.resident.is_active:
+            messages.warning(
+                request,
+                "La ficha está archivada. Reactívala antes de modificar medicamentos.",
+            )
+            return redirect("residents:detail", pk=self.resident.pk)
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["resident"] = self.resident
+        return context
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(
+            self.request,
+            "Medicamento eliminado. La acción quedó registrada en la auditoría.",
+        )
+        return response
+
+    def get_success_url(self):
+        return f"{reverse('residents:detail', kwargs={'pk': self.resident.pk})}#salud"
+
+
 class ResidentExportView(RoleRequiredMixin, View):
-    allowed_roles = (Role.DIRECCION, Role.ADMINISTRACION, Role.ENFERMERIA)
+    allowed_roles = (Role.DIRECCION, Role.ADMINISTRACION, Role.ENFERMERA_JEFE)
 
     def get(self, request, *args, **kwargs):
         queryset = (

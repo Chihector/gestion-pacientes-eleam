@@ -73,7 +73,7 @@ def test_anonymous_user_is_redirected_from_care_list(client):
 
 
 @pytest.mark.parametrize(
-    "role", [Role.ENFERMERIA, Role.TECNICO, Role.CUIDADOR]
+    "role", [Role.ENFERMERA_JEFE, Role.ENFERMERIA, Role.TECNICO, Role.CUIDADOR]
 )
 def test_care_roles_can_create_record(client, make_user, resident, role):
     user = make_user(f"{role.lower()}@example.test", role)
@@ -96,7 +96,7 @@ def test_care_roles_can_create_record(client, make_user, resident, role):
     assert log.actor == user
 
 
-@pytest.mark.parametrize("role", [Role.ADMINISTRACION, Role.DIRECCION])
+@pytest.mark.parametrize("role", [Role.ADMINISTRACION, Role.DIRECCION, Role.MEDICO])
 def test_roles_without_care_permission_cannot_create(
     client, make_user, resident, role
 ):
@@ -111,8 +111,8 @@ def test_roles_without_care_permission_cannot_create(
     assert DailyCareRecord.objects.count() == 0
 
 
-def test_record_rejects_future_date(client, nurse_user, resident):
-    client.force_login(nurse_user)
+def test_record_rejects_future_date(client, head_nurse_user, resident):
+    client.force_login(head_nurse_user)
     future = (timezone.localtime() + timedelta(days=1)).strftime(
         "%Y-%m-%dT%H:%M"
     )
@@ -128,7 +128,7 @@ def test_record_rejects_future_date(client, nurse_user, resident):
 
 
 def test_record_rejects_plan_from_another_resident(
-    client, nurse_user, resident
+    client, head_nurse_user, resident
 ):
     other = Resident.objects.create(
         first_name="Otro",
@@ -137,8 +137,8 @@ def test_record_rejects_plan_from_another_resident(
         birth_date=date(1950, 1, 1),
         admission_date=date(2023, 1, 1),
     )
-    plan = make_plan(other, nurse_user)
-    client.force_login(nurse_user)
+    plan = make_plan(other, head_nurse_user)
+    client.force_login(head_nurse_user)
 
     response = client.post(
         reverse("care:record_create"),
@@ -168,11 +168,11 @@ def test_save_and_register_another_returns_to_form(
 # --- Revisión de Enfermería -------------------------------------------------
 
 
-def test_nurse_can_review_record(client, nurse_user, caregiver_user, resident):
+def test_head_nurse_can_review_record(client, head_nurse_user, caregiver_user, resident):
     record = make_record(
         resident, caregiver_user, requires_nursing_review=True
     )
-    client.force_login(nurse_user)
+    client.force_login(head_nurse_user)
 
     response = client.post(
         reverse("care:record_review", kwargs={"pk": record.pk}),
@@ -181,7 +181,7 @@ def test_nurse_can_review_record(client, nurse_user, caregiver_user, resident):
 
     assert response.status_code == 302
     record.refresh_from_db()
-    assert record.reviewed_by == nurse_user
+    assert record.reviewed_by == head_nurse_user
     assert record.reviewed_at is not None
     assert "correcta" in record.review_notes
     assert record.review_pending is False
@@ -190,10 +190,10 @@ def test_nurse_can_review_record(client, nurse_user, caregiver_user, resident):
         model_label="care.DailyCareRecord",
         object_id=str(record.pk),
     )
-    assert log.actor == nurse_user
+    assert log.actor == head_nurse_user
 
 
-def test_non_nurse_cannot_review_record(
+def test_non_head_nurse_cannot_review_record(
     client, caregiver_user, resident
 ):
     record = make_record(
@@ -212,10 +212,10 @@ def test_non_nurse_cannot_review_record(
 
 
 def test_record_without_review_flag_cannot_be_reviewed(
-    client, nurse_user, caregiver_user, resident
+    client, head_nurse_user, caregiver_user, resident
 ):
     record = make_record(resident, caregiver_user)
-    client.force_login(nurse_user)
+    client.force_login(head_nurse_user)
 
     response = client.post(
         reverse("care:record_review", kwargs={"pk": record.pk}), {}
@@ -224,11 +224,11 @@ def test_record_without_review_flag_cannot_be_reviewed(
     assert response.status_code == 302
     record.refresh_from_db()
     assert record.reviewed_at is None
-    assert record.can_be_reviewed_by(nurse_user) is False
+    assert record.can_be_reviewed_by(head_nurse_user) is False
 
 
 def test_corrected_record_cannot_be_reviewed(
-    client, nurse_user, caregiver_user, resident
+    client, head_nurse_user, caregiver_user, resident
 ):
     record = make_record(
         resident,
@@ -236,7 +236,7 @@ def test_corrected_record_cannot_be_reviewed(
         status=DailyCareRecord.Status.CORREGIDO,
         requires_nursing_review=True,
     )
-    client.force_login(nurse_user)
+    client.force_login(head_nurse_user)
 
     response = client.post(
         reverse("care:record_review", kwargs={"pk": record.pk}), {}
@@ -317,8 +317,8 @@ def test_correction_requires_reason(
     assert original.status == DailyCareRecord.Status.VIGENTE
 
 
-def test_another_caregiver_cannot_correct_but_nurse_can(
-    client, make_user, caregiver_user, nurse_user, resident
+def test_another_caregiver_cannot_correct_but_head_nurse_can(
+    client, make_user, caregiver_user, head_nurse_user, resident
 ):
     original = make_record(resident, caregiver_user)
     other = make_user("otro.cuidador@example.test", Role.CUIDADOR)
@@ -329,7 +329,7 @@ def test_another_caregiver_cannot_correct_but_nurse_can(
     )
     assert denied.status_code == 403
 
-    client.force_login(nurse_user)
+    client.force_login(head_nurse_user)
     allowed = client.get(
         reverse("care:record_correct", kwargs={"pk": original.pk})
     )
@@ -356,7 +356,7 @@ def test_corrected_record_cannot_be_corrected_again(
 
 
 def test_list_filters_and_hides_corrected_by_default(
-    client, nurse_user, caregiver_user, resident
+    client, head_nurse_user, caregiver_user, resident
 ):
     current = make_record(resident, caregiver_user)
     corrected = make_record(
@@ -365,7 +365,7 @@ def test_list_filters_and_hides_corrected_by_default(
         status=DailyCareRecord.Status.CORREGIDO,
         category=DailyCareRecord.Category.MOVILIDAD,
     )
-    client.force_login(nurse_user)
+    client.force_login(head_nurse_user)
 
     response = client.get(reverse("care:record_list"))
     records = list(response.context["records"])
@@ -383,13 +383,13 @@ def test_list_filters_and_hides_corrected_by_default(
 
 
 def test_list_filters_pending_review_and_resident(
-    client, nurse_user, caregiver_user, resident
+    client, head_nurse_user, caregiver_user, resident
 ):
     pending = make_record(
         resident, caregiver_user, requires_nursing_review=True
     )
     make_record(resident, caregiver_user)
-    client.force_login(nurse_user)
+    client.force_login(head_nurse_user)
 
     response = client.get(
         reverse("care:record_list"), {"pendientes": "1"}
@@ -405,7 +405,7 @@ def test_list_filters_pending_review_and_resident(
 
 
 def test_record_detail_shows_correction_chain(
-    client, nurse_user, caregiver_user, resident
+    client, head_nurse_user, caregiver_user, resident
 ):
     original = make_record(resident, caregiver_user)
     correction = make_record(
@@ -417,7 +417,7 @@ def test_record_detail_shows_correction_chain(
     )
     original.status = DailyCareRecord.Status.CORREGIDO
     original.save(update_fields=["status"])
-    client.force_login(nurse_user)
+    client.force_login(head_nurse_user)
 
     response = client.get(original.get_absolute_url())
     assert response.status_code == 200
@@ -433,7 +433,7 @@ def test_record_detail_shows_correction_chain(
 
 
 def test_only_nurse_can_manage_care_plans(
-    client, nurse_user, technician_user, resident
+    client, head_nurse_user, technician_user, resident
 ):
     client.force_login(technician_user)
     denied = client.post(
@@ -449,7 +449,7 @@ def test_only_nurse_can_manage_care_plans(
     )
     assert denied.status_code == 403
 
-    client.force_login(nurse_user)
+    client.force_login(head_nurse_user)
     allowed = client.post(
         reverse("care:plan_create", kwargs={"resident_pk": resident.pk}),
         {
@@ -464,14 +464,14 @@ def test_only_nurse_can_manage_care_plans(
     assert allowed.status_code == 302
     plan = CarePlan.objects.get()
     assert plan.resident == resident
-    assert plan.created_by == nurse_user
+    assert plan.created_by == head_nurse_user
 
 
 def test_plan_close_requires_reason_and_can_reopen(
-    client, nurse_user, resident
+    client, head_nurse_user, resident
 ):
-    plan = make_plan(resident, nurse_user)
-    client.force_login(nurse_user)
+    plan = make_plan(resident, head_nurse_user)
+    client.force_login(head_nurse_user)
 
     response = client.post(
         reverse("care:plan_close", kwargs={"pk": plan.pk}),
@@ -494,7 +494,7 @@ def test_plan_close_requires_reason_and_can_reopen(
         model_label="care.CarePlan",
         object_id=str(plan.pk),
     ).latest("created_at")
-    assert log.actor == nurse_user
+    assert log.actor == head_nurse_user
 
     client.post(reverse("care:plan_reopen", kwargs={"pk": plan.pk}))
     plan.refresh_from_db()
@@ -503,13 +503,13 @@ def test_plan_close_requires_reason_and_can_reopen(
 
 
 def test_archived_resident_blocks_care_changes(
-    client, nurse_user, caregiver_user, resident
+    client, head_nurse_user, caregiver_user, resident
 ):
     resident.is_active = False
     resident.save(update_fields=["is_active"])
-    plan = make_plan(resident, nurse_user)
+    plan = make_plan(resident, head_nurse_user)
     record = make_record(resident, caregiver_user)
-    client.force_login(nurse_user)
+    client.force_login(head_nurse_user)
 
     plan_response = client.post(
         reverse("care:plan_create", kwargs={"resident_pk": resident.pk}),

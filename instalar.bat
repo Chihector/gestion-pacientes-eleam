@@ -25,7 +25,7 @@ echo Instalando dependencias...
 "%PY%" -m pip install -r requirements.txt || goto :error
 
 set "NEW_DB=0"
-if not exist "db.sqlite3" set "NEW_DB=1"
+if not exist "db.sqlite3" if not exist ".initialized" set "NEW_DB=1"
 
 echo Preparando la base de datos...
 "%PY%" manage.py migrate || goto :error
@@ -33,6 +33,7 @@ echo Preparando la base de datos...
 if "%NEW_DB%"=="1" (
     echo Cargando datos ficticios de demostracion...
     "%PY%" manage.py seed_demo || goto :error
+    type nul > .initialized
 )
 
 echo.

@@ -47,7 +47,7 @@ class ActiveResidentCareMixin:
 
 
 class CarePlanCreateView(RoleRequiredMixin, ActiveResidentCareMixin, CreateView):
-    allowed_roles = (Role.ENFERMERIA,)
+    allowed_roles = (Role.ENFERMERA_JEFE, Role.ENFERMERIA)
     model = CarePlan
     form_class = CarePlanForm
     template_name = "care/plan_form.html"
@@ -89,7 +89,7 @@ class CarePlanCreateView(RoleRequiredMixin, ActiveResidentCareMixin, CreateView)
 
 
 class CarePlanUpdateView(RoleRequiredMixin, UpdateView):
-    allowed_roles = (Role.ENFERMERIA,)
+    allowed_roles = (Role.ENFERMERA_JEFE, Role.ENFERMERIA)
     model = CarePlan
     form_class = CarePlanForm
     template_name = "care/plan_form.html"
@@ -131,7 +131,7 @@ class CarePlanUpdateView(RoleRequiredMixin, UpdateView):
 
 
 class CarePlanCloseView(RoleRequiredMixin, View):
-    allowed_roles = (Role.ENFERMERIA,)
+    allowed_roles = (Role.ENFERMERA_JEFE,)
 
     def post(self, request, pk, *args, **kwargs):
         plan = get_object_or_404(CarePlan.objects.select_related("resident"), pk=pk)
@@ -164,7 +164,7 @@ class CarePlanCloseView(RoleRequiredMixin, View):
 
 
 class CarePlanReopenView(RoleRequiredMixin, View):
-    allowed_roles = (Role.ENFERMERIA,)
+    allowed_roles = (Role.ENFERMERA_JEFE,)
 
     def post(self, request, pk, *args, **kwargs):
         plan = get_object_or_404(CarePlan.objects.select_related("resident"), pk=pk)
@@ -296,7 +296,7 @@ class DailyCareRecordListView(LoginRequiredMixin, ListView):
 
 
 class DailyCareRecordCreateView(RoleRequiredMixin, CreateView):
-    allowed_roles = (Role.ENFERMERIA, Role.TECNICO, Role.CUIDADOR)
+    allowed_roles = (Role.ENFERMERA_JEFE, Role.ENFERMERIA, Role.TECNICO, Role.CUIDADOR)
     model = DailyCareRecord
     form_class = DailyCareRecordForm
     template_name = "care/record_form.html"
@@ -367,7 +367,7 @@ class DailyCareRecordDetailView(LoginRequiredMixin, DetailView):
 
 
 class DailyCareRecordCorrectView(RoleRequiredMixin, FormView):
-    allowed_roles = (Role.ENFERMERIA, Role.TECNICO, Role.CUIDADOR)
+    allowed_roles = (Role.ENFERMERA_JEFE, Role.ENFERMERIA, Role.TECNICO, Role.CUIDADOR)
     form_class = DailyCareCorrectionForm
     template_name = "care/record_form.html"
 
@@ -448,7 +448,7 @@ class DailyCareRecordCorrectView(RoleRequiredMixin, FormView):
 
 
 class DailyCareRecordReviewView(RoleRequiredMixin, View):
-    allowed_roles = (Role.ENFERMERIA,)
+    allowed_roles = (Role.ENFERMERA_JEFE,)
 
     def post(self, request, pk, *args, **kwargs):
         record = get_object_or_404(
@@ -502,7 +502,7 @@ class DailyCareRecordReviewView(RoleRequiredMixin, View):
 
 
 class DailyCareRecordExportView(RoleRequiredMixin, View):
-    allowed_roles = (Role.DIRECCION, Role.ENFERMERIA)
+    allowed_roles = (Role.DIRECCION, Role.ENFERMERA_JEFE)
 
     def get(self, request, *args, **kwargs):
         queryset = DailyCareRecord.objects.select_related(

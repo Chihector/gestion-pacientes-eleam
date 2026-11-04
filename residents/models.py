@@ -189,3 +189,160 @@ class Contact(AuditedModel):
                 other.is_primary = False
                 other.save()
         super().save(*args, **kwargs)
+
+
+class Disease(AuditedModel):
+    """Enfermedad, diagnóstico o patología de un residente."""
+
+    class Status(models.TextChoices):
+        ACTIVA = "ACTIVA", "Activa"
+        CONTROLADA = "CONTROLADA", "Controlada"
+        EN_TRATAMIENTO = "EN_TRATAMIENTO", "En tratamiento"
+        RESUELTA = "RESUELTA", "Resuelta / Inactiva"
+
+    resident = models.ForeignKey(
+        Resident,
+        verbose_name="residente",
+        related_name="diseases",
+        on_delete=models.CASCADE,
+    )
+    name = models.CharField("enfermedad o condición", max_length=150)
+    diagnosed_date = models.DateField(
+        "fecha de diagnóstico", null=True, blank=True
+    )
+    status = models.CharField(
+        "estado",
+        max_length=20,
+        choices=Status.choices,
+        default=Status.ACTIVA,
+    )
+    notes = models.TextField("observaciones / indicaciones", blank=True)
+
+    class Meta:
+        verbose_name = "enfermedad o condición"
+        verbose_name_plural = "enfermedades y condiciones"
+        ordering = ["status", "name"]
+        indexes = [
+            models.Index(fields=["resident", "status"]),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.name} · {self.resident}"
+
+    @property
+    def is_active_condition(self) -> bool:
+        return self.status != self.Status.RESUELTA
+
+    @property
+    def status_css(self) -> str:
+        return {
+            self.Status.ACTIVA: "danger",
+            self.Status.EN_TRATAMIENTO: "warning",
+            self.Status.CONTROLADA: "info",
+            self.Status.RESUELTA: "muted",
+        }.get(self.status, "muted")
+
+
+class Medication(AuditedModel):
+    """Medicamento o remedio prescrito para un residente."""
+
+    class Status(models.TextChoices):
+        ACTIVO = "ACTIVO", "Activo"
+        SOS = "SOS", "SOS (condicional)"
+        SUSPENDIDO = "SUSPENDIDO", "Suspendido"
+        FINALIZADO = "FINALIZADO", "Finalizado"
+
+    class Route(models.TextChoices):
+        ORAL = "ORAL", "Oral"
+        SUBLINGUAL = "SUBLINGUAL", "Sublingual"
+        SUBCUTANEA = "SUBCUTANEA", "Subcutánea"
+        INTRAMUSCULAR = "INTRAMUSCULAR", "Intramuscular"
+        TOPICA = "TOPICA", "Tópica"
+        OFTALMICA = "OFTALMICA", "Oftálmica"
+        OTICA = "OTICA", "Ótica"
+        INHALATORIA = "INHALATORIA", "Inhalatoria"
+        RECTAL = "RECTAL", "Rectal"
+        OTRA = "OTRA", "Otra"
+
+    resident = models.ForeignKey(
+        Resident,
+        verbose_name="residente",
+        related_name="medications",
+        on_delete=models.CASCADE,
+    )
+    name = models.CharField("nombre del medicamento", max_length=150)
+    dose = models.CharField(
+        "dosis",
+        max_length=100,
+        help_text="Ej.: 50 mg, 1 comprimido, 10 UI, 5 ml",
+    )
+    frequency = models.CharField(
+        "frecuencia u horario",
+        max_length=120,
+        help_text="Ej.: Cada 8 hrs, 08:00 y 20:00, Con el desayuno, SOS en caso de dolor",
+    )
+    route = models.CharField(
+        "vía de administración",
+        max_length=20,
+        choices=Route.choices,
+        default=Route.ORAL,
+    )
+    status = models.CharField(
+        "estado del tratamiento",
+        max_length=20,
+        choices=Status.choices,
+        default=Status.ACTIVO,
+    )
+    prescribed_by = models.CharField(
+        "profesional que indica",
+        max_length=150,
+        blank=True,
+        help_text="Médico tratante o especialista que prescribe.",
+    )
+    start_date = models.DateField(
+        "fecha de inicio",
+        null=True,
+        blank=True,
+    )
+    end_date = models.DateField(
+        "fecha de término",
+        null=True,
+        blank=True,
+    )
+    instructions = models.TextField(
+        "indicaciones especiales",
+        blank=True,
+        help_text="Instrucciones para la administración (ej. tomar en ayunas, con las comidas, etc.).",
+    )
+    notes = models.TextField("observaciones", blank=True)
+
+    class Meta:
+        verbose_name = "medicamento"
+        verbose_name_plural = "medicamentos"
+        ordering = ["status", "name"]
+        indexes = [
+            models.Index(fields=["resident", "status"]),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.name} {self.dose} · {self.resident}"
+
+    def clean(self):
+        super().clean()
+        if self.start_date and self.end_date and self.end_date < self.start_date:
+            raise ValidationError(
+                {"end_date": "La fecha de término no puede ser anterior a la de inicio."}
+            )
+
+    @property
+    def is_current(self) -> bool:
+        return self.status in {self.Status.ACTIVO, self.Status.SOS}
+
+    @property
+    def status_css(self) -> str:
+        return {
+            self.Status.ACTIVO: "success",
+            self.Status.SOS: "warning",
+            self.Status.SUSPENDIDO: "danger",
+            self.Status.FINALIZADO: "muted",
+        }.get(self.status, "muted")

@@ -259,12 +259,12 @@ class DailyCareRecord(AuditedModel):
         return getattr(self, "correction", None)
 
     def is_owned_or_nurse(self, user) -> bool:
-        """Indica si el usuario es autor del registro o parte de Enfermería."""
+        """Indica si el usuario es autor del registro o Enfermera/o Jefe."""
         if not getattr(user, "is_authenticated", False):
             return False
         return bool(
             user.is_superuser
-            or user.role == Role.ENFERMERIA
+            or user.role == Role.ENFERMERA_JEFE
             or self.created_by_id == user.pk
         )
 
@@ -277,5 +277,5 @@ class DailyCareRecord(AuditedModel):
         if not getattr(user, "is_authenticated", False):
             return False
         return self.review_pending and bool(
-            user.is_superuser or user.role == Role.ENFERMERIA
+            user.is_superuser or user.role == Role.ENFERMERA_JEFE
         )

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Eliminar enfermedad o condición{% endblock %}
+
+{% block content %}
+  <nav aria-label="Ruta de navegación" class="mb-3">
+    <ol class="breadcrumb small mb-0">
+      <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Panel</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'residents:list' %}">Residentes</a></li>
+      <li class="breadcrumb-item"><a href="{{ resident.get_absolute_url }}">{{ resident.full_name }}</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Eliminar enfermedad</li>
+    </ol>
+  </nav>
+
+  <div class="page-head">
+    <div>
+      <p class="eyebrow mb-1">Salud y condiciones clínicas</p>
+      <h1>Eliminar enfermedad o diagnóstico</h1>
+      <p class="lead-sm">Esta acción eliminará el registro clínico de la ficha. Quedará trazado en la auditoría.</p>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-lg-7">
+      <section class="panel-card">
+        <div class="danger-callout mb-3">
+          <i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i>
+          ¿Eliminar el registro de <strong>{{ disease.name }}</strong> de la ficha de {{ resident.full_name }}?
+        </div>
+
+        <div class="data-grid mb-3">
+          <div class="data-item"><span class="data-label">Enfermedad / Diagnóstico</span><span class="data-value">{{ disease.name }}</span></div>
+          <div class="data-item"><span class="data-label">Estado</span><span class="data-value">{{ disease.get_status_display }}</span></div>
+          <div class="data-item"><span class="data-label">Fecha de diagnóstico</span><span class="data-value">{{ disease.diagnosed_date|date:"d/m/Y"|default:"Sin especificar" }}</span></div>
+          {% if disease.notes %}
+            <div class="data-item"><span class="data-label">Observaciones</span><span class="data-value">{{ disease.notes }}</span></div>
+          {% endif %}
+        </div>
+
+        <div class="note-card mb-3">
+          <i class="bi bi-info-circle me-1" aria-hidden="true"></i>
+          <strong>Consejo:</strong> Si la condición ya no está activa pero fue parte del historial médico del residente, puedes cambiar su estado a <strong>"Resuelta / Inactiva"</strong> editándola en vez de eliminarla.
+        </div>
+
+        <form method="post">
+          {% csrf_token %}
+          <div class="form-actions">
+            <button type="submit" class="btn btn-danger"><i class="bi bi-trash me-1" aria-hidden="true"></i> Eliminar registro</button>
+            <a href="{{ resident.get_absolute_url }}#salud" class="btn btn-quiet">Cancelar</a>
+          </div>
+        </form>
+      </section>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="panel-card">
+        <div class="panel-card-header"><h2>Trazabilidad</h2></div>
+        <p class="text-muted-sm mb-2">El registro de auditoría mantendrá la constancia de qué usuario de Enfermería eliminó esta condición y en qué fecha.</p>
+      </div>
+    </div>
+  </div>
+{% endblock %}

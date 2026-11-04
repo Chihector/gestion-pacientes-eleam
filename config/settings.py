@@ -8,6 +8,13 @@ es obligatorio definir DJANGO_SECRET_KEY y una base PostgreSQL administrada.
 from pathlib import Path
 import os
 
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+except ImportError:
+    pass
+
 from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parent.parent

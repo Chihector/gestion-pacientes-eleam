@@ -99,6 +99,12 @@
         </button>
       </li>
       <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-salud" data-bs-toggle="tab" data-bs-target="#pane-salud" type="button" role="tab" aria-controls="pane-salud" aria-selected="false">
+          <i class="bi bi-capsule me-1" aria-hidden="true"></i> Salud y Remedios
+          <span class="badge-soft primary ms-1">{{ active_medications|length }}</span>
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
         <button class="nav-link" id="tab-cuidados" data-bs-toggle="tab" data-bs-target="#pane-cuidados" type="button" role="tab" aria-controls="pane-cuidados" aria-selected="false">
           <i class="bi bi-clipboard-pulse me-1" aria-hidden="true"></i> Cuidados
           <span class="badge-soft primary ms-1">{{ active_care_plans|length }}</span>
@@ -190,6 +196,55 @@
                         <p class="mb-0">{{ resident.clinical_notes|linebreaksbr }}</p>
                       {% else %}
                         <p class="text-muted-sm mb-0">Sin registrar.</p>
+                      {% endif %}
+                    </div>
+                    <div class="col-12 pt-2 border-top">
+                      <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="section-label mb-0">Enfermedades y diagnósticos conocidos</div>
+                        {% if can_edit_clinical and not is_archived %}
+                          <a href="{% url 'residents:disease_create' resident.pk %}" class="btn btn-sm btn-link p-0 text-decoration-none">
+                            <i class="bi bi-plus-circle me-1"></i>Agregar
+                          </a>
+                        {% endif %}
+                      </div>
+                      {% if active_diseases %}
+                        <div class="d-flex flex-wrap gap-2 mb-1">
+                          {% for d in active_diseases %}
+                            <span class="badge-soft {{ d.status_css }} d-inline-flex align-items-center gap-1">
+                              <strong>{{ d.name }}</strong> ({{ d.get_status_display }})
+                              {% if can_edit_clinical and not is_archived %}
+                                <a href="{% url 'residents:disease_update' d.pk %}" class="text-reset ms-1" title="Editar"><i class="bi bi-pencil-square"></i></a>
+                              {% endif %}
+                            </span>
+                          {% endfor %}
+                        </div>
+                      {% else %}
+                        <p class="text-muted-sm mb-1">Sin enfermedades activas registradas.</p>
+                      {% endif %}
+                    </div>
+
+                    <div class="col-12 pt-2 border-top">
+                      <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="section-label mb-0">Medicamentos y remedios vigentes</div>
+                        {% if can_edit_clinical and not is_archived %}
+                          <a href="{% url 'residents:medication_create' resident.pk %}" class="btn btn-sm btn-link p-0 text-decoration-none">
+                            <i class="bi bi-plus-circle me-1"></i>Agregar
+                          </a>
+                        {% endif %}
+                      </div>
+                      {% if active_medications %}
+                        <div class="d-flex flex-wrap gap-2 mb-1">
+                          {% for m in active_medications %}
+                            <span class="badge-soft {{ m.status_css }} d-inline-flex align-items-center gap-1">
+                              <strong>{{ m.name }} {{ m.dose }}</strong> · {{ m.frequency }}
+                              {% if can_edit_clinical and not is_archived %}
+                                <a href="{% url 'residents:medication_update' m.pk %}" class="text-reset ms-1" title="Editar"><i class="bi bi-pencil-square"></i></a>
+                              {% endif %}
+                            </span>
+                          {% endfor %}
+                        </div>
+                      {% else %}
+                        <p class="text-muted-sm mb-1">Sin medicamentos registrados actualmente.</p>
                       {% endif %}
                     </div>
                   </div>
@@ -339,6 +394,149 @@
         <div class="info-callout mt-3">
           <i class="bi bi-info-circle me-1" aria-hidden="true"></i>
           Si se elimina el contacto principal, el sistema no promueve otro automáticamente: la ficha mostrará una advertencia hasta que se designe uno nuevo.
+        </div>
+      </div>
+
+      <div class="tab-pane fade" id="pane-salud" role="tabpanel" aria-labelledby="tab-salud" tabindex="0">
+        <!-- SECCIÓN ENFERMEDADES -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+          <div>
+            <h2 class="h5 mb-1"><i class="bi bi-heart-pulse text-danger me-1"></i> Enfermedades y Condiciones Clínicas</h2>
+            <p class="text-muted-sm mb-0">Patologías, diagnósticos médicos y condiciones crónicas. Pueden editarse en cualquier momento por Enfermería.</p>
+          </div>
+          {% if can_edit_clinical and not is_archived %}
+            <a class="btn btn-outline-primary" href="{% url 'residents:disease_create' resident.pk %}">
+              <i class="bi bi-plus-circle me-1" aria-hidden="true"></i> Agregar enfermedad
+            </a>
+          {% endif %}
+        </div>
+
+        <div class="row g-3 mb-4">
+          {% for disease in diseases %}
+            <div class="col-md-6 col-lg-4">
+              <div class="contact-card h-100">
+                <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                  <h3 class="h6 fw-bold mb-0 text-dark">{{ disease.name }}</h3>
+                  <span class="badge-soft {{ disease.status_css }}">{{ disease.get_status_display }}</span>
+                </div>
+                <div class="text-muted-sm mb-2">
+                  <i class="bi bi-calendar-event me-1"></i>
+                  {% if disease.diagnosed_date %}
+                    Diagnóstico: {{ disease.diagnosed_date|date:"d/m/Y" }}
+                  {% else %}
+                    Fecha no especificada
+                  {% endif %}
+                </div>
+                {% if disease.notes %}
+                  <p class="small text-secondary mb-3">{{ disease.notes|linebreaksbr }}</p>
+                {% endif %}
+                {% if can_edit_clinical and not is_archived %}
+                  <div class="contact-actions mt-auto pt-2 border-top">
+                    <a class="btn btn-sm btn-outline-primary" href="{% url 'residents:disease_update' disease.pk %}">
+                      <i class="bi bi-pencil" aria-hidden="true"></i> Editar
+                    </a>
+                    <a class="btn btn-sm btn-quiet text-danger" href="{% url 'residents:disease_delete' disease.pk %}">
+                      <i class="bi bi-trash" aria-hidden="true"></i> Eliminar
+                    </a>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          {% empty %}
+            <div class="col-12">
+              <div class="empty-state py-3">
+                <i class="bi bi-heartbreak text-muted mb-2" style="font-size: 2rem;"></i>
+                <div class="fw-semibold">Sin enfermedades ni condiciones registradas</div>
+                <p class="text-muted-sm mb-0">
+                  {% if can_edit_clinical and not is_archived %}
+                    Usa el botón "Agregar enfermedad" para registrar la primera condición o diagnóstico médico.
+                  {% else %}
+                    No se registran diagnósticos para este residente.
+                  {% endif %}
+                </p>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+
+        <!-- SECCIÓN MEDICAMENTOS / REMEDIOS -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 pt-3 border-top">
+          <div>
+            <h2 class="h5 mb-1"><i class="bi bi-capsule text-primary me-1"></i> Medicamentos y Remedios en Tratamiento</h2>
+            <p class="text-muted-sm mb-0">Fármacos prescritos, horarios, dosis y vías de administración. Editables por Enfermería.</p>
+          </div>
+          {% if can_edit_clinical and not is_archived %}
+            <a class="btn btn-primary" href="{% url 'residents:medication_create' resident.pk %}">
+              <i class="bi bi-plus-lg me-1" aria-hidden="true"></i> Agregar medicamento
+            </a>
+          {% endif %}
+        </div>
+
+        <div class="row g-3">
+          {% for med in medications %}
+            <div class="col-md-6">
+              <div class="contact-card h-100{% if med.is_current %} primary{% endif %}">
+                <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                  <div>
+                    <h3 class="h6 fw-bold mb-1">{{ med.name }} <span class="text-primary">{{ med.dose }}</span></h3>
+                    <div class="text-muted-sm">
+                      <i class="bi bi-clock me-1"></i> <strong>{{ med.frequency }}</strong> · Vía {{ med.get_route_display }}
+                    </div>
+                  </div>
+                  <span class="badge-soft {{ med.status_css }}">{{ med.get_status_display }}</span>
+                </div>
+
+                {% if med.prescribed_by %}
+                  <div class="small text-secondary mb-1">
+                    <i class="bi bi-person-badge me-1"></i> Indica: {{ med.prescribed_by }}
+                  </div>
+                {% endif %}
+
+                {% if med.start_date or med.end_date %}
+                  <div class="small text-secondary mb-2">
+                    <i class="bi bi-calendar-range me-1"></i>
+                    {% if med.start_date %}Desde: {{ med.start_date|date:"d/m/Y" }}{% endif %}
+                    {% if med.end_date %} · Hasta: {{ med.end_date|date:"d/m/Y" }}{% endif %}
+                  </div>
+                {% endif %}
+
+                {% if med.instructions %}
+                  <div class="warning-callout py-2 px-3 mb-2 small">
+                    <i class="bi bi-info-circle-fill me-1"></i> {{ med.instructions }}
+                  </div>
+                {% endif %}
+
+                {% if med.notes %}
+                  <p class="small text-muted mb-2">{{ med.notes }}</p>
+                {% endif %}
+
+                {% if can_edit_clinical and not is_archived %}
+                  <div class="contact-actions mt-auto pt-2 border-top">
+                    <a class="btn btn-sm btn-outline-primary" href="{% url 'residents:medication_update' med.pk %}">
+                      <i class="bi bi-pencil" aria-hidden="true"></i> Editar remedio
+                    </a>
+                    <a class="btn btn-sm btn-quiet text-danger" href="{% url 'residents:medication_delete' med.pk %}">
+                      <i class="bi bi-trash" aria-hidden="true"></i> Eliminar
+                    </a>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          {% empty %}
+            <div class="col-12">
+              <div class="empty-state py-3">
+                <i class="bi bi-capsule text-muted mb-2" style="font-size: 2rem;"></i>
+                <div class="fw-semibold">Sin medicamentos registrados</div>
+                <p class="text-muted-sm mb-0">
+                  {% if can_edit_clinical and not is_archived %}
+                    Usa el botón "Agregar medicamento" para registrar el tratamiento farmacológico del residente.
+                  {% else %}
+                    No hay medicamentos registrados actualmente.
+                  {% endif %}
+                </p>
+              </div>
+            </div>
+          {% endfor %}
         </div>
       </div>
 

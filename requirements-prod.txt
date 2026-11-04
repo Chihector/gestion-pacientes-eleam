@@ -1,0 +1,7 @@
+-r requirements.txt
+
+# Producción: PostgreSQL y servidor de aplicaciones.
+# Elegir gunicorn en Linux o waitress en Windows; no ejecutar runserver.
+psycopg[binary]>=3.2,<4
+gunicorn>=23,<24
+waitress>=3.0,<4

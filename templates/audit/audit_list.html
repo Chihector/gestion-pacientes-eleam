@@ -86,13 +86,13 @@
               <td data-label="Acción"><span class="badge-soft {{ log.action_css }}">{{ log.get_action_display }}</span></td>
               <td data-label="Registro afectado">
                 <span class="fw-semibold small">
-                  {% if log.model_label == "residents.Resident" %}
+                  {% if log.model_label == "residents.Resident" and log.object_id %}
                     <a href="{% url 'residents:detail' log.object_id %}">{{ log.object_repr }}</a>
                   {% else %}
                     {{ log.object_repr }}
                   {% endif %}
                 </span>
-                <div class="resident-meta">{{ log.model_label|model_friendly }} #{{ log.object_id }}</div>
+                <div class="resident-meta">{{ log.model_label|model_friendly }}{% if log.object_id %} #{{ log.object_id }}{% endif %}</div>
                 {% if log.change_list %}
                   <details class="audit-changes">
                     <summary>Ver {{ log.change_list|length }} campo{{ log.change_list|length|pluralize:"s" }} con cambios</summary>

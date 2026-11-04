@@ -19,8 +19,8 @@ def _clinical_payload(**overrides):
     return payload
 
 
-def test_create_log_has_actor_and_ip(client, nurse_user):
-    client.force_login(nurse_user)
+def test_create_log_has_actor_and_ip(client, head_nurse_user):
+    client.force_login(head_nurse_user)
     response = client.post(
         reverse("residents:create"),
         {
@@ -41,7 +41,7 @@ def test_create_log_has_actor_and_ip(client, nurse_user):
         action=AuditLog.Action.CREATE,
         model_label="residents.Resident",
     )
-    assert log.actor == nurse_user
+    assert log.actor == head_nurse_user
     assert log.ip_address == "190.12.34.56"
     assert log.changes["first_name"]["after"] == "Auditada"
 
@@ -121,6 +121,19 @@ def test_audit_list_filters_by_action_and_model(client, direction_user):
     response = client.get(reverse("audit:list"), {"modelo": "residents.Resident"})
     assert response.context["paginator"].count == 1
     assert response.context["logs"][0].object_repr == "Rosa Ficticia"
+
+
+def test_audit_list_handles_export_log_without_object_id(
+    client, direction_user, resident
+):
+    client.force_login(direction_user)
+
+    export_response = client.get(reverse("residents:export"))
+    assert export_response.status_code == 200
+
+    response = client.get(reverse("audit:list"))
+    assert response.status_code == 200
+    assert "Nómina de residentes" in response.content.decode()
 
 
 def test_audit_list_search_by_actor(client, direction_user):

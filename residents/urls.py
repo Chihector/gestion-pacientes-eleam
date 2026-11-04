@@ -4,6 +4,12 @@ from .views import (
     ContactCreateView,
     ContactDeleteView,
     ContactUpdateView,
+    DiseaseCreateView,
+    DiseaseDeleteView,
+    DiseaseUpdateView,
+    MedicationCreateView,
+    MedicationDeleteView,
+    MedicationUpdateView,
     ResidentArchiveView,
     ResidentClinicalUpdateView,
     ResidentCreateView,
@@ -41,5 +47,35 @@ urlpatterns = [
         "contactos/<int:pk>/eliminar/",
         ContactDeleteView.as_view(),
         name="contact_delete",
+    ),
+    path(
+        "<int:resident_pk>/enfermedades/nueva/",
+        DiseaseCreateView.as_view(),
+        name="disease_create",
+    ),
+    path(
+        "enfermedades/<int:pk>/editar/",
+        DiseaseUpdateView.as_view(),
+        name="disease_update",
+    ),
+    path(
+        "enfermedades/<int:pk>/eliminar/",
+        DiseaseDeleteView.as_view(),
+        name="disease_delete",
+    ),
+    path(
+        "<int:resident_pk>/medicamentos/nuevo/",
+        MedicationCreateView.as_view(),
+        name="medication_create",
+    ),
+    path(
+        "medicamentos/<int:pk>/editar/",
+        MedicationUpdateView.as_view(),
+        name="medication_update",
+    ),
+    path(
+        "medicamentos/<int:pk>/eliminar/",
+        MedicationDeleteView.as_view(),
+        name="medication_delete",
     ),
 ]

@@ -38,6 +38,16 @@ def direction_user(make_user):
 
 
 @pytest.fixture
+def medico_user(make_user):
+    return make_user("medico@example.test", Role.MEDICO)
+
+
+@pytest.fixture
+def head_nurse_user(make_user):
+    return make_user("enfermera.jefe@example.test", Role.ENFERMERA_JEFE)
+
+
+@pytest.fixture
 def nurse_user(make_user):
     return make_user("enfermeria@example.test", Role.ENFERMERIA)
 

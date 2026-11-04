@@ -16,7 +16,7 @@ if not exist "%PY%" (
 )
 
 set "NEW_DB=0"
-if not exist "db.sqlite3" set "NEW_DB=1"
+if not exist "db.sqlite3" if not exist ".initialized" set "NEW_DB=1"
 
 echo Actualizando la base de datos...
 "%PY%" manage.py migrate || goto :error
@@ -24,6 +24,7 @@ echo Actualizando la base de datos...
 if "%NEW_DB%"=="1" (
     echo Cargando datos ficticios de demostracion...
     "%PY%" manage.py seed_demo || goto :error
+    type nul > .initialized
 )
 
 echo.

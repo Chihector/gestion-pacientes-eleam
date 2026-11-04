@@ -17,7 +17,7 @@ from django.utils import timezone
 
 from accounts.models import Role, User
 from care.models import CarePlan, DailyCareRecord, shift_for_time
-from residents.models import Contact, Resident
+from residents.models import Contact, Disease, Medication, Resident
 from residents.rut import calculate_dv
 
 DEMO_PASSWORD = "DemoEleam2026!"
@@ -40,6 +40,18 @@ DEMO_USERS = [
         "first_name": "Carolina",
         "last_name": "Demo",
         "role": Role.ENFERMERIA,
+    },
+    {
+        "email": "medico@example.test",
+        "first_name": "Martín",
+        "last_name": "Demo",
+        "role": Role.MEDICO,
+    },
+    {
+        "email": "enfermera.jefe@example.test",
+        "first_name": "Paula",
+        "last_name": "Demo",
+        "role": Role.ENFERMERA_JEFE,
     },
     {
         "email": "tecnico@example.test",
@@ -293,6 +305,85 @@ DEMO_RESIDENTS = [
     },
 ]
 
+
+
+DEMO_DISEASES = [
+    {
+        "body": "11222333",
+        "name": "Hipertensión arterial",
+        "status": Disease.Status.CONTROLADA,
+        "diagnosed_date": date(2018, 4, 15),
+        "notes": "Control de presión arterial en cada turno.",
+    },
+    {
+        "body": "11222333",
+        "name": "Diabetes mellitus tipo 2",
+        "status": Disease.Status.CONTROLADA,
+        "diagnosed_date": date(2020, 9, 10),
+        "notes": "HGT semanal y régimen hipoglucídico.",
+    },
+    {
+        "body": "14567890",
+        "name": "Artrosis de rodilla bilateral",
+        "status": Disease.Status.EN_TRATAMIENTO,
+        "diagnosed_date": date(2019, 3, 20),
+        "notes": "Kinesioterapia motora 2 veces por semana.",
+    },
+    {
+        "body": "13456789",
+        "name": "Enfermedad de Alzheimer (fase moderada)",
+        "status": Disease.Status.ACTIVA,
+        "diagnosed_date": date(2021, 5, 12),
+        "notes": "Apoyo total en actividades básicas de la vida diaria.",
+    },
+]
+
+DEMO_MEDICATIONS = [
+    {
+        "body": "11222333",
+        "name": "Losartán",
+        "dose": "50 mg",
+        "frequency": "Cada 12 horas (08:00 y 20:00)",
+        "route": Medication.Route.ORAL,
+        "status": Medication.Status.ACTIVO,
+        "prescribed_by": "Dr. Fernando Soto (Médico general)",
+        "start_date": date(2023, 1, 15),
+        "instructions": "Administrar con un vaso de agua.",
+    },
+    {
+        "body": "11222333",
+        "name": "Metformina",
+        "dose": "850 mg",
+        "frequency": "Cada 24 horas con el almuerzo",
+        "route": Medication.Route.ORAL,
+        "status": Medication.Status.ACTIVO,
+        "prescribed_by": "Dr. Fernando Soto (Médico general)",
+        "start_date": date(2023, 1, 15),
+        "instructions": "Tomar junto con comida principal.",
+    },
+    {
+        "body": "14567890",
+        "name": "Paracetamol",
+        "dose": "500 mg",
+        "frequency": "SOS en caso de dolor articular",
+        "route": Medication.Route.ORAL,
+        "status": Medication.Status.SOS,
+        "prescribed_by": "Dra. Marcela Lagos (Geriatra)",
+        "start_date": date(2023, 3, 1),
+        "instructions": "Máximo 2 gramos diarios. Registrar en observaciones.",
+    },
+    {
+        "body": "13456789",
+        "name": "Donepezilo",
+        "dose": "10 mg",
+        "frequency": "Cada 24 horas en la noche (21:00)",
+        "route": Medication.Route.ORAL,
+        "status": Medication.Status.ACTIVO,
+        "prescribed_by": "Dr. Fernando Soto (Neurólogo)",
+        "start_date": date(2022, 10, 5),
+        "instructions": "Administrar antes de acostarse.",
+    },
+]
 # Planes de cuidado ficticios. Se identifican por residente y título para
 # mantener el comando idempotente.
 DEMO_CARE_PLANS = [
@@ -580,6 +671,43 @@ class Command(BaseCommand):
                     )
                     records_created += 1
 
+
+        diseases_created = 0
+        if not Disease.objects.filter(resident__is_demo=True).exists():
+            for ddata in DEMO_DISEASES:
+                resident = residents_by_body.get(ddata["body"])
+                if resident:
+                    Disease.objects.create(
+                        resident=resident,
+                        name=ddata["name"],
+                        status=ddata["status"],
+                        diagnosed_date=ddata.get("diagnosed_date"),
+                        notes=ddata.get("notes", ""),
+                        created_by=nurse,
+                        updated_by=nurse,
+                    )
+                    diseases_created += 1
+
+        medications_created = 0
+        if not Medication.objects.filter(resident__is_demo=True).exists():
+            for mdata in DEMO_MEDICATIONS:
+                resident = residents_by_body.get(mdata["body"])
+                if resident:
+                    Medication.objects.create(
+                        resident=resident,
+                        name=mdata["name"],
+                        dose=mdata["dose"],
+                        frequency=mdata["frequency"],
+                        route=mdata.get("route", Medication.Route.ORAL),
+                        status=mdata.get("status", Medication.Status.ACTIVO),
+                        prescribed_by=mdata.get("prescribed_by", ""),
+                        start_date=mdata.get("start_date"),
+                        instructions=mdata.get("instructions", ""),
+                        created_by=nurse,
+                        updated_by=nurse,
+                    )
+                    medications_created += 1
+
         self.stdout.write(self.style.SUCCESS("Datos de demostración cargados."))
         self.stdout.write(
             f"Usuarios: {users_created} creados, {users_updated} actualizados. "
@@ -591,9 +719,10 @@ class Command(BaseCommand):
         )
         self.stdout.write(
             f"Planes de cuidado: {plans_created} creados, {plans_updated} actualizados. "
+            f"Enfermedades demo: {diseases_created}. Medicamentos demo: {medications_created}. "
             f"Registros de cuidado nuevos: {records_created}."
         )
         self.stdout.write(
-            "Cuentas: administracion@ / direccion@ / enfermeria@ / tecnico@ / "
-            "cuidador@example.test"
+            "Cuentas: administracion@ / direccion@ / medico@ / "
+            "enfermera.jefe@ / enfermeria@ / tecnico@ / cuidador@example.test"
         )
