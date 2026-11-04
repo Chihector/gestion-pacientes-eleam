@@ -21,9 +21,9 @@ Este checklist operacionaliza la etapa 5 de la [hoja de ruta](../HOJA_DE_RUTA.md
 
 ## 2. Decisión de despliegue
 
-- [ ] Elegir entre copia local independiente por PC o instalación central compartida.
-- [ ] Si es central: elegir proveedor, ubicación de datos, dominio, TLS y PostgreSQL administrado.
-- [ ] Definir cómo se sirven los archivos estáticos (`collectstatic` y proxy/servidor).
+- [x] Elegir entre copia local independiente por PC o instalación central compartida. **Decisión (2026-11-04): servidor central con PostgreSQL administrado y HTTPS.**
+- [ ] Si es central: elegir entre hosting administrado en internet o servidor dedicado dentro del ELEAM; proveedor, ubicación de datos, dominio, TLS y PostgreSQL administrado.
+- [x] Definir cómo se sirven los archivos estáticos. **Decidido y verificado (2026-11-04): WhiteNoise (`collectstatic` + middleware, verificado con Waitress y `DEBUG=False`); alternativamente, el proxy del hosting puede servir `STATIC_ROOT`.**
 - [ ] Definir presupuesto, disponibilidad, soporte y proceso de salida del proveedor.
 - [ ] Designar a la persona responsable de operar el sistema y a quien tendrá acceso técnico.
 
@@ -81,7 +81,9 @@ El piloto puede comenzar solo cuando existan, como mínimo:
 | 2026-11-04 | Suite completa | 115 pruebas pasan en PostgreSQL local, incluida la prueba del endpoint `/health/` |
 | 2026-11-04 | Humo del servidor | HTTP 200 en `/cuenta/login/`; 302 a login en `/`, `/admin/`, `/cuidados/`, `/incidentes/` |
 | 2026-11-04 | Respaldo y restauración PostgreSQL | Dump en `respaldos/` (formato `pg_dump --format=custom`), restauración en base de pruebas `eleam_restore_test`, `migrate --check` limpio y conteos idénticos (7 usuarios, 9 residentes, 9 contactos, 7 cuidados); la base de pruebas se eliminó; el volcado de ensayo también se eliminó |
-| 2026-11-04 | Cuentas demo | `seed_demo` crea 7 cuentas; se agregaron `medico@example.test` y `enfermera.jefe@example.test` |
+| 2026-11-04 | Cuenta demo nueva | `seed_demo` crea 7 cuentas; se agregaron `medico@example.test` y `enfermera.jefe@example.test` |
+| 2026-11-04 | Decisión de despliegue | El piloto se prepara como **servidor central** con PostgreSQL administrado y HTTPS |
+| 2026-11-04 | Estáticos y producción | `collectstatic` OK (135 archivos); WhiteNoise sirve estáticos con `DEBUG=False` (HTTP 200); `check --deploy` sin advertencias; humo con Waitress: `/health/` 200, login 200, `/` 302 |
 | 2026-10-30 | Dependencias de producción | `requirements-prod.txt` validado con `pip --dry-run` |
 | 2026-10-30 | Configuración de producción | `check --deploy` sin errores; advertencia opcional de HSTS preload documentada |
 | 2026-10-30 | Instalación limpia | `instalar.bat` en copia temporal; login HTTP 200 |

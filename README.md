@@ -80,7 +80,7 @@ La exportación CSV disponible se limita a la nómina de residentes. Los informe
 - Argon2 para el hash de contraseñas
 - pytest y pytest-django para las pruebas
 
-Los archivos de Bootstrap, Bootstrap Icons y HTMX están incluidos en `static/vendor/`, por lo que la interfaz funciona sin conexión a internet. Para producción, `requirements-prod.txt` agrega el controlador PostgreSQL y los servidores de aplicaciones (gunicorn en Linux, waitress en Windows).
+Los archivos de Bootstrap, Bootstrap Icons y HTMX están incluidos en `static/vendor/`, por lo que la interfaz funciona sin conexión a internet. Para producción, `requirements-prod.txt` agrega el controlador PostgreSQL y los servidores de aplicaciones (gunicorn en Linux, waitress en Windows); WhiteNoise sirve los archivos estáticos tras `collectstatic`, sin necesidad de nginx para los estáticos. La aplicación expone `/health/` (200/503) para monitoreo, sin autenticación y sin exponer datos.
 
 ## Inicio rápido en Windows
 
@@ -306,7 +306,7 @@ Los incrementos funcionales 1, 2 y 3 ya están implementados. El trabajo siguien
 
 1. Cerrar brechas técnicas: pruebas CSV (hechas), dependencias de producción (hechas), `check --deploy` (hecho) e instalación limpia y restauración SQLite (verificadas). Faltan PostgreSQL, HTTPS, estáticos y staging.
 2. Probar `instalar.bat` en un PC Windows físico limpio, sin Python ni entorno virtual previo; verificar arranque, actualización y conservación de la base local.
-3. Elegir el modo de uso: una copia local independiente por PC o una instalación central para que varios equipos compartan datos. Para el segundo caso, seguir [Plan para publicar la aplicación web](docs/PUBLICACION_WEB.md).
+3. **Modo de uso decidido (2026-11-04): servidor central.** El piloto se prepara como instalación central compartida con PostgreSQL administrado y HTTPS; sigue [Plan para publicar la aplicación web](docs/PUBLICACION_WEB.md). Queda pendiente elegir entre hosting administrado en internet o servidor dedicado dentro del ELEAM.
 4. Validar con el ELEAM flujos y permisos; completar revisión legal y de seguridad, respaldos restaurables, capacitación y procedimiento de continuidad.
 5. Iniciar un piloto controlado solo después de cumplir los criterios de preparación de la hoja de ruta y del [checklist del piloto](docs/CHECKLIST_PILOTO.md).
 

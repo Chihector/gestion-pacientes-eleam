@@ -5,3 +5,5 @@
 psycopg[binary]>=3.2,<4
 gunicorn>=23,<24
 waitress>=3.0,<4
+# Sirve STATIC_ROOT detrás de gunicorn/waitress (alternativa simple a nginx).
+whitenoise>=6.6,<7
