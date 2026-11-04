@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import connection
 from django.db.models import Prefetch
+from django.http import JsonResponse
 from django.utils import timezone
 from django.views.generic import TemplateView
 
@@ -10,6 +12,20 @@ from audit.models import AuditLog
 from care.models import CarePlan, DailyCareRecord
 from incidents.models import Incident
 from residents.models import Contact, Resident
+
+
+def health_check(request):
+    """Verificación liviana para monitoreo del despliegue.
+
+    No requiere autenticación ni expone datos: responde 200 si la aplicación
+    y la base de datos están operativas, y 503 en caso contrario.
+    """
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+    except Exception:
+        return JsonResponse({"status": "error"}, status=503)
+    return JsonResponse({"status": "ok"})
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):

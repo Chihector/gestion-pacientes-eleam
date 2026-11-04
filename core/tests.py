@@ -10,6 +10,13 @@ from residents.models import Contact, Resident
 pytestmark = pytest.mark.django_db
 
 
+def test_health_check_responds_ok_without_auth(client):
+    response = client.get(reverse("core:health"))
+
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
+
+
 def test_dashboard_requires_login(client):
     response = client.get(reverse("core:dashboard"))
     assert response.status_code == 302
