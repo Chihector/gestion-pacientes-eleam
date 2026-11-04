@@ -2,7 +2,7 @@
 
 Este documento define el alcance funcional de los tres primeros incrementos. Está escrito para validarlo con el equipo del ELEAM antes de ampliarlo. Todas las pruebas y demos usan **datos ficticios**.
 
-**Estado:** los incrementos 1, 2 y 3 están implementados. El proyecto está en la etapa de preparación del piloto; las historias marcadas como implementadas describen comportamiento técnico y todavía requieren validación institucional donde se indica.
+**Estado:** los incrementos 1, 2 y 3 están implementados y la suite tiene **115 pruebas automatizadas**. El proyecto está en la etapa de preparación del piloto; las historias marcadas como implementadas describen comportamiento técnico y todavía requieren validación institucional donde se indica.
 
 ## Alcance del incremento 1
 
@@ -14,6 +14,7 @@ Incluye:
 - Búsqueda y consulta de residentes.
 - Exportación CSV de la nómina de residentes para Dirección, Enfermería y Administración; la descarga queda auditada.
 - Ficha administrativa, información clínica relevante (alergias y antecedentes) y contactos.
+- Gestión de enfermedades/condiciones y medicamentos, incluida su edición posterior por Enfermería.
 - Creación, edición, archivado y reactivación de residentes.
 - Datos ficticios de demostración y pruebas automatizadas.
 
@@ -417,7 +418,37 @@ No reemplaza los avisos inmediatos, protocolos institucionales, evaluación prof
 - [x] La nómina incluye RUT, nombres y apellidos, nombre preferido, nacimiento, edad, sexo, habitación, previsión, estado, fecha de ingreso y nombre, parentesco y teléfono del contacto principal; el archivo es sensible.
 - [x] No existe exportación de registros de cuidados ni de reportes de incidentes.
 
+**Cobertura automatizada:** permisos por rol, filtros de búsqueda/estado/archivados y evento de auditoría de la descarga (7 pruebas).
+
 **Pendiente de validación institucional:** confirmar que los roles, campos exportados y manejo de archivos descargados son adecuados antes de usar datos reales.
+
+### US-25 — Mantener enfermedades y condiciones
+
+**Como** Enfermería **quiero** registrar, actualizar o retirar una enfermedad/condición de la ficha **para** mantener vigente la información clínica del residente.
+
+**Criterios de aceptación**
+
+- [x] Se registra el nombre, fecha de diagnóstico opcional, estado y observaciones.
+- [x] Enfermería puede editar la información después de guardarla y eliminarla con confirmación.
+- [x] Cada creación, edición y eliminación queda auditada.
+- [x] El resto de los roles autorizados puede consultar la información, pero no modificarla.
+- [x] Una ficha archivada bloquea estos cambios.
+
+**Prioridad:** alta.
+
+### US-26 — Mantener medicamentos
+
+**Como** Enfermería **quiero** registrar y actualizar los medicamentos de un residente **para** que el equipo autorizado consulte las indicaciones vigentes.
+
+**Criterios de aceptación**
+
+- [x] Se registra nombre, dosis, frecuencia u horario, vía, estado, profesional que indica, fechas opcionales, instrucciones y observaciones.
+- [x] Enfermería puede editar los datos después de guardarlos y eliminar el registro con confirmación.
+- [x] La fecha de término no puede ser anterior a la fecha de inicio.
+- [x] Cada creación, edición y eliminación queda auditada.
+- [x] El resto de los roles autorizados puede consultar la información, pero no modificarla; una ficha archivada bloquea cambios.
+
+**Prioridad:** alta.
 
 ## Requisitos no funcionales de los incrementos 1, 2 y 3
 
@@ -436,7 +467,8 @@ No reemplaza los avisos inmediatos, protocolos institucionales, evaluación prof
 ## Definición de terminado (incrementos 1, 2 y 3)
 
 - [x] Historias US-01 a US-23 implementadas y cubiertas técnicamente por pruebas.
-- [x] Exportación CSV de residentes implementada según US-24; su cobertura automatizada está pendiente de confirmar.
+- [x] Exportación CSV de residentes implementada según US-24 y cubierta por pruebas de permisos, filtros y auditoría.
+- [x] Gestión de enfermedades y medicamentos implementada según US-25 y US-26, con edición posterior y auditoría.
 - [x] Matriz de permisos cubierta por pruebas automatizadas en la suite pytest.
 - [x] Datos ficticios cargables con un comando seguro (`seed_demo`).
 - [x] README con instalación, lanzador de Windows (`iniciar.bat`), ejecución y pruebas.
@@ -444,4 +476,4 @@ No reemplaza los avisos inmediatos, protocolos institucionales, evaluación prof
 - [ ] Validación de categorías, turnos, campos, revisión y corrección con el equipo del ELEAM.
 - [ ] Revisión legal y de seguridad antes de usar datos reales.
 - [ ] Validar los campos, roles y criterios de seguimiento de incidentes con el ELEAM.
-- [ ] Añadir o confirmar pruebas automatizadas de permisos, filtros y auditoría de la exportación CSV.
+- [x] Añadir o confirmar pruebas automatizadas de permisos, filtros y auditoría de la exportación CSV.

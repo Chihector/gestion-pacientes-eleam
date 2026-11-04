@@ -2,6 +2,16 @@
 
 La aplicación ya es una web Django, pero el despliegue web compartido **todavía no está preparado ni validado**. Una publicación permitirá que varios PCs usen el mismo sistema desde el navegador y una base común. No requiere convertirlo en una aplicación móvil o separar frontend y backend.
 
+## Estado técnico verificado (2026-10-30)
+
+- 115 pruebas automatizadas pasan. La aplicación expone `/health/` (200 si Django y la base de datos están operativas, 503 en caso contrario) para monitoreo sin autenticación.
+- `requirements-prod.txt` declara `psycopg[binary]`, `gunicorn` y `waitress`.
+- `python manage.py check --deploy` no reporta errores con configuración de producción; solo queda la decisión opcional sobre HSTS preload.
+- La instalación limpia con `instalar.bat` fue verificada en una copia temporal y el login respondió HTTP 200.
+- Se probó un respaldo y restauración SQLite en una copia limpia.
+- PostgreSQL 18 local se conectó correctamente y las migraciones están aplicadas.
+- **Pendiente para publicación:** PostgreSQL de producción/staging, HTTPS, dominio, estáticos, respaldos cifrados y validación institucional. La conexión local no reemplaza estas tareas.
+
 ## Recomendación
 
 Para un piloto con varios usuarios, usa un único entorno central alojado en una plataforma compatible con Django, con PostgreSQL administrado y HTTPS. Los usuarios entran desde el navegador; no se instala una base independiente en cada PC. No expongas `python manage.py runserver` ni uses SQLite como base multiusuario de producción.
@@ -12,13 +22,30 @@ Si no se desea alojar el sistema en internet, una segunda opción es un servidor
 
 1. **Validar el producto:** confirmar con el ELEAM flujos, campos, roles, permisos, exportación y responsabilidades operativas.
 2. **Elegir responsable y alojamiento:** definir quién operará el sistema, quién tendrá acceso técnico, ubicación de datos, disponibilidad y soporte.
-3. **Completar dependencias de producción:** `requirements.txt` aún no declara un controlador PostgreSQL ni un servidor WSGI/ASGI de producción. Elegirlos y añadirlos al proyecto antes del despliegue.
+3. **Completar dependencias de producción:** ya se agregó `requirements-prod.txt` con `psycopg[binary]`, `gunicorn` y `waitress`. Elegir el servidor según el sistema operativo del hosting y validarlo en staging.
 4. **Preparar una configuración de producción:** configurar `DJANGO_DEBUG=False`, `DJANGO_SECRET_KEY` robusta, `DEMO_MODE=False`, `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS`, credenciales PostgreSQL y correo mediante variables/secretos del proveedor. No subir secretos al repositorio.
 5. **Servir la aplicación con HTTPS:** configurar dominio, certificado TLS y el servidor de aplicaciones elegido detrás de un proxy/servicio compatible. Activar la configuración de cookies seguras y HTTPS de Django.
 6. **Publicar archivos estáticos:** ejecutar `python manage.py collectstatic --noinput` en el proceso de despliegue y configurar cómo se sirve `STATIC_ROOT`; la infraestructura actual no incluye un servidor dedicado de estáticos.
-7. **Verificar despliegue:** ejecutar migraciones en la base correcta, `python manage.py check --deploy` y las pruebas automatizadas en un entorno de staging antes de producción.
-8. **Proteger y operar los datos:** configurar respaldos cifrados, probar restauraciones, limitar accesos, documentar retención, monitorear disponibilidad y establecer respuesta ante incidentes sin registrar información clínica en logs técnicos.
+7. **Verificar despliegue:** ejecutar migraciones en la base correcta, `python manage.py check --deploy` y las pruebas automatizadas en un entorno de staging antes de producción. La configuración actual pasa `check --deploy` sin errores; la única advertencia posible es `security.W021` (HSTS preload), que se resuelve con `SECURE_HSTS_PRELOAD=True` si el dominio asume ese compromiso.
+8. **Proteger y operar los datos:** configurar respaldos cifrados, probar restauraciones, limitar accesos, documentar retención, monitorear disponibilidad (por ejemplo con `/health/`) y establecer respuesta ante incidentes sin registrar información clínica en logs técnicos. Ya se probó una restauración SQLite local y un ensayo completo de respaldo y restauración PostgreSQL en la instalación local (dump → restauración → verificación de conteos y `migrate --check`, 2026-11-04); falta probar el respaldo y la restauración PostgreSQL en un entorno de staging con datos del ELEAM. Ver [Respaldo y restauración](RESPALDO_Y_RESTAURACION.md).
 9. **Hacer un piloto controlado:** empezar con un grupo pequeño autorizado, mantener el proceso actual como respaldo y ampliar solo tras revisar resultados.
+
+## Comandos de referencia
+
+```bash
+# Dependencias de producción
+python -m pip install -r requirements-prod.txt
+
+# Estáticos y migraciones
+python manage.py collectstatic --noinput
+python manage.py migrate
+
+# Servidor de aplicaciones (elegir uno)
+gunicorn config.wsgi:application --bind 0.0.0.0:8000
+waitress-serve --listen=0.0.0.0:8000 config.wsgi:application
+```
+
+No uses `python manage.py runserver` en producción. El proxy o servicio de hosting debe encargarse de HTTPS y de servir `STATIC_ROOT` si no se usa una capa específica para estáticos.
 
 ## No cargar datos reales todavía
 

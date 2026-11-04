@@ -71,7 +71,7 @@ Implementar en incrementos pequeños:
 2. Ficha del residente y contactos. **Implementado.**
 3. Registros diarios, plan de cuidados, correcciones y revisión de Enfermería. **Implementado y probado técnicamente; pendiente de validación con el equipo.**
 4. Incidentes, consulta e informes básicos. **Implementado y probado técnicamente; pendiente de validación con el equipo.**
-5. Pruebas automatizadas, respaldos y documentación operativa. **En curso: 83 pruebas pasan en el entorno actual; instalación local portable documentada; respaldos y operación para piloto pendientes.**
+5. Pruebas automatizadas, respaldos y documentación operativa. **En curso: 115 pruebas pasan; PostgreSQL 18 local y sus migraciones verificados; instalación limpia y restauración SQLite y PostgreSQL (ensayo local) verificadas; publicación, respaldo/restauración PostgreSQL en staging y operación para piloto pendientes.**
 
 Construir primero con datos ficticios. Revisar cada entrega con el personal del ELEAM. Registrar los cambios de forma que una corrección no borre silenciosamente el dato original.
 
@@ -79,13 +79,18 @@ Construir primero con datos ficticios. Revisar cada entrega con el personal del 
 
 **Estado actual del proyecto:** los incrementos funcionales 1, 2 y 3 están implementados. El trabajo actual es verificar con el ELEAM las reglas y permisos, y completar la preparación legal, de seguridad y operación; no hay un incremento funcional 4 definido todavía.
 
+**Progreso técnico verificado el 2026-10-30:** 114 pruebas pasaron en PostgreSQL 18 local; `manage.py check` no reportó problemas y `makemigrations --check --dry-run` no detectó cambios pendientes; las migraciones de enfermedades y medicamentos estaban aplicadas. La exportación CSV tiene pruebas de permisos, filtros y auditoría; `requirements-prod.txt` declara PostgreSQL y servidores de aplicaciones; `check --deploy` no arroja errores con configuración de producción (solo queda la decisión opcional de HSTS preload); `instalar.bat` funcionó en una copia limpia temporal y el login respondió HTTP 200; se probó un respaldo y restauración SQLite en una copia limpia; la prueba funcional en navegador confirmó permisos por rol, exportación CSV y auditoría, incluida la corrección de un 500 al auditar una exportación. El PostgreSQL local no equivale a un despliegue productivo ni a una restauración verificada en staging. El detalle está en el [checklist del piloto](docs/CHECKLIST_PILOTO.md).
+
+**Progreso técnico verificado el 2026-11-04:** la migración `accounts.0002_alter_user_role` (roles `MEDICO` y `ENFERMERA_JEFE` en las opciones del campo `role`) se generó y aplicó; `makemigrations --check --dry-run` no detecta cambios pendientes; la suite completa tiene **115 pruebas** y todas pasan en PostgreSQL local; el servidor de desarrollo respondió HTTP 200 en `/cuenta/login/` y 302 a login en `/`, `/admin/`, `/cuidados/` e `/incidentes/`; `seed_demo` agregó las cuentas ficticias `medico@example.test` y `enfermera.jefe@example.test` (total: 7 cuentas demo); se agregó el endpoint `/health/` para monitoreo (200 operativo, 503 si la base de datos falla); se ensayó un respaldo y restauración PostgreSQL completo en una base de pruebas local (dump → restauración → `migrate --check` limpio → conteos idénticos al origen → base de pruebas eliminada); la documentación se actualizó y la copia SQLite antigua se resguardó en `respaldos/`. Persiste el pendiente de ensayar respaldo/restauración PostgreSQL en staging y de completar validación institucional, legal y operativa.
+
 - Probar permisos: cada rol ve y modifica solo lo autorizado.
 - Probar casos normales y errores: campos incompletos, duplicados, correcciones y usuarios desactivados.
-- Probar `instalar.bat` en un PC Windows limpio y comprobar el arranque y la actualización sin perder la base local.
-- Añadir o confirmar pruebas automatizadas de permisos, filtros y auditoría de la exportación CSV de residentes.
+- [x] Probar `instalar.bat` en una copia limpia y comprobar el arranque y la actualización sin perder la base local. **Verificado en copia temporal; falta repetirlo en un PC Windows físico sin Python ni entorno virtual.**
+- [x] Añadir o confirmar pruebas automatizadas de permisos, filtros y auditoría de la exportación CSV de residentes.
 - Probar que el historial de cambios es consultable por personal autorizado.
 - Revisar el alcance de la exportación CSV de residentes, sus campos, permisos y tratamiento de los archivos descargados.
-- Ensayar una restauración desde un respaldo.
+- [x] Ensayar una restauración desde un respaldo SQLite.
+- [x] Ensayar una restauración completa sobre PostgreSQL local (2026-11-04: dump → restauración en base de pruebas → verificación de conteos y `migrate --check`). **Falta repetirla en staging.**
 - Preparar un procedimiento manual temporal si se cae el sistema o internet.
 - Decidir si el piloto usará un PC local por usuario o un servidor central para acceso compartido. La instalación actual es local a un PC; la publicación web aún debe prepararse.
 - Capacitar a usuarios y definir un canal para reportar problemas.
@@ -115,7 +120,7 @@ Construir primero con datos ficticios. Revisar cada entrega con el personal del 
 
 - [ ] Número de residentes, funcionarios y turnos que debe soportar el piloto.
 - [ ] Dispositivos disponibles y calidad de internet en las áreas de atención.
-- [ ] Roles definitivos y permisos asociados.
+- [x] Roles definitivos y permisos asociados. **REVISADO: Dirección, Médico/a, Enfermera/o Jefe, Enfermería, Técnico/a, Cuidador/a, Administración**
 - [ ] Proveedor de alojamiento y ubicación de los datos.
 - [ ] Requisitos de conservación, acceso, corrección y eliminación de datos.
 - [ ] Responsable de soporte y respuesta ante incidentes.

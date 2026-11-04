@@ -3,8 +3,8 @@
 ## Principios
 
 - **Minimizar datos:** solo lo necesario para identificar, contactar y cuidar con seguridad.
-- **No almacenar diagnósticos estructurados en el MVP:** "antecedentes relevantes" y "alergias" son texto libre acotado, revisado por Enfermería.
-- **No eliminar información clínica:** las fichas se archivan y los registros de cuidado se corrigen con una nueva versión; las correcciones y revisiones quedan en auditoría.
+- **Enfermedades y medicamentos editables por Enfermería:** diagnósticos y remedios son gestionados por Enfermería y pueden ser editados posteriormente tras guardarse (cambio de dosis, estado activo/suspendido, indicaciones) para mantener actualizada la prescripción.
+- **Conservar la trazabilidad clínica:** las fichas se archivan y los registros de cuidado se corrigen con una nueva versión; las enfermedades y medicamentos pueden actualizarse o eliminarse por Enfermería, dejando cada cambio auditado.
 - **Planes acordados, no generados:** el plan de cuidados lo escribe Enfermería; el sistema no genera objetivos, acciones ni recomendaciones clínicas.
 - **Separar lo administrativo de lo clínico:** son formularios y permisos distintos.
 - **No usar datos reales** durante el desarrollo, las pruebas ni las demostraciones.
@@ -25,6 +25,8 @@ erDiagram
     RESIDENT ||--o{ INCIDENT : "tiene"
     CARE_PLAN ||--o{ DAILY_CARE_RECORD : "orienta"
     DAILY_CARE_RECORD ||--o| DAILY_CARE_RECORD : "corrige"
+    RESIDENT ||--o{ DISEASE : "presenta"
+    RESIDENT ||--o{ MEDICATION : "recibe"
     RESIDENT ||--o{ AUDITLOG : "origina (referencia lógica)"
 
     USER {
@@ -71,6 +73,38 @@ erDiagram
         string phone
         string email
         boolean is_primary
+        text notes
+        datetime created_at
+        datetime updated_at
+        bigint created_by_id FK
+        bigint updated_by_id FK
+    }
+
+    DISEASE {
+        bigint id PK
+        bigint resident_id FK
+        string name
+        date diagnosed_date
+        string status
+        text notes
+        datetime created_at
+        datetime updated_at
+        bigint created_by_id FK
+        bigint updated_by_id FK
+    }
+
+    MEDICATION {
+        bigint id PK
+        bigint resident_id FK
+        string name
+        string dose
+        string frequency
+        string route
+        string status
+        string prescribed_by
+        date start_date
+        date end_date
+        text instructions
         text notes
         datetime created_at
         datetime updated_at
@@ -166,7 +200,7 @@ erDiagram
 | `email` | correo | Sí | Único, normalizado en minúsculas. Es el identificador de acceso. |
 | `first_name` | texto (150) | Sí | Nombre de la persona. |
 | `last_name` | texto (150) | Sí | Apellidos. |
-| `role` | selección | Sí | `DIRECCION`, `ENFERMERIA`, `TECNICO`, `CUIDADOR`, `ADMINISTRACION`. |
+| `role` | selección | Sí | `DIRECCION`, `MEDICO`, `ENFERMERA_JEFE`, `ENFERMERIA`, `TECNICO`, `CUIDADOR`, `ADMINISTRACION`. |
 | `is_active` | booleano | Sí | Una cuenta desactivada no puede iniciar sesión. No se elimina. |
 | `is_staff` | booleano | Sí | Solo para superusuarios técnicos; no se activa por rol. |
 | `is_superuser` | booleano | Sí | Acceso técnico excepcional. |
@@ -227,6 +261,49 @@ erDiagram
 2. Eliminar un contacto pide confirmación y deja un registro de auditoría con el snapshot anterior.
 3. Si se elimina el contacto principal, no se promueve otro automáticamente; la ficha muestra una advertencia.
 4. Los contactos de una ficha archivada son de solo lectura hasta reactivarla.
+
+### `residents.Disease` — enfermedad o condición
+
+| Campo | Tipo | Obligatorio | Reglas |
+|---|---|:---:|---|
+| `resident` | FK | Sí | Residente al que pertenece la condición. |
+| `name` | texto (150) | Sí | Nombre de la enfermedad o condición. |
+| `diagnosed_date` | fecha | No | Fecha de diagnóstico, si se conoce. |
+| `status` | selección | Sí | `ACTIVA`, `CONTROLADA`, `EN_TRATAMIENTO` o `RESUELTA`; por defecto `ACTIVA`. |
+| `notes` | texto | No | Observaciones o indicaciones clínicas. |
+| `created_at`, `updated_at` | fecha/hora | Sí | Tiempos de auditoría del modelo. |
+| `created_by`, `updated_by` | FK usuario | No | Actor que creó o modificó el registro. |
+
+**Reglas**
+
+1. Solo Médico/a, Enfermera/o Jefe y Enfermería crean, editan y eliminan enfermedades/condiciones desde la aplicación; los demás roles autorizados pueden consultarlas.
+2. Se permite editar después de guardar para mantener actualizado el estado y las observaciones. Toda creación, edición o eliminación queda auditada.
+3. Una ficha archivada bloquea estas operaciones.
+4. El sistema registra información entregada por el equipo; no diagnostica ni recomienda tratamientos.
+
+### `residents.Medication` — medicamento
+
+| Campo | Tipo | Obligatorio | Reglas |
+|---|---|:---:|---|
+| `resident` | FK | Sí | Residente al que pertenece el tratamiento. |
+| `name` | texto (150) | Sí | Nombre del medicamento. |
+| `dose` | texto (100) | Sí | Dosis según la indicación profesional. |
+| `frequency` | texto (120) | Sí | Frecuencia u horario indicado. |
+| `route` | selección | Sí | Vía: oral, sublingual, subcutánea, intramuscular, tópica, oftálmica, ótica, inhalatoria, rectal u otra. |
+| `status` | selección | Sí | `ACTIVO`, `SOS`, `SUSPENDIDO` o `FINALIZADO`; por defecto `ACTIVO`. |
+| `prescribed_by` | texto (150) | No | Profesional que indica. |
+| `start_date`, `end_date` | fecha | No | Fechas del tratamiento; término no puede preceder al inicio. |
+| `instructions` | texto | No | Indicaciones especiales de administración. |
+| `notes` | texto | No | Observaciones. |
+| `created_at`, `updated_at` | fecha/hora | Sí | Tiempos de auditoría del modelo. |
+| `created_by`, `updated_by` | FK usuario | No | Actor que creó o modificó el registro. |
+
+**Reglas**
+
+1. Solo Médico/a, Enfermera/o Jefe y Enfermería crean, editan y eliminan medicamentos desde la aplicación; los demás roles autorizados pueden consultarlos.
+2. Se permite editar después de guardar para actualizar dosis, horario, estado, fechas o instrucciones. Toda creación, edición o eliminación queda auditada.
+3. Una ficha archivada bloquea estas operaciones.
+4. El registro no prescribe ni valida clínicamente un tratamiento; Enfermería debe mantener los datos conforme a la indicación profesional.
 
 ### `care.CarePlan` — plan de cuidados
 
@@ -336,7 +413,7 @@ erDiagram
 |---|---|---|
 | Identificación | Nombre, RUT, fecha de nacimiento, habitación | Acceso autenticado; auditoría de cambios; no logs. |
 | Contacto | Teléfono, correo, parentesco | Acceso autenticado; no exportación masiva en el MVP. |
-| Salud | Alergias, antecedentes, observaciones | Acceso autenticado; edición solo Enfermería; no logs. |
+| Salud | Alergias, antecedentes, enfermedades, medicamentos y observaciones | Acceso autenticado; edición solo Enfermería; no logs técnicos. Los cambios se guardan en la auditoría protegida. |
 | Cuidados | Plan, registros por turno, correcciones y revisiones | Acceso autenticado; registro por roles autorizados; no logs. |
 | Auditoría | Actor, cambios, IP | Solo Dirección y Administración; retención definida. |
 | Credenciales | Hash de contraseña | Nunca se muestra, exporta ni audita. |
@@ -351,7 +428,7 @@ erDiagram
 - **Inmutabilidad:** un registro de cuidado no se actualiza ni se borra; la corrección crea otra fila y conserva la anterior.
 - **Revisión:** el estado pendiente se deriva de `requires_nursing_review=True`, `reviewed_at` vacío y `status=VIGENTE`.
 - **Planes:** un plan cerrado no se elimina; se conserva para el historial y puede reactivarse con auditoría.
-- **Exportación:** la nómina de residentes se puede descargar como CSV para Dirección, Enfermería y Administración; la descarga audita filtros y total. El archivo contiene datos personales y requiere controles de acceso y manejo definidos por el ELEAM. No se exportan cuidados ni incidentes. Las exportaciones adicionales no están implementadas.
+ - **Exportación:** la nómina de residentes se puede descargar como CSV para Dirección, Enfermera/o Jefe y Administración; la descarga audita filtros y total. El archivo contiene datos personales y requiere controles de acceso y manejo definidos por el ELEAM. No se exportan cuidados ni incidentes. Las exportaciones adicionales no están implementadas.
 - **Respaldo:** la base de producción (PostgreSQL) se respalda cifrada; las restauraciones se prueban.
 
 ## Decisiones pendientes
