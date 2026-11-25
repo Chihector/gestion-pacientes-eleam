@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import csv
+import io
 from datetime import date, timedelta
 
 import pytest
@@ -546,3 +548,106 @@ def test_seed_demo_creates_care_data_idempotently(settings):
     call_command("seed_demo", verbosity=0)
     assert CarePlan.objects.count() == first_plans
     assert DailyCareRecord.objects.count() == first_records
+
+
+# --- Exportación CSV de registros de cuidados -------------------------------
+
+
+@pytest.mark.parametrize(
+    "role,expected",
+    [
+        (Role.DIRECCION, 200),
+        (Role.ENFERMERA_JEFE, 200),
+        (Role.ADMINISTRACION, 403),
+        (Role.MEDICO, 403),
+        (Role.ENFERMERIA, 403),
+        (Role.TECNICO, 403),
+        (Role.CUIDADOR, 403),
+    ],
+)
+def test_care_export_is_limited_to_report_roles(
+    client, make_user, resident, role, expected
+):
+    user = make_user(f"export-{role.lower()}@example.test", role)
+    make_record(resident, user)
+    client.force_login(user)
+
+    response = client.get(reverse("care:record_export"))
+
+    assert response.status_code == expected
+    if expected == 200:
+        assert response["Content-Type"].startswith("text/csv")
+        assert "attachment;" in response["Content-Disposition"]
+
+
+def test_care_export_applies_filters_and_is_audited(
+    client, direction_user, nurse_user, resident
+):
+    today = timezone.localdate()
+    make_record(
+        resident,
+        nurse_user,
+        observations="Observación para el próximo turno.",
+    )
+    make_record(
+        resident,
+        nurse_user,
+        recorded_at=timezone.now() - timedelta(days=3),
+        description="Registro de otro día",
+    )
+    client.force_login(direction_user)
+
+    response = client.get(
+        reverse("care:record_export"),
+        {"fecha": today.isoformat(), "turno": DailyCareRecord.Shift.MANANA},
+    )
+
+    assert response.status_code == 200
+    content = response.content.decode("utf-8-sig")
+    rows = list(csv.reader(io.StringIO(content)))
+    assert len(rows) == 2  # cabecera + un registro
+    assert "Observación para el próximo turno." in content
+    assert "Registro de otro día" not in content
+
+    log = AuditLog.objects.get(
+        action=AuditLog.Action.EXPORT,
+        model_label="care.DailyCareRecord",
+    )
+    assert log.actor == direction_user
+    assert log.changes["total"] == 1
+    assert log.changes["filtros"]["turno"] == DailyCareRecord.Shift.MANANA
+
+
+def test_care_export_can_include_all_dates_corrected_and_pending(
+    client, direction_user, nurse_user, resident
+):
+    make_record(
+        resident,
+        nurse_user,
+        recorded_at=timezone.now() - timedelta(days=3),
+        status=DailyCareRecord.Status.CORREGIDO,
+        description="Versión corregida",
+    )
+    make_record(
+        resident,
+        nurse_user,
+        requires_nursing_review=True,
+        description="Pendiente de revisión",
+    )
+    client.force_login(direction_user)
+
+    all_response = client.get(
+        reverse("care:record_export"), {"fecha": "todas", "corregidos": "1"}
+    )
+    assert all_response.status_code == 200
+    all_content = all_response.content.decode("utf-8-sig")
+    assert "Versión corregida" in all_content
+    assert "Pendiente de revisión" in all_content
+
+    pending_response = client.get(
+        reverse("care:record_export"), {"fecha": "todas", "pendientes": "1"}
+    )
+    assert pending_response.status_code == 200
+    pending_content = pending_response.content.decode("utf-8-sig")
+    assert "Pendiente de revisión" in pending_content
+    assert "Versión corregida" not in pending_content

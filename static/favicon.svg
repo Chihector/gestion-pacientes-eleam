@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="ELEAM">
+  <rect width="64" height="64" rx="14" fill="#0d6efd"/>
+  <path d="M32 51C32 51 11 37.5 11 24.5C11 17 16.6 12 23 12C27 12 30.2 13.9 32 16.8C33.8 13.9 37 12 41 12C47.4 12 53 17 53 24.5C53 37.5 32 51 32 51Z" fill="#ffffff"/>
+  <path d="M17 31H24L27 25L31 38L35 29L38 31H47" fill="none" stroke="#0d6efd" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

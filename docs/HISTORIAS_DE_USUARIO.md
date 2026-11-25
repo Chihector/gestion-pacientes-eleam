@@ -2,7 +2,7 @@
 
 Este documento define el alcance funcional de los tres primeros incrementos. Está escrito para validarlo con el equipo del ELEAM antes de ampliarlo. Todas las pruebas y demos usan **datos ficticios**.
 
-**Estado:** los incrementos 1, 2 y 3 están implementados y la suite tiene **115 pruebas automatizadas**. El proyecto está en la etapa de preparación del piloto; las historias marcadas como implementadas describen comportamiento técnico y todavía requieren validación institucional donde se indica.
+**Estado:** los incrementos 1, 2 y 3 están implementados y la suite tiene **132 pruebas automatizadas**. El proyecto está en la etapa de preparación del piloto; las historias marcadas como implementadas describen comportamiento técnico y todavía requieren validación institucional donde se indica.
 
 ## Alcance del incremento 1
 
@@ -45,7 +45,7 @@ No incluye todavía:
 
 ## Alcance del incremento 3
 
-Incluye reporte confidencial de incidentes, seguimiento y cierre por roles autorizados, consulta y reportes agregados en un período. Los informes son solo de lectura y no exportan datos. Los roles y campos implementados siguen la propuesta del prototipo y deben validarse con el equipo del ELEAM.
+Incluye reporte confidencial de incidentes, seguimiento y cierre por roles autorizados, consulta, reportes agregados en un período y exportación CSV auditable para Dirección, Médico/a y Enfermera/o Jefe. Los roles y campos implementados siguen la propuesta del prototipo y deben validarse con el equipo del ELEAM.
 
 No reemplaza los avisos inmediatos, protocolos institucionales, evaluación profesional ni obligaciones legales de notificación.
 
@@ -406,7 +406,7 @@ No reemplaza los avisos inmediatos, protocolos institucionales, evaluación prof
 
 ## Funcionalidad adicional implementada
 
-**Como** Dirección, Enfermería o Administración **quiero** descargar la nómina filtrada de residentes **para** realizar tareas autorizadas.
+**Como** Dirección, Enfermería o Administración **quiero** descargar la nómina filtrada de residentes **para** realizar tareas autorizadas. También se implementaron exportaciones de registros de cuidados (Dirección y Enfermera/o Jefe) y del reporte de incidentes (Dirección, Médico/a y Enfermera/o Jefe).
 
 ### US-24 — Exportar la nómina de residentes
 
@@ -416,11 +416,31 @@ No reemplaza los avisos inmediatos, protocolos institucionales, evaluación prof
 - [x] Se aplican los filtros de búsqueda, estado y fichas archivadas de la lista de residentes.
 - [x] La descarga registra en auditoría los filtros utilizados y el total de fichas exportadas.
 - [x] La nómina incluye RUT, nombres y apellidos, nombre preferido, nacimiento, edad, sexo, habitación, previsión, estado, fecha de ingreso y nombre, parentesco y teléfono del contacto principal; el archivo es sensible.
-- [x] No existe exportación de registros de cuidados ni de reportes de incidentes.
-
 **Cobertura automatizada:** permisos por rol, filtros de búsqueda/estado/archivados y evento de auditoría de la descarga (7 pruebas).
 
-**Pendiente de validación institucional:** confirmar que los roles, campos exportados y manejo de archivos descargados son adecuados antes de usar datos reales.
+### US-27 — Exportar registros de cuidados
+
+**Como** Dirección o Enfermera/o Jefe **quiero** descargar los registros de cuidados filtrados **para** analizar el turno con la información vigente.
+
+- [x] Solo Dirección y Enfermera/o Jefe pueden acceder a la exportación CSV.
+- [x] Se aplican los filtros de fecha (incluido «todas»), turno, categoría, residente, texto, pendientes de revisión y corregidos.
+- [x] El archivo incluye identificación del residente, fecha y hora, turno, categoría, descripción, observaciones, estado de revisión y quién registró; se omiten las versiones corregidas salvo solicitud explícita.
+- [x] La descarga registra en auditoría los filtros y el total de registros.
+
+**Cobertura automatizada:** permisos por rol, filtros, contenido del CSV y auditoría (9 pruebas).
+
+### US-28 — Exportar el reporte de incidentes
+
+**Como** Dirección, Médico/a o Enfermera/o Jefe **quiero** descargar el reporte filtrado de incidentes **para** el análisis agregado con seguimiento.
+
+- [x] Solo Dirección, Médico/a y Enfermera/o Jefe pueden acceder a la exportación CSV.
+- [x] Se aplican los filtros de período, tipo y estado del formulario de informes.
+- [x] El archivo incluye residente, tipo, gravedad percibida, lugar, hechos, acciones inmediatas, notificaciones, estado y datos de cierre.
+- [x] La descarga registra en auditoría los filtros y el total de incidentes; Administración sigue sin acceso a los eventos detallados.
+
+**Cobertura automatizada:** permisos por rol, filtros, contenido del CSV y auditoría (8 pruebas).
+
+**Pendiente de validación institucional:** confirmar que los roles, campos exportados y manejo de los archivos descargados son adecuados antes de usar datos reales.
 
 ### US-25 — Mantener enfermedades y condiciones
 
@@ -466,8 +486,8 @@ No reemplaza los avisos inmediatos, protocolos institucionales, evaluación prof
 
 ## Definición de terminado (incrementos 1, 2 y 3)
 
-- [x] Historias US-01 a US-23 implementadas y cubiertas técnicamente por pruebas.
-- [x] Exportación CSV de residentes implementada según US-24 y cubierta por pruebas de permisos, filtros y auditoría.
+- [x] Historias US-01 a US-28 implementadas y cubiertas técnicamente por pruebas.
+- [x] Exportaciones CSV de residentes, cuidados e incidentes implementadas según US-24, US-27 y US-28 y cubiertas por pruebas de permisos, filtros, contenido y auditoría.
 - [x] Gestión de enfermedades y medicamentos implementada según US-25 y US-26, con edición posterior y auditoría.
 - [x] Matriz de permisos cubierta por pruebas automatizadas en la suite pytest.
 - [x] Datos ficticios cargables con un comando seguro (`seed_demo`).
@@ -476,4 +496,4 @@ No reemplaza los avisos inmediatos, protocolos institucionales, evaluación prof
 - [ ] Validación de categorías, turnos, campos, revisión y corrección con el equipo del ELEAM.
 - [ ] Revisión legal y de seguridad antes de usar datos reales.
 - [ ] Validar los campos, roles y criterios de seguimiento de incidentes con el ELEAM.
-- [x] Añadir o confirmar pruebas automatizadas de permisos, filtros y auditoría de la exportación CSV.
+- [x] Añadir o confirmar pruebas automatizadas de permisos, filtros y auditoría de las tres exportaciones CSV (24 pruebas en total).

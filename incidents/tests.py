@@ -1,3 +1,5 @@
+import csv
+import io
 from datetime import datetime, time, timedelta
 
 import pytest
@@ -265,3 +267,77 @@ def test_administration_cannot_read_incident_audit_payload(
         log.model_label != "incidents.Incident"
         for log in dashboard_response.context["recent_logs"]
     )
+
+
+# --- Exportación CSV de incidentes ------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "role,expected",
+    [
+        (Role.DIRECCION, 200),
+        (Role.MEDICO, 200),
+        (Role.ENFERMERA_JEFE, 200),
+        (Role.ADMINISTRACION, 403),
+        (Role.ENFERMERIA, 403),
+        (Role.TECNICO, 403),
+        (Role.CUIDADOR, 403),
+    ],
+)
+def test_incident_export_is_limited_to_report_roles(
+    client, make_user, resident, caregiver_user, role, expected
+):
+    user = make_user(f"export-{role.lower()}@example.test", role)
+    make_incident(resident, caregiver_user)
+    client.force_login(user)
+
+    response = client.get(reverse("incidents:export"))
+
+    assert response.status_code == expected
+    if expected == 200:
+        assert response["Content-Type"].startswith("text/csv")
+        assert "attachment;" in response["Content-Disposition"]
+
+
+def test_incident_export_applies_filters_and_is_audited(
+    client, direction_user, caregiver_user, resident
+):
+    today = timezone.localdate()
+    make_incident(
+        resident,
+        caregiver_user,
+        occurred_at=timezone.make_aware(datetime.combine(today, time(12, 0))),
+        description="Incidente reciente",
+        notified_to="Enfermería de turno",
+    )
+    make_incident(
+        resident,
+        caregiver_user,
+        occurred_at=timezone.make_aware(
+            datetime.combine(today - timedelta(days=40), time(12, 0))
+        ),
+        description="Incidente antiguo",
+    )
+    client.force_login(direction_user)
+
+    response = client.get(
+        reverse("incidents:export"),
+        {"desde": today.isoformat(), "hasta": today.isoformat()},
+    )
+
+    assert response.status_code == 200
+    content = response.content.decode("utf-8-sig")
+    rows = list(csv.reader(io.StringIO(content)))
+    assert len(rows) == 2  # cabecera + un registro
+    assert rows[0][10] == "Notificaciones realizadas"
+    assert "Incidente reciente" in content
+    assert "Incidente antiguo" not in content
+    assert "Enfermería de turno" in content
+
+    log = AuditLog.objects.get(
+        action=AuditLog.Action.EXPORT,
+        model_label="incidents.Incident",
+    )
+    assert log.actor == direction_user
+    assert log.changes["total"] == 1
+    assert log.changes["filtros"]["desde"] == today.isoformat()

@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib.staticfiles.storage import staticfiles_storage
 from django.urls import include, path
 from django.views.generic import RedirectView
 
@@ -19,4 +20,10 @@ urlpatterns = [
     path("cuidados/", include("care.urls")),
     path("incidentes/", include("incidents.urls")),
     path("auditoria/", include("audit.urls")),
+    # Chromium solicita /favicon.ico aunque la plantilla declare un SVG.
+    path(
+        "favicon.ico",
+        RedirectView.as_view(url=staticfiles_storage.url("favicon.svg"), permanent=False),
+        name="favicon",
+    ),
 ]

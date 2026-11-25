@@ -6,8 +6,9 @@ Este checklist operacionaliza la etapa 5 de la [hoja de ruta](../HOJA_DE_RUTA.md
 
 ## 1. Brechas técnicas
 
-- [x] Suite automatizada completa: **115 pruebas** pasan en PostgreSQL local (`pytest`).
-- [x] Pruebas de la exportación CSV: permisos por rol, filtros y auditoría de la descarga.
+- [x] Suite automatizada completa: **132 pruebas** pasan con `pytest` (SQLite en memoria) y con `DJANGO_SETTINGS_MODULE=config.settings pytest` (PostgreSQL local).
+- [x] Pruebas de las tres exportaciones CSV (residentes, cuidados e incidentes): permisos por rol, filtros, contenido y auditoría de la descarga.
+- [x] Cobertura de las aplicaciones medida con `pytest-cov`: 92 %.
 - [x] Dependencias de producción declaradas en `requirements-prod.txt` (psycopg, gunicorn y waitress).
 - [x] `python manage.py check` sin errores en desarrollo.
 - [x] `python manage.py check --deploy` con configuración de producción: sin errores; la única advertencia era `security.W021` (HSTS preload), que se elimina al definir `SECURE_HSTS_PRELOAD=True` y asumir el compromiso del dominio.
@@ -36,7 +37,7 @@ Este checklist operacionaliza la etapa 5 de la [hoja de ruta](../HOJA_DE_RUTA.md
 - [ ] Acordar la ventana para corregir registros y el tratamiento de días anteriores.
 - [ ] Validar campos, gravedad percibida, seguimiento y cierre de incidentes.
 - [ ] Acordar indicadores agregados y quién puede consultarlos.
-- [ ] Confirmar si se mantiene la exportación CSV de residentes y cómo se manejan los archivos descargados.
+- [ ] Confirmar si se mantienen las exportaciones CSV de residentes, cuidados e incidentes y cómo se manejan los archivos descargados.
 - [ ] Revisar la interfaz con al menos una persona de Enfermería y una de Administración.
 
 ## 4. Revisión legal y de seguridad
@@ -79,6 +80,9 @@ El piloto puede comenzar solo cuando existan, como mínimo:
 | 2026-10-30 | PostgreSQL local | Conexión a `127.0.0.1:5432`; migraciones aplicadas; `manage.py check` y `makemigrations --check --dry-run` correctos |
 | 2026-11-04 | Migración de roles | `accounts.0002_alter_user_role` (roles `MEDICO` y `ENFERMERA_JEFE`) generada y aplicada; `makemigrations --check --dry-run` sin cambios |
 | 2026-11-04 | Suite completa | 115 pruebas pasan en PostgreSQL local, incluida la prueba del endpoint `/health/` |
+| 2026-11-25 | Suite completa y cobertura | 132 pruebas pasan en SQLite en memoria y en PostgreSQL local; cobertura del 92 % con `pytest-cov` |
+| 2026-11-25 | Exportaciones CSV | 17 pruebas nuevas para cuidados e incidentes; corregidos cuatro nombres de campo inexistentes que causaban HTTP 500 |
+| 2026-11-25 | Prueba funcional en navegador | Login con rol Dirección, panel, `/health/` y tres exportaciones en HTTP 200; sin errores en consola; se añadió favicon SVG |
 | 2026-11-04 | Humo del servidor | HTTP 200 en `/cuenta/login/`; 302 a login en `/`, `/admin/`, `/cuidados/`, `/incidentes/` |
 | 2026-11-04 | Respaldo y restauración PostgreSQL | Dump en `respaldos/` (formato `pg_dump --format=custom`), restauración en base de pruebas `eleam_restore_test`, `migrate --check` limpio y conteos idénticos (7 usuarios, 9 residentes, 9 contactos, 7 cuidados); la base de pruebas se eliminó; el volcado de ensayo también se eliminó |
 | 2026-11-04 | Cuenta demo nueva | `seed_demo` crea 7 cuentas; se agregaron `medico@example.test` y `enfermera.jefe@example.test` |

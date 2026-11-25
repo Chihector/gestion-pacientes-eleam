@@ -36,7 +36,7 @@ Se ejecutó `instalar.bat` sobre una copia temporal sin `db.sqlite3`, usando el 
 
 ## Verificación local (2026-11-04)
 
-Sobre la instalación local con PostgreSQL 18 se confirmó: la migración `accounts.0002_alter_user_role` (roles `MEDICO` y `ENFERMERA_JEFE` en las opciones del campo) aplicada y `makemigrations --check --dry-run` sin cambios pendientes; la suite completa en **115 pruebas**; el servidor de desarrollo respondió HTTP 200 en `/cuenta/login/` y 302 (redirección a login) en `/`, `/admin/`, `/cuidados/` e `/incidentes/`; `seed_demo` agregó las cuentas ficticias `medico@example.test` y `enfermera.jefe@example.test` (total: 7 cuentas demo); y se ensayó un respaldo/restauración PostgreSQL completo (dump → restauración en una base de pruebas → `migrate --check` limpio → conteos idénticos; la base de pruebas se eliminó). Ver [Respaldo y restauración](RESPALDO_Y_RESTAURACION.md). La copia SQLite antigua se movió a `respaldos/db_2026-10-30_legado-sqlite.sqlite3`; la instalación usa PostgreSQL según `.env`.
+Sobre la instalación local con PostgreSQL 18 se confirmó: la migración `accounts.0002_alter_user_role` (roles `MEDICO` y `ENFERMERA_JEFE` en las opciones del campo) aplicada y `makemigrations --check --dry-run` sin cambios pendientes; la suite completa en **115 pruebas** (posteriormente ampliada a 132 el 2026-11-25); el servidor de desarrollo respondió HTTP 200 en `/cuenta/login/` y 302 (redirección a login) en `/`, `/admin/`, `/cuidados/` e `/incidentes/`; `seed_demo` agregó las cuentas ficticias `medico@example.test` y `enfermera.jefe@example.test` (total: 7 cuentas demo); y se ensayó un respaldo/restauración PostgreSQL completo (dump → restauración en una base de pruebas → `migrate --check` limpio → conteos idénticos; la base de pruebas se eliminó). Ver [Respaldo y restauración](RESPALDO_Y_RESTAURACION.md). La copia SQLite antigua se movió a `respaldos/db_2026-10-30_legado-sqlite.sqlite3`; la instalación usa PostgreSQL según `.env`.
 
 ## Actualizar la copia
 
@@ -65,5 +65,12 @@ Para ejecutar las pruebas automatizadas se necesitan las dependencias de desarro
 
 ```powershell
 python -m pip install -r requirements-dev.txt
+python -m pytest
+```
+
+`pytest` usa `config/settings_test.py` (SQLite en memoria), así que funciona sin configurar PostgreSQL. La suite tiene **132 pruebas** y la cobertura de las aplicaciones es del 92 % si se instala `pytest-cov`. Para repetir la verificación sobre la base PostgreSQL local:
+
+```powershell
+$env:DJANGO_SETTINGS_MODULE = "config.settings"
 python -m pytest
 ```

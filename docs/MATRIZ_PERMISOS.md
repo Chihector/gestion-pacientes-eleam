@@ -57,12 +57,14 @@
 | Gestionar usuarios y roles | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
 | Restablecer contraseña otro usuario | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
 | Exportar nómina residentes (CSV) | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ | ✅ |
+| Exportar registros de cuidados (CSV) | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Exportar reporte de incidentes (CSV) | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
 
 **Nota:** La información clínica es de solo lectura para Dirección, Técnico/a, Cuidador/a y Administración puede ver pero no editar. Solo Médico, Enfermera Jefe y Enfermería la modifican. Dirección puede editar datos administrativos y gestionar ingreso/egreso.
 
 Administración conserva acceso a la auditoría general, pero los eventos detallados de incidentes se excluyen tanto de la auditoría como de la actividad reciente del panel para evitar que esa vía revele reportes a un rol sin acceso al módulo.
 
-La aplicación implementa una exportación CSV de la nómina de residentes para Dirección, Enfermería y Administración. La descarga registra los filtros y el total exportado en auditoría. Los campos y el manejo de los archivos deben validarse con el ELEAM antes de usar datos reales. No se exportan cuidados ni incidentes.
+La aplicación implementa tres exportaciones CSV: nómina de residentes (Dirección, Enfermera Jefe y Administración), registros de cuidados (Dirección y Enfermera Jefe) y reporte de incidentes (Dirección, Médico y Enfermera Jefe). Cada descarga aplica los filtros vigentes y registra en auditoría los filtros y el total exportado. Los campos y el manejo de los archivos deben validarse con el ELEAM antes de usar datos reales; son información sensible.
 
 ## Permisos propuestos para etapas posteriores
 
@@ -70,7 +72,7 @@ La aplicación implementa una exportación CSV de la nómina de residentes para 
 |---|:---:|:---:|:---:|:---:|:---:|
 | Exportar otros reportes autorizados | Por definir | Por definir | ❌ | ❌ | Por definir |
 
-Las exportaciones adicionales requieren definir autorización, campos, límites y auditoría con el ELEAM.
+Las tres exportaciones ya implementadas requieren validación institucional de campos, roles y resguardo de archivos antes de usar datos reales. Cualquier exportación adicional requiere definir autorización, campos, límites y auditoría con el ELEAM.
 
 ## Reglas adicionales
 

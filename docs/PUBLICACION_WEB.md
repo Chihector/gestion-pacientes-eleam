@@ -4,14 +4,20 @@ La aplicación ya es una web Django, pero el despliegue web compartido **todaví
 
 ## Estado técnico verificado
 
-Verificado el 2026-11-04 (la verificación del 2026-10-30 se conserva al pie):
+Verificado el 2026-11-25 (las verificaciones del 2026-11-04 y 2026-10-30 se conservan al pie):
 
-- **115 pruebas automatizadas** pasan, incluida la prueba del endpoint `/health/` (200 si Django y la base de datos están operativas, 503 en caso contrario) para monitoreo sin autenticación.
+- **132 pruebas automatizadas** pasan con `pytest` (SQLite en memoria) y con `DJANGO_SETTINGS_MODULE=config.settings pytest` (PostgreSQL local), incluida la prueba del endpoint `/health/` (200 si Django y la base de datos están operativas, 503 en caso contrario) para monitoreo sin autenticación. Cobertura de las aplicaciones: 92 %.
 - `requirements-prod.txt` declara `psycopg[binary]`, `gunicorn`, `waitress` y `whitenoise` (también está en `requirements.txt` porque `settings.py` carga el middleware).
 - `python manage.py collectstatic --noinput` copia 135 archivos a `staticfiles/` (no versionado), y WhiteNoise los sirve correctamente con `DEBUG=False` detrás de Waitress (`/static/css/app.css` → HTTP 200 `text/css`).
 - Prueba de humo con Waitress y `DEBUG=False` (secreto de un solo uso, `ALLOWED_HOSTS=127.0.0.1`): `/health/` → 200, `/` → 302 a `/panel/`, `/cuenta/login/` → 200, estáticos → 200. Con `SECURE_SSL_REDIRECT` (defecto), `check --deploy` no reporta ninguna advertencia (0 issues).
 - `instalar.bat` fue verificada en una copia temporal (arranque y login HTTP 200) y el ensayo de respaldo/restauración PostgreSQL está documentado en [Respaldo y restauración](RESPALDO_Y_RESTAURACION.md).
 - **Decisión tomada (2026-11-04):** el piloto central se hará en un servidor central con PostgreSQL administrado, HTTPS y acceso desde navegador; ya no se usará SQLite como base multiusuario ni `runserver` en producción. Pendientes: proveedor, dominio/TLS, estáticos en el hosting (WhiteNoise ya lo resuelve sin nginx; se puede mantener en el proxy si se prefiere), respaldos cifrados y validación institucional.
+
+Verificación del 2026-11-04 (histórica):
+
+- `check --deploy` con configuración de producción sin errores; única advertencia opcional de HSTS preload.
+- `collectstatic` copia 135 archivos y WhiteNoise los sirve con `DEBUG=False` tras Waitress (HTTP 200 en `/static/css/app.css`).
+- Ensayo local de respaldo y restauración PostgreSQL completo (dump → restauración → `migrate --check` limpio → conteos idénticos).
 
 Verificación del 2026-10-30 (histórica):
 

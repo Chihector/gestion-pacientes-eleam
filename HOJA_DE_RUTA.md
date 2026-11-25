@@ -71,7 +71,7 @@ Implementar en incrementos pequeños:
 2. Ficha del residente y contactos. **Implementado.**
 3. Registros diarios, plan de cuidados, correcciones y revisión de Enfermería. **Implementado y probado técnicamente; pendiente de validación con el equipo.**
 4. Incidentes, consulta e informes básicos. **Implementado y probado técnicamente; pendiente de validación con el equipo.**
-5. Pruebas automatizadas, respaldos y documentación operativa. **En curso: 115 pruebas pasan; PostgreSQL 18 local y sus migraciones verificados; instalación limpia y restauración SQLite y PostgreSQL (ensayo local) verificadas; publicación, respaldo/restauración PostgreSQL en staging y operación para piloto pendientes.**
+5. Pruebas automatizadas, respaldos y documentación operativa. **En curso: 132 pruebas pasan; PostgreSQL 18 local y sus migraciones verificados; instalación limpia y restauración SQLite y PostgreSQL (ensayo local) verificadas; publicación, respaldo/restauración PostgreSQL en staging y operación para piloto pendientes.**
 
 Construir primero con datos ficticios. Revisar cada entrega con el personal del ELEAM. Registrar los cambios de forma que una corrección no borre silenciosamente el dato original.
 
@@ -83,12 +83,15 @@ Construir primero con datos ficticios. Revisar cada entrega con el personal del 
 
 **Progreso técnico verificado el 2026-11-04:** la migración `accounts.0002_alter_user_role` (roles `MEDICO` y `ENFERMERA_JEFE` en las opciones del campo `role`) se generó y aplicó; `makemigrations --check --dry-run` no detecta cambios pendientes; la suite completa tiene **115 pruebas** y todas pasan en PostgreSQL local; el servidor de desarrollo respondió HTTP 200 en `/cuenta/login/` y 302 a login en `/`, `/admin/`, `/cuidados/` e `/incidentes/`; `seed_demo` agregó las cuentas ficticias `medico@example.test` y `enfermera.jefe@example.test` (total: 7 cuentas demo); se agregó el endpoint `/health/` para monitoreo (200 operativo, 503 si la base de datos falla); se ensayó un respaldo y restauración PostgreSQL completo en una base de pruebas local (dump → restauración → `migrate --check` limpio → conteos idénticos al origen → base de pruebas eliminada); `collectstatic` copia 135 archivos y WhiteNoise los sirve con `DEBUG=False` (HTTP 200 en `/static/css/app.css` detrás de Waitress; `/` 302, login 200, `/health/` 200); `check --deploy` con configuración de producción no reporta ninguna advertencia; la documentación se actualizó y la copia SQLite antigua se resguardó en `respaldos/`. Se decidió preparar el piloto como **servidor central** (hosting por definir). Persiste el pendiente de ensayar respaldo/restauración PostgreSQL en staging y de completar validación institucional, legal y operativa.
 
+**Progreso técnico verificado el 2026-11-25:** la suite alcanza **132 pruebas** y pasa tanto con `pytest` (SQLite en memoria, `config/settings_test.py`) como con `DJANGO_SETTINGS_MODULE=config.settings pytest` (PostgreSQL local). La cobertura de las aplicaciones es del 92 % (`pytest-cov`). `manage.py check` y `makemigrations --check --dry-run` no reportan problemas; `check --deploy` con configuración de producción solo deja la decisión opcional de HSTS preload; `collectstatic` mantiene 135 archivos y `seed_demo` sigue siendo idempotente. Se añadieron 17 pruebas para las exportaciones CSV de cuidados e incidentes, que detectaron y permitieron corregir referencias a campos inexistentes (`notes`, `immediate_actions`, `notified`, `get_full_name()`) que causaban HTTP 500. La prueba funcional en navegador confirmó ingreso, panel, `/health/` y las tres exportaciones en HTTP 200, sin errores de consola; se añadió un favicon SVG que elimina el 404 de `/favicon.ico`. Sigue pendiente la validación institucional, legal y operativa, además del despliegue en staging.
+
 - Probar permisos: cada rol ve y modifica solo lo autorizado.
 - Probar casos normales y errores: campos incompletos, duplicados, correcciones y usuarios desactivados.
 - [x] Probar `instalar.bat` en una copia limpia y comprobar el arranque y la actualización sin perder la base local. **Verificado en copia temporal; falta repetirlo en un PC Windows físico sin Python ni entorno virtual.**
 - [x] Añadir o confirmar pruebas automatizadas de permisos, filtros y auditoría de la exportación CSV de residentes.
+- [x] Añadir pruebas automatizadas de permisos, filtros y auditoría de las exportaciones CSV de cuidados e incidentes (2026-11-25).
 - Probar que el historial de cambios es consultable por personal autorizado.
-- Revisar el alcance de la exportación CSV de residentes, sus campos, permisos y tratamiento de los archivos descargados.
+- Revisar el alcance de las tres exportaciones CSV (residentes, cuidados e incidentes): campos, permisos y tratamiento de los archivos descargados.
 - [x] Ensayar una restauración desde un respaldo SQLite.
 - [x] Ensayar una restauración completa sobre PostgreSQL local (2026-11-04: dump → restauración en base de pruebas → verificación de conteos y `migrate --check`). **Falta repetirla en staging.**
 - Preparar un procedimiento manual temporal si se cae el sistema o internet.
@@ -134,4 +137,4 @@ Construir primero con datos ficticios. Revisar cada entrega con el personal del 
 - [ ] Criterios de cierre y reapertura de planes de cuidados con el equipo clínico.
 - [ ] Validar los campos, gravedad percibida, seguimiento, roles de acceso y cierre de incidentes.
 - [ ] Acordar qué indicadores agregados son útiles y quién puede consultarlos.
-- [ ] Confirmar con el ELEAM si se mantiene la exportación CSV de residentes y qué reglas operativas aplican a los archivos descargados.
+- [ ] Confirmar con el ELEAM si se mantienen las exportaciones CSV de residentes, cuidados e incidentes y qué reglas operativas aplican a los archivos descargados.

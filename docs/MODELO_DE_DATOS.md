@@ -428,7 +428,7 @@ erDiagram
 - **Inmutabilidad:** un registro de cuidado no se actualiza ni se borra; la corrección crea otra fila y conserva la anterior.
 - **Revisión:** el estado pendiente se deriva de `requires_nursing_review=True`, `reviewed_at` vacío y `status=VIGENTE`.
 - **Planes:** un plan cerrado no se elimina; se conserva para el historial y puede reactivarse con auditoría.
- - **Exportación:** la nómina de residentes se puede descargar como CSV para Dirección, Enfermera/o Jefe y Administración; la descarga audita filtros y total. El archivo contiene datos personales y requiere controles de acceso y manejo definidos por el ELEAM. No se exportan cuidados ni incidentes. Las exportaciones adicionales no están implementadas.
+ - **Exportación:** hay tres descargas CSV auditadas: nómina de residentes (Dirección, Enfermera/o Jefe y Administración), registros de cuidados (Dirección y Enfermera/o Jefe) y reporte de incidentes (Dirección, Médico/a y Enfermera/o Jefe). Cada descarga registra filtros y total. Los archivos contienen datos personales y clínicos, por lo que requieren controles de acceso y manejo definidos por el ELEAM antes de usar datos reales.
 - **Respaldo:** la base de producción (PostgreSQL) se respalda cifrada; las restauraciones se prueban.
 
 ## Decisiones pendientes
@@ -441,6 +441,6 @@ erDiagram
 - [ ] ¿Quién puede corregir registros de otra persona además de Enfermería?
 - [ ] ¿Cuánto tiempo se conservan ficha, contactos, cuidados y auditoría después del egreso o fallecimiento?
 - [ ] ¿Se requiere registrar tutores o representantes legales con vigencia?
-- [ ] ¿Se mantienen los campos y roles de la exportación CSV actual de residentes y qué reglas aplican a los archivos descargados?
+- [ ] ¿Se mantienen los campos y roles de las exportaciones CSV actuales (residentes, cuidados e incidentes) y qué reglas aplican a los archivos descargados?
 - [ ] ¿Se necesitan otras exportaciones y quién autoriza cada una?
 - [ ] ¿Se necesita historial de habitaciones o traslados?

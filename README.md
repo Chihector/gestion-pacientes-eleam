@@ -11,7 +11,7 @@ Aplicación web para apoyar el registro y la consulta de información de residen
 | 1. Entender el problema | Documentada, pendiente de validación con el equipo |
 | 2. Definir alcance y reglas | Documentada en `docs/` |
 | 3. Prototipo navegable | Disponible en `prototipo/` (datos ficticios) |
-| 4. Construir el MVP | Incrementos funcionales 1, 2 y 3 implementados; 115 pruebas automatizadas |
+| 4. Construir el MVP | Incrementos funcionales 1, 2 y 3 implementados; 132 pruebas automatizadas |
 | 5. Preparar el piloto (etapa actual) | Avances técnicos verificados; pendientes validación institucional, revisión legal/seguridad y operación |
 | 6. Piloto controlado | Aún no iniciado |
 | 7. Operación y mejora | Posterior al piloto |
@@ -49,6 +49,7 @@ Documentos de referencia:
 ## Qué incluye el incremento 2
 
 - Bandeja de cuidados en `/cuidados/` con filtros por fecha, turno, categoría, residente o texto, pendientes de revisión y registros corregidos.
+- Exportación CSV de registros de cuidados con los filtros aplicados y auditoría; disponible para Dirección y Enfermera/o Jefe.
 - Registro de cuidados por turno con residente, plan relacionado, fecha y hora, turno, categoría, descripción y observaciones.
 - Los registros **no se editan ni se eliminan**: una corrección crea una versión nueva, exige un motivo y deja la versión anterior visible como `CORREGIDO`.
 - Revisión de Enfermería para los registros marcados, con revisor, fecha y observaciones; la revisión y la corrección quedan en auditoría. Solo Enfermera/o Jefe puede revisar.
@@ -63,12 +64,13 @@ Documentos de referencia:
 - Registro confidencial de incidentes con residente, fecha, tipo, lugar, gravedad percibida, hechos, acciones inmediatas y notificaciones.
 - Consulta de incidentes por Médico/a, Enfermera/o Jefe, Enfermería, Técnico/a, Cuidador/a y Dirección; Administración no accede al módulo ni a sus eventos detallados de auditoría.
 - Cierre con seguimiento obligatorio por Dirección, Médico/a o Enfermera/o Jefe; el reporte original se conserva y el cierre queda auditado.
-- Informes agregados por período, tipo, gravedad percibida y estado para Dirección, Médico/a y Enfermera/o Jefe. No exportan datos.
+- Informes agregados por período, tipo, gravedad percibida y estado para Dirección, Médico/a y Enfermera/o Jefe.
+- Exportación CSV del reporte de incidentes con los filtros aplicados y auditoría; disponible para los mismos tres roles con acceso a informes.
 - El panel muestra incidentes abiertos a roles autorizados.
 
 El flujo y los campos se basan en el prototipo y en los permisos propuestos; requieren validación con el ELEAM. El módulo no reemplaza el aviso inmediato, los protocolos institucionales ni la evaluación profesional.
 
-La exportación CSV disponible se limita a la nómina de residentes. Los informes de incidentes no exportan datos y otras exportaciones aún requieren definición y autorización institucional. También quedan fuera de alcance el portal de familias, facturación, inventario, integraciones y aplicación móvil nativa. El sistema no diagnostica, no recomienda tratamientos, no define prioridades clínicas y no genera planes automáticamente.
+Hay tres exportaciones CSV implementadas y auditadas: nómina de residentes, registros de cuidados y reporte de incidentes. Todas aplican los filtros vigentes y registran en auditoría quién exportó, cuándo, los filtros y el total de filas. Antes de usarlas con datos reales deben validarse con el ELEAM los campos incluidos, los roles autorizados y las reglas de resguardo de los archivos descargados. Quedan fuera de alcance el portal de familias, facturación, inventario, integraciones y aplicación móvil nativa. El sistema no diagnostica, no recomienda tratamientos, no define prioridades clínicas y no genera planes automáticamente.
 
 ## Stack
 
@@ -253,13 +255,27 @@ python -m pytest accounts/tests.py
 python -m pytest accounts/tests.py::test_login_uses_email
 ```
 
-La suite automatizada tiene actualmente **115 pruebas** y cubre, entre otros:
+Por defecto, `pytest` usa `config/settings_test.py`: SQLite **en memoria**, sin depender de PostgreSQL ni de credenciales locales. Para ejecutar la misma suite contra PostgreSQL (verificación de staging):
+
+```powershell
+$env:DJANGO_SETTINGS_MODULE = "config.settings"
+python -m pytest
+```
+
+Para medir cobertura (requiere `pytest-cov`):
+
+```powershell
+python -m pytest --cov=accounts --cov=audit --cov=core --cov=residents --cov=care --cov=incidents --cov-report=term-missing
+```
+
+La suite automatizada tiene actualmente **132 pruebas** y cubre, entre otros:
 
 - Normalización y validación de RUT chileno.
 - Creación de residentes con RUT válido y rechazo de duplicados.
 - Permisos por rol en vistas administrativas, clínicas, de usuarios, cuidados y auditoría.
 - Búsqueda, filtro de archivados y respuesta parcial HTMX.
-- Permisos, filtros y auditoría de la exportación CSV de residentes.
+- Permisos, filtros y auditoría de las tres exportaciones CSV: residentes (Dirección, Enfermera/o Jefe y Administración), cuidados (Dirección y Enfermera/o Jefe) e incidentes (Dirección, Médico/a y Enfermera/o Jefe).
+- Contenido real de las exportaciones de cuidados e incidentes, incluidas observaciones, notificaciones y acciones inmediatas; las pruebas detectaron y evitaron errores por nombres de campo incorrectos.
 - Renderizado de la auditoría con eventos de exportación sin registro individual.
 - Archivado/reactivación y su registro en auditoría.
 - Contacto principal único, creación y eliminación auditada.
@@ -272,17 +288,28 @@ La suite automatizada tiene actualmente **115 pruebas** y cubre, entre otros:
 - Creación, edición posterior y eliminación auditada de enfermedades y medicamentos; pruebas de permisos clínicos, historial y fichas archivadas.
 - Datos demo idempotentes y protección contra mezclar datos reales.
 
+### Verificación técnica del 2026-11-25
+
+- **132 pruebas** pasan con `pytest` (SQLite en memoria) y con `DJANGO_SETTINGS_MODULE=config.settings pytest` (PostgreSQL local).
+- Cobertura del código de las aplicaciones: **92 %** (`pytest-cov`).
+- `manage.py check` y `makemigrations --check --dry-run`: sin problemas ni cambios pendientes.
+- `check --deploy` con configuración de producción: sin errores; queda solo la decisión opcional de HSTS preload.
+- `collectstatic --noinput`: 135 archivos; `seed_demo`: idempotente (7 cuentas demo).
+- Corregidos fallos reales en las exportaciones CSV de cuidados e incidentes (referencias a campos inexistentes: `notes`, `immediate_actions`, `notified` y `get_full_name()`) y añadidas 17 pruebas que los cubren.
+- Prueba funcional en navegador: ingreso con rol Dirección, panel, `/health/` y las tres exportaciones responden HTTP 200; sin errores en consola ni peticiones fallidas.
+- Se añadió un favicon SVG y su redirección para eliminar el 404 de `/favicon.ico`.
+
 ## Estructura del proyecto
 
 ```text
-config/        Configuración y rutas raíz
+config/        Configuración y rutas raíz (settings_test.py fuerza SQLite en memoria para pytest)
 core/          Panel, mixins de permisos y formularios base
 accounts/      Usuario personalizado, roles, login y gestión de cuentas
 residents/     Residentes, contactos, RUT y comando seed_demo
 care/          Planes de cuidados, registros por turno, correcciones y revisión
 audit/         Auditoría, middleware, signals y consulta de eventos
 templates/     Plantillas Django
-static/        CSS, JS y librerías front-end incluidas
+static/        CSS, JS, favicon y librerías front-end incluidas
 docs/          Matriz de permisos, historias, modelo de datos, checklist y respaldo
 prototipo/     Prototipo estático navegable con datos ficticios
 requirements-prod.txt  Dependencias de producción (PostgreSQL y servidor de aplicaciones)
@@ -296,7 +323,7 @@ requirements-prod.txt  Dependencias de producción (PostgreSQL y servidor de apl
 4. Definir responsables de cuentas, respaldos, soporte y respuesta ante incidentes.
 5. Configurar `DJANGO_DEBUG=False`, una `DJANGO_SECRET_KEY` robusta, HTTPS, HSTS y PostgreSQL administrado.
 6. Desactivar `DEMO_MODE` y eliminar todos los datos ficticios.
-7. Definir retención, respaldo y restauración; ya se probó una restauración SQLite local y falta probar PostgreSQL.
+7. Definir retención, respaldo y restauración; ya se probaron restauraciones SQLite y PostgreSQL en el entorno local y falta probar PostgreSQL en staging.
 8. Capacitar al personal y acordar un procedimiento manual de continuidad.
 9. No cargar datos reales hasta completar estas verificaciones.
 
@@ -304,7 +331,7 @@ requirements-prod.txt  Dependencias de producción (PostgreSQL y servidor de apl
 
 Los incrementos funcionales 1, 2 y 3 ya están implementados. El trabajo siguiente corresponde a la etapa 5 de `HOJA_DE_RUTA.md`, no a un nuevo incremento funcional:
 
-1. Cerrar brechas técnicas: pruebas CSV (hechas), dependencias de producción (hechas), `check --deploy` (hecho) e instalación limpia y restauración SQLite (verificadas). Faltan PostgreSQL, HTTPS, estáticos y staging.
+1. Cerrar brechas técnicas: pruebas de las tres exportaciones CSV, dependencias de producción, `check --deploy`, instalación limpia y restauraciones SQLite y PostgreSQL locales (hechas y verificadas el 2026-11-25). Faltan HTTPS, despliegue y restauración PostgreSQL en staging.
 2. Probar `instalar.bat` en un PC Windows físico limpio, sin Python ni entorno virtual previo; verificar arranque, actualización y conservación de la base local.
 3. **Modo de uso decidido (2026-11-04): servidor central.** El piloto se prepara como instalación central compartida con PostgreSQL administrado y HTTPS; sigue [Plan para publicar la aplicación web](docs/PUBLICACION_WEB.md). Queda pendiente elegir entre hosting administrado en internet o servidor dedicado dentro del ELEAM.
 4. Validar con el ELEAM flujos y permisos; completar revisión legal y de seguridad, respaldos restaurables, capacitación y procedimiento de continuidad.
